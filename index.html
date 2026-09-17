@@ -156,6 +156,8 @@
   select.status-select{padding:6px 8px;font-size:12px;border-radius:8px;}
   .empty-state{text-align:center;padding:40px 10px;color:var(--muted);font-size:13.5px;}
   .protocolo-tag{font-family:'Playfair Display',serif;font-weight:700;color:var(--navy);}
+  .btn-editar{background:#fff;border:1.5px solid var(--line);border-radius:9px;padding:6px 9px;font-size:13px;cursor:pointer;line-height:1;}
+  .btn-editar:hover{border-color:var(--gold);background:#f7f4ec;}
 
   /* Receipt modal */
   .modal-bg{position:fixed;inset:0;background:rgba(11,20,35,.6);backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;z-index:100;padding:30px 14px;overflow:auto;}
@@ -517,7 +519,7 @@
       <div style="overflow-x:auto;">
         <table>
           <thead>
-            <tr><th>Protocolo</th><th>Cliente</th><th>CPF</th><th>Celular</th><th>Data</th><th>Horário</th><th>Situação</th><th>Recibo</th><th>Mensagem</th></tr>
+            <tr><th>Protocolo</th><th>Cliente</th><th>CPF</th><th>Celular</th><th>Data</th><th>Horário</th><th>Situação</th><th>Recibo</th><th>Mensagem</th><th>Editar</th><th>Excluir</th></tr>
           </thead>
           <tbody id="listaBody"></tbody>
         </table>
@@ -621,6 +623,55 @@
 <!-- TELA DE CONFIRMAÇÃO DE PRESENÇA (acessada via link ?confirmar=ID) -->
 <div class="tela-cheia" id="telaConfirmacao" style="display:none;">
   <div class="card" id="confirmacaoConteudo"></div>
+</div>
+
+<!-- MODAL EDITAR AGENDAMENTO -->
+<div class="modal-bg" id="modalEditar">
+  <div class="modal-shell" style="max-width:460px;">
+    <div class="modal-close"><span id="fecharModalEditar">✕</span></div>
+    <div class="card" style="margin-bottom:0;">
+      <h2>✏️ Editar Agendamento</h2>
+      <p class="sub">Protocolo <b class="protocolo-tag" id="editProtocolo">—</b></p>
+
+      <div class="row2">
+        <div class="field">
+          <label>Nome completo</label>
+          <input type="text" id="editNome">
+        </div>
+        <div class="field">
+          <label>CPF</label>
+          <input type="text" id="editCpf" maxlength="14">
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label>Celular / WhatsApp</label>
+          <input type="tel" id="editCelular" maxlength="16">
+        </div>
+        <div class="field">
+          <label>Data</label>
+          <input type="date" id="editData">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Horário</label>
+        <select id="editHorario"></select>
+        <div class="hint">Horários já ocupados por outro cliente aparecem desabilitados.</div>
+      </div>
+
+      <div class="field">
+        <label>Observações</label>
+        <textarea id="editObs" placeholder="Ex: Cliente interessado em troca de aparelho, retirada de peça, etc."></textarea>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btnSalvarEdicao">✓ Salvar alterações</button>
+        <button class="btn btn-ghost" id="btnCancelarEdicao">Cancelar</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL CONFIGURAÇÕES DA LOJA -->
@@ -1135,6 +1186,36 @@ async function atualizarStatus(id, status){
   }
 }
 
+async function atualizarAgendamento(id, dados){
+  if(usandoFirestore){
+    await db.collection('agendamentos').doc(id).update(dados);
+  } else {
+    const lista = carregarLocal();
+    const item = lista.find(x=>x.id===id);
+    if(item){ Object.assign(item, dados); salvarLocal(lista); }
+  }
+  const item = cacheAgendamentos.find(x=>x.id===id);
+  if(item) Object.assign(item, dados);
+}
+
+async function excluirAgendamento(id){
+  if(usandoFirestore){
+    await db.collection('agendamentos').doc(id).delete();
+  } else {
+    salvarLocal(carregarLocal().filter(x=>x.id!==id));
+  }
+  cacheAgendamentos = cacheAgendamentos.filter(x=>x.id!==id);
+}
+function confirmarExclusao(a){
+  const ok = window.confirm(`Excluir o agendamento de ${a.nome} (${fmtDataISOtoBR(a.data)} às ${a.horario})?\n\nEssa ação não pode ser desfeita. Se preferir manter o histórico, use "Cancelou" na Situação em vez de excluir.`);
+  if(!ok) return;
+  excluirAgendamento(a.id).then(()=>{
+    toast('Agendamento excluído.');
+    renderLista(); renderCalendario();
+    if(diaSelecionado) renderDiaPanel(diaSelecionado);
+  }).catch(e=>{ console.error(e); toast('Erro ao excluir agendamento.'); });
+}
+
 async function carregarTodos(){
   if(usandoFirestore){
     iniciarSincronizacaoTempoReal();
@@ -1240,6 +1321,70 @@ document.getElementById('btnAbrirLink').addEventListener('click', ()=>{
   window.open(document.getElementById('linkPublicoInput').value, '_blank');
 });
 
+/* ---------- modal de edição de agendamento ---------- */
+function gerarOpcoesHorarioEdicao(data, idAtual){
+  const ocupados = new Set(cacheAgendamentos.filter(a=>a.data===data && a.status!=='cancelado' && a.id!==idAtual).map(a=>a.horario));
+  const bloqueados = new Set(horariosBloqueados(data).map(b=>b.horario));
+  return gerarHorariosDisponiveis().map(h=>{
+    const indisponivel = ocupados.has(h) || bloqueados.has(h);
+    const motivo = bloqueados.has(h) ? ' — bloqueado' : (ocupados.has(h) ? ' — ocupado' : '');
+    return `<option value="${h}" ${indisponivel?'disabled':''}>${h}${motivo}</option>`;
+  }).join('');
+}
+function abrirModalEditar(a){
+  document.getElementById('editProtocolo').textContent = a.protocolo || '—';
+  document.getElementById('editNome').value = a.nome || '';
+  document.getElementById('editCpf').value = a.cpf || '';
+  document.getElementById('editCelular').value = a.celular || '';
+  document.getElementById('editData').value = a.data || '';
+  document.getElementById('editObs').value = a.observacao || '';
+  document.getElementById('editHorario').innerHTML = gerarOpcoesHorarioEdicao(a.data, a.id);
+  document.getElementById('editHorario').value = a.horario;
+  window.__edicaoAtual = a;
+  document.getElementById('modalEditar').classList.add('show');
+}
+document.getElementById('editData').addEventListener('change', ()=>{
+  const a = window.__edicaoAtual;
+  if(!a) return;
+  const bloqueioDia = diaBloqueadoInfo(document.getElementById('editData').value);
+  if(bloqueioDia.bloqueado){
+    toast(`Atenção: esse dia está bloqueado (${bloqueioDia.motivo}), mas você ainda pode salvar se necessário.`);
+  }
+  document.getElementById('editHorario').innerHTML = gerarOpcoesHorarioEdicao(document.getElementById('editData').value, a.id);
+});
+document.getElementById('editCpf').addEventListener('input', e=>{ e.target.value = maskCPF(e.target.value); });
+document.getElementById('editCelular').addEventListener('input', e=>{ e.target.value = maskCelular(e.target.value); });
+document.getElementById('fecharModalEditar').onclick = ()=> document.getElementById('modalEditar').classList.remove('show');
+document.getElementById('btnCancelarEdicao').onclick = ()=> document.getElementById('modalEditar').classList.remove('show');
+document.getElementById('modalEditar').addEventListener('click', e=>{ if(e.target.id==='modalEditar') document.getElementById('modalEditar').classList.remove('show'); });
+
+document.getElementById('btnSalvarEdicao').addEventListener('click', async ()=>{
+  const a = window.__edicaoAtual;
+  if(!a) return;
+  const nome = document.getElementById('editNome').value.trim();
+  const cpf = document.getElementById('editCpf').value.trim();
+  const celular = document.getElementById('editCelular').value.trim();
+  const data = document.getElementById('editData').value;
+  const horario = document.getElementById('editHorario').value;
+  const observacao = document.getElementById('editObs').value.trim();
+
+  if(!nome){ toast('Informe o nome do cliente.'); return; }
+  if(cpf.replace(/\D/g,'').length===11 && !validaCPF(cpf)){ toast('CPF inválido — confira os números.'); return; }
+  if(!celular){ toast('Informe o celular do cliente.'); return; }
+  if(!data || !horario){ toast('Selecione data e horário.'); return; }
+
+  const btn = document.getElementById('btnSalvarEdicao');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  try{
+    await atualizarAgendamento(a.id, { nome, cpf, celular, data, horario, observacao });
+    toast('Agendamento atualizado com sucesso!');
+    document.getElementById('modalEditar').classList.remove('show');
+    renderLista(); renderCalendario();
+    if(diaSelecionado) renderDiaPanel(diaSelecionado);
+  }catch(e){ console.error(e); toast('Erro ao salvar as alterações.'); }
+  finally{ btn.disabled = false; btn.textContent = '✓ Salvar alterações'; }
+});
+
 /* ---------- modal de configurações da loja ---------- */
 document.getElementById('btnConfigLoja').addEventListener('click', ()=>{
   document.getElementById('cfgNomeLoja').value = CONFIG_LOJA.nome;
@@ -1326,14 +1471,30 @@ function renderDiaPanel(iso){
   } else {
     box.innerHTML = doDia.map(a=>{
       const s = statusInfo(a.status);
-      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);">
-        <div>
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);gap:8px;">
+        <div style="min-width:0;">
           <div style="font-weight:700;font-size:13.5px;">${a.horario} · ${a.nome}</div>
           <div style="font-size:11.5px;color:var(--muted);">${a.celular || ''}</div>
         </div>
-        <span class="badge" style="background:${s.bg};color:${s.color};">${s.label}</span>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+          <span class="badge" style="background:${s.bg};color:${s.color};">${s.label}</span>
+          <button class="btn-editar" data-editar="${a.id}" title="Editar agendamento">✏️</button>
+          <button class="btn-editar" style="color:#b3432b;" data-excluir="${a.id}" title="Excluir agendamento">🗑️</button>
+        </div>
       </div>`;
     }).join('');
+    box.querySelectorAll('button[data-editar]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const a = cacheAgendamentos.find(x=>x.id===btn.dataset.editar);
+        if(a) abrirModalEditar(a);
+      });
+    });
+    box.querySelectorAll('button[data-excluir]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const a = cacheAgendamentos.find(x=>x.id===btn.dataset.excluir);
+        if(a) confirmarExclusao(a);
+      });
+    });
   }
 
   renderBloqueiosPanel(iso);
@@ -1647,6 +1808,8 @@ function renderLista(){
           <option value="pos_venda">Agradecimento pós-venda</option>
         </select>
       </td>
+      <td><button class="btn-editar" data-editar="${a.id}" title="Editar agendamento">✏️</button></td>
+      <td><button class="btn-editar" style="color:#b3432b;" data-excluir="${a.id}" title="Excluir agendamento">🗑️</button></td>
     </tr>`;
   }).join('');
 
@@ -1670,6 +1833,18 @@ function renderLista(){
       const a = cacheAgendamentos.find(x=>x.id===sel.dataset.msg);
       if(a) abrirWhatsAppComMensagem(a, sel.value);
       sel.value = '';
+    });
+  });
+  body.querySelectorAll('button[data-editar]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const a = cacheAgendamentos.find(x=>x.id===btn.dataset.editar);
+      if(a) abrirModalEditar(a);
+    });
+  });
+  body.querySelectorAll('button[data-excluir]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const a = cacheAgendamentos.find(x=>x.id===btn.dataset.excluir);
+      if(a) confirmarExclusao(a);
     });
   });
 }
