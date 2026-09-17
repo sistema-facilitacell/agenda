@@ -225,8 +225,32 @@
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
 
+  .aviso-novo{position:fixed;top:18px;right:18px;z-index:300;opacity:0;pointer-events:none;transform:translateX(20px);transition:.3s;}
+  .aviso-novo.show{opacity:1;pointer-events:auto;transform:translateX(0);animation:avisoPulso 1s ease-in-out 2;}
+  @keyframes avisoPulso{0%,100%{box-shadow:0 14px 34px rgba(11,30,53,.3);}50%{box-shadow:0 14px 34px rgba(201,168,76,.55);}}
+  .aviso-novo-item{
+    background:linear-gradient(135deg,var(--navy),var(--navy-2));color:#fff;border:1.5px solid var(--gold);
+    border-radius:13px;padding:13px 16px;display:flex;align-items:center;gap:12px;
+    box-shadow:0 14px 34px rgba(11,30,53,.3);max-width:320px;
+  }
+  .aviso-novo-icone{font-size:22px;flex-shrink:0;}
+  .aviso-novo-item b{display:block;font-size:13.5px;color:var(--gold-2);}
+  .aviso-novo-item div div{font-size:12.5px;color:#e7ecf3;margin-top:2px;}
+  .aviso-novo-fechar{margin-left:auto;cursor:pointer;opacity:.7;font-size:13px;flex-shrink:0;}
+  .aviso-novo-fechar:hover{opacity:1;}
+
   .config-banner{background:#fff3e0;border:1px solid #f0c98a;color:#7a4a12;padding:12px 16px;border-radius:10px;font-size:12.5px;margin:0 auto 16px;max-width:1100px;}
   .config-banner code{background:#fdebcf;padding:1px 5px;border-radius:4px;}
+
+  .auditoria-item{padding:10px 0;border-bottom:1px solid var(--line);font-size:12.8px;}
+  .auditoria-item .linha1{display:flex;justify-content:space-between;gap:8px;}
+  .auditoria-item b{color:var(--navy);}
+  .auditoria-item .quando{color:var(--muted);font-size:11px;white-space:nowrap;}
+  .auditoria-item .detalhes{color:#5a6570;margin-top:2px;}
+
+  .assinatura-box{position:relative;margin:14px 0;}
+  #assinaturaCanvas{width:100%;height:160px;border:1.5px dashed var(--gold);border-radius:12px;background:#fdfcf8;touch-action:none;cursor:crosshair;}
+  .assinatura-linha{position:absolute;bottom:22px;left:20px;right:20px;border-top:1px solid #d8cfa9;font-size:10px;color:#a89a6e;text-align:center;padding-top:3px;pointer-events:none;}
 
   /* Risco de no-show */
   .risco-box{margin-top:8px;padding:9px 11px;border-radius:9px;font-size:12px;display:none;align-items:center;gap:8px;}
@@ -294,6 +318,12 @@
   .tela-cheia{max-width:520px;margin:60px auto;padding:0 16px;}
   .tela-cheia .card{text-align:center;}
   .tela-cheia .icone{font-size:42px;margin-bottom:6px;}
+
+  .nps-grid{display:grid;grid-template-columns:repeat(11,1fr);gap:5px;margin:18px 0 8px;}
+  .nps-btn{padding:10px 0;border-radius:9px;border:1.5px solid var(--line);background:#fff;font-weight:700;font-size:13px;cursor:pointer;color:var(--ink);}
+  .nps-btn:hover{border-color:var(--gold);}
+  .nps-btn.selecionado{background:var(--navy);border-color:var(--navy);color:#fff;}
+  .nps-legendas{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-bottom:16px;}
 
   /* Tela de login do painel administrativo */
   .login-wrap{position:fixed;inset:0;z-index:500;display:flex;background:#eef1ef;}
@@ -371,6 +401,7 @@
   <div class="tab" data-tab="metricas"><span class="dot"></span>Métricas</div>
   <div class="tab" data-tab="checkin"><span class="dot"></span>Check-in</div>
   <div class="tabs-right">
+    <div class="tab tab-config" id="btnAuditoria">📋 Auditoria</div>
     <div class="tab tab-config" id="btnConfigLoja">⚙️ Configurações</div>
     <div class="tab tab-link" id="btnLinkPublico">🔗 Link Autoagendamento</div>
     <div class="tab tab-config" id="btnSair" style="display:none;">🚪 Sair</div>
@@ -625,6 +656,43 @@
   <div class="card" id="confirmacaoConteudo"></div>
 </div>
 
+<!-- TELA DE AVALIAÇÃO PÓS-ATENDIMENTO (acessada via link ?avaliar=ID) -->
+<div class="tela-cheia" id="telaAvaliacao" style="display:none;">
+  <div class="card" id="avaliacaoConteudo"></div>
+</div>
+
+<!-- MODAL ASSINATURA DIGITAL (check-in) -->
+<div class="modal-bg" id="modalAssinatura">
+  <div class="modal-shell" style="max-width:420px;">
+    <div class="modal-close"><span id="fecharModalAssinatura">✕</span></div>
+    <div class="card" style="margin-bottom:0;text-align:center;">
+      <h2>✍️ Assinatura do Cliente</h2>
+      <p class="sub" id="assinaturaClienteNome">Confirme a chegada com a assinatura</p>
+      <div class="assinatura-box">
+        <canvas id="assinaturaCanvas" width="360" height="160"></canvas>
+        <div class="assinatura-linha">Assine acima</div>
+      </div>
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn btn-ghost" id="btnLimparAssinatura">Limpar</button>
+        <button class="btn btn-ghost" id="btnPularAssinatura">Pular assinatura</button>
+        <button class="btn btn-primary" id="btnConfirmarAssinatura">✓ Confirmar chegada</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AUDITORIA -->
+<div class="modal-bg" id="modalAuditoria">
+  <div class="modal-shell" style="max-width:540px;">
+    <div class="modal-close"><span id="fecharModalAuditoria">✕</span></div>
+    <div class="card" style="margin-bottom:0;">
+      <h2>📋 Histórico de Ações</h2>
+      <p class="sub">Registro de quem fez o quê no sistema (mais recentes primeiro)</p>
+      <div id="auditoriaLista" style="max-height:60vh;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL EDITAR AGENDAMENTO -->
 <div class="modal-bg" id="modalEditar">
   <div class="modal-shell" style="max-width:460px;">
@@ -759,6 +827,11 @@
           </div>
 
           <div class="r-status-line"><span class="r-status-badge" id="rStatusBadge">Agendado</span></div>
+
+          <div id="rAssinaturaBox" style="display:none;margin-top:14px;text-align:center;">
+            <p style="font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:#8a8062;margin:0 0 4px;">Assinatura do cliente</p>
+            <img id="rAssinaturaImg" src="" alt="Assinatura" style="max-width:220px;max-height:80px;border-bottom:1px solid #d8cfa9;padding-bottom:4px;">
+          </div>
         </div>
       </div>
     </div>
@@ -772,6 +845,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="aviso-novo" id="avisoNovoAgendamento"></div>
 
 <script>
 /* =========================================================
@@ -995,11 +1069,18 @@ function gerarMensagem(a, tipo){
       return `Olá ${nomeCurto}! Muito obrigado pela compra na ${CONFIG_LOJA.nome} 🎉 Qualquer dúvida sobre o seu aparelho, estamos por aqui para ajudar!`;
     case 'vaga_aberta':
       return `Olá ${nomeCurto}! Abriu uma vaga no horário das ${a.horario} do dia ${dataBR} na ${CONFIG_LOJA.nome}, que era o horário que você estava aguardando. Quer confirmar esse horário? Responda aqui o quanto antes, pois é por ordem de chegada.`;
+    case 'avaliacao':
+      return `Olá ${nomeCurto}! Muito obrigado pela visita na ${CONFIG_LOJA.nome}. Poderia dar uma nota de 0 a 10 pro nosso atendimento? Leva só 10 segundos e ajuda muito a gente! 🙏`;
     default:
       return `Olá ${nomeCurto}! Aqui é da ${CONFIG_LOJA.nome}, sobre seu agendamento do dia ${dataBR} às ${a.horario}.`;
   }
 }
-const TIPOS_COM_LINK_CONFIRMACAO = ['confirmacao', 'lembrete_dia', 'lembrete_hora'];
+const LINKS_POR_TIPO = {
+  confirmacao: { montar: (a)=>montarLinkConfirmacao(a), texto: 'Confirme sua presença (ou avise se não puder ir) aqui:' },
+  lembrete_dia: { montar: (a)=>montarLinkConfirmacao(a), texto: 'Confirme sua presença (ou avise se não puder ir) aqui:' },
+  lembrete_hora: { montar: (a)=>montarLinkConfirmacao(a), texto: 'Confirme sua presença (ou avise se não puder ir) aqui:' },
+  avaliacao: { montar: (a)=>montarLinkAvaliacao(a), texto: 'Deixe sua avaliação aqui, leva só 10 segundos:' }
+};
 
 function abrirWhatsAppComMensagem(a, tipo){
   const celular = apenasDigitos(a.celular);
@@ -1011,8 +1092,9 @@ function abrirWhatsAppComMensagem(a, tipo){
   gerarMensagemComIA(a, tipo).then(texto=>{
     // O link vai colado por fora da IA (nunca dentro do prompt), pra garantir que
     // chegue sempre exatamente igual, sem risco de vir truncado ou reescrito.
-    if(TIPOS_COM_LINK_CONFIRMACAO.includes(tipo) && a.id){
-      texto += `\n\nConfirme sua presença (ou avise se não puder ir) aqui:\n${montarLinkConfirmacao(a)}`;
+    const linkInfo = LINKS_POR_TIPO[tipo];
+    if(linkInfo && a.id){
+      texto += `\n\n${linkInfo.texto}\n${linkInfo.montar(a)}`;
     }
     const url = `https://wa.me/55${celular}?text=${encodeURIComponent(texto)}`;
     if(janela && !janela.closed) janela.location.href = url;
@@ -1028,7 +1110,8 @@ const GROQ_CONTEXTO_TIPO = {
   reagendamento: 'pedir para o cliente reagendar, com gentileza, pois ele não compareceu no horário marcado',
   cancelamento: 'confirmar que o agendamento do cliente foi cancelado',
   pos_venda: 'agradecer o cliente por uma compra feita na loja',
-  vaga_aberta: 'avisar o cliente que abriu uma vaga no horário que ele estava aguardando na fila de espera'
+  vaga_aberta: 'avisar o cliente que abriu uma vaga no horário que ele estava aguardando na fila de espera',
+  avaliacao: 'pedir, com simpatia, para o cliente avaliar o atendimento que acabou de receber na loja'
 };
 async function gerarMensagemComIA(a, tipo){
   const fallback = gerarMensagem(a, tipo);
@@ -1076,6 +1159,65 @@ function toast(msg){
   t.textContent = msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 2600);
 }
+
+/* ---------- aviso sonoro/visual de agendamento novo ---------- */
+function tocarSomNotificacao(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const tocarNota = (freq, inicio, duracao)=>{
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime + inicio);
+      gain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + inicio + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + inicio + duracao);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + inicio);
+      osc.stop(ctx.currentTime + inicio + duracao + 0.05);
+    };
+    tocarNota(880, 0, 0.14);
+    tocarNota(1175, 0.15, 0.22);
+  }catch(e){ /* navegador pode bloquear áudio sem interação prévia — sem problema, some silenciosamente */ }
+}
+let tituloOriginalPagina = null;
+let piscarTituloInterval = null;
+function avisarNoTitulo(msg){
+  if(!document.hidden) return; // só pisca o título se a aba não estiver em foco
+  if(tituloOriginalPagina===null) tituloOriginalPagina = document.title;
+  let aceso = false;
+  clearInterval(piscarTituloInterval);
+  piscarTituloInterval = setInterval(()=>{
+    document.title = aceso ? tituloOriginalPagina : msg;
+    aceso = !aceso;
+  }, 900);
+  const pararAoFocar = ()=>{
+    clearInterval(piscarTituloInterval);
+    document.title = tituloOriginalPagina;
+    window.removeEventListener('focus', pararAoFocar);
+  };
+  window.addEventListener('focus', pararAoFocar);
+}
+function notificarNovoAgendamento(a){
+  tocarSomNotificacao();
+  avisarNoTitulo('🔔 Novo agendamento!');
+  const box = document.getElementById('avisoNovoAgendamento');
+  box.innerHTML = `
+    <div class="aviso-novo-item">
+      <span class="aviso-novo-icone">🔔</span>
+      <div>
+        <b>Novo agendamento!</b>
+        <div>${a.nome} · ${fmtDataISOtoBR(a.data)} às ${a.horario}</div>
+      </div>
+      <span class="aviso-novo-fechar">✕</span>
+    </div>`;
+  box.classList.add('show');
+  const fechar = ()=> box.classList.remove('show');
+  box.querySelector('.aviso-novo-fechar').addEventListener('click', fechar);
+  clearTimeout(window.__timeoutAvisoNovo);
+  window.__timeoutAvisoNovo = setTimeout(fechar, 7000);
+}
+
 function pad(n){return n.toString().padStart(2,'0');}
 function fmtDataISOtoBR(iso){
   if(!iso) return '—';
@@ -1153,6 +1295,23 @@ async function proximoProtocolo(){
   }
 }
 
+/* ---------- log de auditoria ---------- */
+function usuarioAtualLabel(){
+  if(usandoFirestore && auth && auth.currentUser && auth.currentUser.email) return auth.currentUser.email;
+  return 'Cliente (via link)';
+}
+async function registrarAuditoria(acao, detalhes){
+  if(!usandoFirestore) return; // auditoria só faz sentido com Firestore compartilhado
+  try{
+    await db.collection('auditoria').add({
+      usuario: usuarioAtualLabel(),
+      acao,
+      detalhes: detalhes || '',
+      quando: new Date().toISOString()
+    });
+  }catch(e){ console.warn('Não foi possível registrar a auditoria:', e); }
+}
+
 async function salvarAgendamento(obj){
   if(usandoFirestore){
     const ref = await db.collection('agendamentos').add(obj);
@@ -1163,6 +1322,7 @@ async function salvarAgendamento(obj){
     lista.push(obj);
     salvarLocal(lista);
   }
+  registrarAuditoria('Criou agendamento', `${obj.nome} — ${fmtDataISOtoBR(obj.data)} às ${obj.horario} (protocolo ${obj.protocolo||'—'})`);
   return obj;
 }
 
@@ -1178,6 +1338,10 @@ async function atualizarStatus(id, status){
   const item = cacheAgendamentos.find(x=>x.id===id);
   if(item) item.status = status;
 
+  if(itemAntes){
+    registrarAuditoria('Alterou situação', `${itemAntes.nome} (protocolo ${itemAntes.protocolo||'—'}) → ${statusInfo(status).label}`);
+  }
+
   if(status==='cancelado' && itemAntes){
     const naFila = filaDoSlot(itemAntes.data, itemAntes.horario);
     if(naFila.length>0){
@@ -1187,6 +1351,7 @@ async function atualizarStatus(id, status){
 }
 
 async function atualizarAgendamento(id, dados){
+  const itemAntes = cacheAgendamentos.find(x=>x.id===id);
   if(usandoFirestore){
     await db.collection('agendamentos').doc(id).update(dados);
   } else {
@@ -1196,15 +1361,20 @@ async function atualizarAgendamento(id, dados){
   }
   const item = cacheAgendamentos.find(x=>x.id===id);
   if(item) Object.assign(item, dados);
+  registrarAuditoria('Editou agendamento', `${dados.nome || (itemAntes&&itemAntes.nome) || '—'} (protocolo ${(itemAntes&&itemAntes.protocolo)||'—'})`);
 }
 
 async function excluirAgendamento(id){
+  const itemAntes = cacheAgendamentos.find(x=>x.id===id);
   if(usandoFirestore){
     await db.collection('agendamentos').doc(id).delete();
   } else {
     salvarLocal(carregarLocal().filter(x=>x.id!==id));
   }
   cacheAgendamentos = cacheAgendamentos.filter(x=>x.id!==id);
+  if(itemAntes){
+    registrarAuditoria('Excluiu agendamento', `${itemAntes.nome} — ${fmtDataISOtoBR(itemAntes.data)} às ${itemAntes.horario} (protocolo ${itemAntes.protocolo||'—'})`);
+  }
 }
 function confirmarExclusao(a){
   const ok = window.confirm(`Excluir o agendamento de ${a.nome} (${fmtDataISOtoBR(a.data)} às ${a.horario})?\n\nEssa ação não pode ser desfeita. Se preferir manter o histórico, use "Cancelou" na Situação em vez de excluir.`);
@@ -1230,6 +1400,7 @@ async function carregarTodos(){
 }
 
 let listenersAtivos = false;
+let primeiraCargaAgendamentos = true;
 function rerenderTudo(){
   renderCalendario();
   renderLista();
@@ -1244,10 +1415,20 @@ function iniciarSincronizacaoTempoReal(){
   listenersAtivos = true;
 
   db.collection('agendamentos').onSnapshot(snap=>{
+    const idsAntes = new Set(cacheAgendamentos.map(a=>a.id));
+    const novos = snap.docs
+      .map(d=>({id:d.id, ...d.data()}))
+      .filter(a=> !idsAntes.has(a.id));
+
     cacheAgendamentos = snap.docs
       .map(d=>({id:d.id, ...d.data()}))
       .sort((a,b)=> (a.data+a.horario).localeCompare(b.data+b.horario));
     rerenderTudo();
+
+    if(!primeiraCargaAgendamentos && novos.length>0){
+      novos.forEach(a=> notificarNovoAgendamento(a));
+    }
+    primeiraCargaAgendamentos = false;
   }, err=>{ console.error('Erro ao sincronizar agendamentos:', err); toast('Erro de conexão com o banco de dados — verifique as regras do Firestore.'); });
 
   db.collection('bloqueios').onSnapshot(snap=>{
@@ -1296,6 +1477,13 @@ function montarLinkConfirmacao(a){
   url.search = '';
   url.hash = '';
   url.searchParams.set('confirmar', a.id);
+  return url.toString();
+}
+function montarLinkAvaliacao(a){
+  const url = new URL(window.location.href);
+  url.search = '';
+  url.hash = '';
+  url.searchParams.set('avaliar', a.id);
   return url.toString();
 }
 document.getElementById('btnLinkPublico').addEventListener('click', ()=>{
@@ -1384,6 +1572,39 @@ document.getElementById('btnSalvarEdicao').addEventListener('click', async ()=>{
   }catch(e){ console.error(e); toast('Erro ao salvar as alterações.'); }
   finally{ btn.disabled = false; btn.textContent = '✓ Salvar alterações'; }
 });
+
+/* ---------- modal de auditoria ---------- */
+function fmtDataHoraISO(iso){
+  const d = new Date(iso);
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+document.getElementById('btnAuditoria').addEventListener('click', async ()=>{
+  const box = document.getElementById('auditoriaLista');
+  box.innerHTML = `<div class="empty-state">Carregando...</div>`;
+  document.getElementById('modalAuditoria').classList.add('show');
+  if(!usandoFirestore){
+    box.innerHTML = `<div class="empty-state">Auditoria disponível apenas com Firestore configurado.</div>`;
+    return;
+  }
+  try{
+    const snap = await db.collection('auditoria').get();
+    const registros = snap.docs.map(d=>d.data()).sort((a,b)=> (b.quando||'').localeCompare(a.quando||'')).slice(0,150);
+    if(registros.length===0){
+      box.innerHTML = `<div class="empty-state">Nenhum registro ainda.</div>`;
+      return;
+    }
+    box.innerHTML = registros.map(r=>`
+      <div class="auditoria-item">
+        <div class="linha1"><span><b>${r.usuario||'—'}</b> — ${r.acao||''}</span><span class="quando">${r.quando?fmtDataHoraISO(r.quando):''}</span></div>
+        ${r.detalhes ? `<div class="detalhes">${r.detalhes}</div>` : ''}
+      </div>`).join('');
+  }catch(e){
+    console.error(e);
+    box.innerHTML = `<div class="empty-state">Erro ao carregar o histórico.</div>`;
+  }
+});
+document.getElementById('fecharModalAuditoria').onclick = ()=> document.getElementById('modalAuditoria').classList.remove('show');
+document.getElementById('modalAuditoria').addEventListener('click', e=>{ if(e.target.id==='modalAuditoria') document.getElementById('modalAuditoria').classList.remove('show'); });
 
 /* ---------- modal de configurações da loja ---------- */
 document.getElementById('btnConfigLoja').addEventListener('click', ()=>{
@@ -1806,6 +2027,7 @@ function renderLista(){
           <option value="reagendamento">Pedir reagendamento</option>
           <option value="cancelamento">Confirmar cancelamento</option>
           <option value="pos_venda">Agradecimento pós-venda</option>
+          <option value="avaliacao">Pedir avaliação</option>
         </select>
       </td>
       <td><button class="btn-editar" data-editar="${a.id}" title="Editar agendamento">✏️</button></td>
@@ -1977,6 +2199,14 @@ function abrirRecibo(a){
   badge.style.background = s.bg;
   badge.style.color = s.color;
 
+  const assinaturaBox = document.getElementById('rAssinaturaBox');
+  if(a.assinatura){
+    document.getElementById('rAssinaturaImg').src = a.assinatura;
+    assinaturaBox.style.display = 'block';
+  } else {
+    assinaturaBox.style.display = 'none';
+  }
+
   window.__reciboAtual = a;
   document.getElementById('modalRecibo').classList.add('show');
 }
@@ -2065,18 +2295,96 @@ function buscarCheckin(){
     </div>`;
   }).join('');
   box.querySelectorAll('button[data-chegou]').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      btn.disabled = true; btn.textContent = 'Confirmando...';
-      await atualizarStatus(btn.dataset.chegou, 'compareceu');
-      toast('Chegada confirmada com sucesso!');
-      renderLista();
-      if(diaSelecionado) renderDiaPanel(diaSelecionado);
-      buscarCheckin();
+    btn.addEventListener('click', ()=>{
+      const a = candidatos.find(x=>x.id===btn.dataset.chegou);
+      if(a) abrirModalAssinatura(a);
     });
   });
 }
 document.getElementById('btnCheckinBuscar').addEventListener('click', buscarCheckin);
 document.getElementById('checkinBusca').addEventListener('keydown', e=>{ if(e.key==='Enter') buscarCheckin(); });
+
+/* ---------- assinatura digital no check-in ---------- */
+let assinaturaAgendamentoAtual = null;
+let assinaturaDesenhando = false;
+let assinaturaTemTraco = false;
+function coordenadaCanvas(canvas, evento){
+  const rect = canvas.getBoundingClientRect();
+  const ponto = evento.touches ? evento.touches[0] : evento;
+  const escalaX = canvas.width / rect.width;
+  const escalaY = canvas.height / rect.height;
+  return { x: (ponto.clientX - rect.left) * escalaX, y: (ponto.clientY - rect.top) * escalaY };
+}
+(function configurarCanvasAssinatura(){
+  const canvas = document.getElementById('assinaturaCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.lineWidth = 2.4;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#0B1E35';
+
+  function iniciar(e){
+    e.preventDefault();
+    assinaturaDesenhando = true;
+    assinaturaTemTraco = true;
+    const {x,y} = coordenadaCanvas(canvas, e);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  }
+  function mover(e){
+    if(!assinaturaDesenhando) return;
+    e.preventDefault();
+    const {x,y} = coordenadaCanvas(canvas, e);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  }
+  function soltar(){ assinaturaDesenhando = false; }
+
+  canvas.addEventListener('mousedown', iniciar);
+  canvas.addEventListener('mousemove', mover);
+  window.addEventListener('mouseup', soltar);
+  canvas.addEventListener('touchstart', iniciar, {passive:false});
+  canvas.addEventListener('touchmove', mover, {passive:false});
+  canvas.addEventListener('touchend', soltar);
+})();
+function limparCanvasAssinatura(){
+  const canvas = document.getElementById('assinaturaCanvas');
+  canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+  assinaturaTemTraco = false;
+}
+function abrirModalAssinatura(a){
+  assinaturaAgendamentoAtual = a;
+  limparCanvasAssinatura();
+  document.getElementById('assinaturaClienteNome').textContent = `${a.nome} · ${a.horario}`;
+  document.getElementById('modalAssinatura').classList.add('show');
+}
+document.getElementById('fecharModalAssinatura').onclick = ()=> document.getElementById('modalAssinatura').classList.remove('show');
+document.getElementById('modalAssinatura').addEventListener('click', e=>{ if(e.target.id==='modalAssinatura') document.getElementById('modalAssinatura').classList.remove('show'); });
+document.getElementById('btnLimparAssinatura').addEventListener('click', limparCanvasAssinatura);
+
+async function finalizarCheckin(assinaturaDataUrl){
+  const a = assinaturaAgendamentoAtual;
+  if(!a) return;
+  if(assinaturaDataUrl){
+    await atualizarAgendamento(a.id, { assinatura: assinaturaDataUrl });
+  }
+  await atualizarStatus(a.id, 'compareceu');
+  document.getElementById('modalAssinatura').classList.remove('show');
+  toast('Chegada confirmada com sucesso!');
+  renderLista();
+  if(diaSelecionado) renderDiaPanel(diaSelecionado);
+  buscarCheckin();
+}
+document.getElementById('btnPularAssinatura').addEventListener('click', ()=> finalizarCheckin(null));
+document.getElementById('btnConfirmarAssinatura').addEventListener('click', async ()=>{
+  const btn = document.getElementById('btnConfirmarAssinatura');
+  btn.disabled = true; btn.textContent = 'Confirmando...';
+  try{
+    const canvas = document.getElementById('assinaturaCanvas');
+    const dataUrl = assinaturaTemTraco ? canvas.toDataURL('image/png') : null;
+    await finalizarCheckin(dataUrl);
+  }catch(e){ console.error(e); toast('Erro ao confirmar chegada.'); }
+  finally{ btn.disabled = false; btn.textContent = '✓ Confirmar chegada'; }
+});
 
 /* ---------- portal público de autoagendamento (?portal=cliente) ---------- */
 function ativarPortalPublico(){
@@ -2162,6 +2470,83 @@ function renderTelaConfirmacao(a){
       toast('Tudo bem, avisamos a loja que você não vai poder comparecer.');
     });
   }
+}
+
+/* ---------- avaliação pós-atendimento (link ?avaliar=ID) ---------- */
+async function abrirTelaAvaliacao(id){
+  document.querySelector('.topbar').style.display = 'none';
+  document.querySelector('.tabs').style.display = 'none';
+  document.getElementById('configBanner').style.display = 'none';
+  document.querySelector('.wrap').style.display = 'none';
+  const tela = document.getElementById('telaAvaliacao');
+  const conteudo = document.getElementById('avaliacaoConteudo');
+  tela.style.display = 'block';
+  conteudo.innerHTML = `<div class="icone">⏳</div><p>Carregando...</p>`;
+
+  let agendamento = null;
+  try{
+    if(usandoFirestore){
+      const [doc, cfgDoc] = await Promise.all([
+        db.collection('agendamentos').doc(id).get(),
+        db.collection('configuracoes').doc('loja').get()
+      ]);
+      if(doc.exists) agendamento = {id:doc.id, ...doc.data()};
+      if(cfgDoc.exists){ const d = cfgDoc.data(); if(d && d.nome && d.endereco) CONFIG_LOJA = d; }
+    } else {
+      agendamento = carregarLocal().find(a=>a.id===id) || null;
+      CONFIG_LOJA = carregarConfigLojaLocal();
+    }
+  }catch(e){ console.error(e); }
+
+  if(!agendamento){
+    conteudo.innerHTML = `<div class="icone">⚠️</div><h2>Não encontramos esse atendimento</h2><p class="sub">Verifique o link recebido.</p>`;
+    return;
+  }
+  renderTelaAvaliacao(agendamento);
+}
+function renderTelaAvaliacao(a){
+  const conteudo = document.getElementById('avaliacaoConteudo');
+  conteudo.innerHTML = `
+    <div class="icone">⭐</div>
+    <h2 style="font-family:'Playfair Display',serif;color:var(--navy);">Como foi seu atendimento?</h2>
+    <p class="sub">Olá, ${a.nome.split(' ')[0]}! De 0 a 10, o quanto você indicaria a ${CONFIG_LOJA.nome} para um amigo ou familiar?</p>
+    <div class="nps-grid" id="npsGrid">
+      ${[0,1,2,3,4,5,6,7,8,9,10].map(n=>`<button class="nps-btn" data-nota="${n}">${n}</button>`).join('')}
+    </div>
+    <div class="nps-legendas"><span>Não indicaria</span><span>Indicaria muito</span></div>
+    <textarea id="avaliacaoComentario" placeholder="Quer contar mais alguma coisa? (opcional)" style="width:100%;min-height:70px;padding:11px 12px;border-radius:10px;border:1.5px solid var(--line);font-family:inherit;font-size:13.5px;margin-bottom:14px;"></textarea>
+    <button class="btn btn-primary" id="btnEnviarAvaliacao" style="width:100%;" disabled>Enviar avaliação</button>
+  `;
+  let notaEscolhida = null;
+  const botoes = conteudo.querySelectorAll('.nps-btn');
+  botoes.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      notaEscolhida = parseInt(btn.dataset.nota);
+      botoes.forEach(b=>b.classList.remove('selecionado'));
+      btn.classList.add('selecionado');
+      document.getElementById('btnEnviarAvaliacao').disabled = false;
+    });
+  });
+  document.getElementById('btnEnviarAvaliacao').addEventListener('click', async (e)=>{
+    if(notaEscolhida===null) return;
+    e.target.disabled = true; e.target.textContent = 'Enviando...';
+    const comentario = document.getElementById('avaliacaoComentario').value.trim();
+    try{
+      const registro = {
+        agendamentoId: a.id, protocolo: a.protocolo||'', nome: a.nome,
+        nota: notaEscolhida, comentario, criadoEm: new Date().toISOString()
+      };
+      if(usandoFirestore){ await db.collection('avaliacoes').add(registro); }
+      conteudo.innerHTML = `
+        <div class="icone">💚</div>
+        <h2 style="font-family:'Playfair Display',serif;color:var(--navy);">Obrigado pela avaliação!</h2>
+        <p class="sub">Sua opinião é muito importante pra gente melhorar sempre.</p>`;
+    }catch(err){
+      console.error(err);
+      toast('Erro ao enviar avaliação. Tente novamente.');
+      e.target.disabled = false; e.target.textContent = 'Enviar avaliação';
+    }
+  });
 }
 
 /* ---------- login / logout do painel administrativo ---------- */
@@ -2278,10 +2663,13 @@ diaSelecionado = hojeISO();
 
 const urlParams = new URLSearchParams(window.location.search);
 const idConfirmar = urlParams.get('confirmar');
+const idAvaliar = urlParams.get('avaliar');
 const modoPublico = urlParams.get('portal') === 'cliente';
 
 if(idConfirmar){
   abrirTelaConfirmacao(idConfirmar);
+} else if(idAvaliar){
+  abrirTelaAvaliacao(idAvaliar);
 } else if(modoPublico){
   ativarPortalPublico();
   carregarTodos();
