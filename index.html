@@ -4,6 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Agenda Atlas — Zoom Tech</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Agenda Atlas — Zoom Tech">
+<meta property="og:description" content="Agende seu atendimento na Zoom Tech em poucos cliques, sem precisar ligar.">
+<meta property="og:image" content="icon-512.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Agenda Atlas — Zoom Tech">
+<meta name="twitter:description" content="Agende seu atendimento na Zoom Tech em poucos cliques, sem precisar ligar.">
+<meta name="twitter:image" content="icon-512.png">
+<meta name="description" content="Agende seu atendimento na Zoom Tech de forma rápida e prática, direto pelo celular.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Agenda Atlas">
+<meta property="og:title" content="Agenda Atlas — Zoom Tech">
+<meta property="og:description" content="Agende seu atendimento na Zoom Tech de forma rápida e prática, direto pelo celular.">
+<meta property="og:image" content="icon-512.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Agenda Atlas — Zoom Tech">
+<meta name="twitter:description" content="Agende seu atendimento na Zoom Tech de forma rápida e prática, direto pelo celular.">
+<meta name="twitter:image" content="icon-512.png">
 <meta name="theme-color" content="#0B1E35">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,17 +52,70 @@
     --wait:#a4813a;
     --shadow:0 20px 50px rgba(11,30,53,.16);
     --radius:16px;
+    --bg-page-1:#eef1f6;
+    --bg-page-2:#e7ebf1;
+    --card-bg:#fff;
+    --card-border:var(--line);
+    --input-bg:#fff;
+    --table-hover:#faf8f2;
   }
+  body.dark-mode{
+    --ink:#e7e9ee;
+    --muted:#9aa3b2;
+    --line:#333c4d;
+    --paper:#20242e;
+    --bg-page-1:#12151c;
+    --bg-page-2:#1a1e28;
+    --card-bg:#1b1f29;
+    --card-border:#2c3140;
+    --input-bg:#232735;
+    --table-hover:#242938;
+  }
+  body.dark-mode .empty-state,
+  body.dark-mode .hint{ color:var(--muted); }
+  body.dark-mode .store-box{ background:#2a2618; color:#e7dcb8; }
+  body.dark-mode .busca-protocolo{ background:#231f14; }
+  body.dark-mode thead th{ color:var(--muted); }
+  body.dark-mode input, body.dark-mode select, body.dark-mode textarea{
+    background:var(--input-bg); color:var(--ink); border-color:var(--card-border);
+  }
+  body.dark-mode .btn-ghost, body.dark-mode .btn-config, body.dark-mode .btn-editar{
+    background:var(--card-bg); color:var(--ink); border-color:var(--card-border);
+  }
+  body.dark-mode .tab:not(.active):not(.tab-link){ background:var(--card-bg); color:var(--ink); }
+  body.dark-mode .cal-day{ background:#232838; border-color:var(--card-border); color:var(--ink); }
+  body.dark-mode .cal-day.selected{ background:var(--navy); }
+  body.dark-mode .modal-shell .card{ background:var(--card-bg); }
+  body.dark-mode #reciboCard{ background:#f3efe6; } /* recibo continua "papel" mesmo no escuro */
+  body.dark-mode .icon-btn{ background:var(--card-bg); color:var(--ink); border-color:var(--card-border); }
+  body.dark-mode .slot{ background:var(--card-bg); color:var(--ink); border-color:var(--card-border); }
+  body.dark-mode tbody tr:hover{ background:var(--table-hover); }
+  body.dark-mode .checkin-card{ background:#232838; border-color:var(--card-border); }
+  body.dark-mode .login-card{ background:var(--card-bg); }
+  body.dark-mode .login-title{ color:var(--ink); }
+  body.dark-mode .lw-atlas{ color:var(--gold-2); }
+  /* textos que usavam navy fixo (bom no fundo claro) viram dourado claro no fundo escuro */
+  body.dark-mode .card h2,
+  body.dark-mode label,
+  body.dark-mode .busca-protocolo .lbl,
+  body.dark-mode .auditoria-item b,
+  body.dark-mode .cal-head .month,
+  body.dark-mode .modal-close span{ color:var(--gold-2); }
+  body.dark-mode .busca-protocolo-item{ background:var(--card-bg); border-color:var(--card-border); }
+  body.dark-mode .busca-protocolo-item b{ color:var(--gold-2); }
+  body.dark-mode .checkin-card b{ color:var(--gold-2); }
+  body.dark-mode .store-box b{ color:#f0e6c8; }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     font-family:'Inter',system-ui,sans-serif;
     background:
       radial-gradient(1200px 600px at 10% -10%, #16305424 0%, transparent 60%),
-      linear-gradient(180deg,#eef1f6 0%, #e7ebf1 100%);
+      linear-gradient(180deg,var(--bg-page-1) 0%, var(--bg-page-2) 100%);
     color:var(--ink);
     min-height:100vh;
     padding-bottom:60px;
+    transition:background .2s, color .2s;
   }
   .topbar{
     background:linear-gradient(135deg,var(--navy) 0%, var(--navy-2) 100%);
@@ -87,7 +159,7 @@
   .tabs-right{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;}
 
   .wrap{max-width:1100px;margin:0 auto;padding:20px 22px 0;}
-  .card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--line);padding:24px;margin-bottom:20px;}
+  .card{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--card-border);padding:24px;margin-bottom:20px;}
   .card h2{margin:0 0 4px;font-family:'Playfair Display',serif;font-size:19px;color:var(--navy);}
   .card .sub{margin:0 0 18px;color:var(--muted);font-size:13px;}
 
@@ -150,6 +222,14 @@
   .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
 
   .store-box{background:#f7f4ec;border:1px dashed var(--gold);border-radius:12px;padding:12px 14px;font-size:12.8px;color:#4a4330;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start;}
+  .lgpd-check{display:flex;gap:10px;align-items:flex-start;font-size:12px;color:#5a6570;cursor:pointer;line-height:1.5;}
+  .cfg-dia-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px;}
+  .cfg-dia-row:last-child{border-bottom:none;}
+  .cfg-dia-nome{width:80px;flex-shrink:0;font-weight:600;color:var(--ink);}
+  .cfg-dia-row label{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);margin:0;white-space:nowrap;}
+  .cfg-dia-row input[type=checkbox]{width:15px;height:15px;cursor:pointer;}
+  .cfg-dia-row input[type=time]{padding:6px 8px;font-size:12px;border-radius:8px;border:1.5px solid var(--line);width:90px;}
+  .lgpd-check input{margin-top:2px;flex-shrink:0;width:16px;height:16px;cursor:pointer;}
   .store-box b{color:var(--navy);}
 
   /* List */
@@ -161,6 +241,10 @@
   .filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
   select.status-select{padding:6px 8px;font-size:12px;border-radius:8px;}
   .empty-state{text-align:center;padding:40px 10px;color:var(--muted);font-size:13.5px;}
+  .empty-state-rica{text-align:center;padding:44px 20px;}
+  .empty-state-rica .ico{font-size:38px;margin-bottom:10px;opacity:.85;}
+  .empty-state-rica .titulo{font-weight:700;color:var(--ink);font-size:15px;margin-bottom:4px;}
+  .empty-state-rica .sub{color:var(--muted);font-size:12.5px;margin-bottom:16px;}
   .protocolo-tag{font-family:'Playfair Display',serif;font-weight:700;color:var(--navy);}
   .btn-editar{background:#fff;border:1.5px solid var(--line);border-radius:9px;padding:6px 9px;font-size:13px;cursor:pointer;line-height:1;}
   .btn-editar:hover{border-color:var(--gold);background:#f7f4ec;}
@@ -253,6 +337,12 @@
   .auditoria-item b{color:var(--navy);}
   .auditoria-item .quando{color:var(--muted);font-size:11px;white-space:nowrap;}
   .auditoria-item .detalhes{color:#5a6570;margin-top:2px;}
+
+  .lixeira-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);gap:10px;font-size:12.8px;}
+  .lixeira-item .info b{display:block;color:var(--navy);font-size:13.5px;}
+  .lixeira-item .info span{color:var(--muted);font-size:11.5px;}
+  .lixeira-item .acoes{display:flex;gap:6px;flex-shrink:0;}
+  body.dark-mode .lixeira-item .info b{ color:var(--gold-2); }
 
   .assinatura-box{position:relative;margin:14px 0;}
   #assinaturaCanvas{width:100%;height:160px;border:1.5px dashed var(--gold);border-radius:12px;background:#fdfcf8;touch-action:none;cursor:crosshair;}
@@ -407,7 +497,9 @@
   <div class="tab" data-tab="metricas"><span class="dot"></span>Métricas</div>
   <div class="tab" data-tab="checkin"><span class="dot"></span>Check-in</div>
   <div class="tabs-right">
+    <div class="tab tab-config" id="btnTema" title="Alternar modo escuro">🌙</div>
     <div class="tab tab-config" id="btnAuditoria">📋 Auditoria</div>
+    <div class="tab tab-config" id="btnLixeira">🗑️ Lixeira</div>
     <div class="tab tab-config" id="btnConfigLoja">⚙️ Configurações</div>
     <div class="tab tab-link" id="btnLinkPublico">🔗 Link Autoagendamento</div>
     <div class="tab tab-config" id="btnSair" style="display:none;">🚪 Sair</div>
@@ -505,7 +597,7 @@
       <div class="field">
         <label>Horário disponível</label>
         <div class="slots" id="slotsBox"></div>
-        <div class="hint">Selecione a data para ver os horários livres. Atendimento das 09:00 às 17:50, intervalos de 30 min.</div>
+        <div class="hint" id="horarioAtendimentoHint">Selecione a data para ver os horários livres.</div>
         <div class="hint" id="filaHint" style="display:none;color:#1a4a7a;">Horários em azul estão cheios — clique para entrar na fila de espera.</div>
       </div>
 
@@ -523,6 +615,13 @@
       <div class="field">
         <label>Observações</label>
         <textarea id="fObs" placeholder="Ex: Cliente interessado em troca de aparelho, retirada de peça, etc."></textarea>
+      </div>
+
+      <div class="field" id="lgpdRow" style="display:none;">
+        <label class="lgpd-check">
+          <input type="checkbox" id="fConsentimentoLGPD">
+          <span>Concordo com o uso dos meus dados (nome, CPF e celular) exclusivamente para realizar e gerenciar este agendamento, conforme a Lei Geral de Proteção de Dados (LGPD).</span>
+        </label>
       </div>
 
       <div class="btn-row">
@@ -561,7 +660,12 @@
           <tbody id="listaBody"></tbody>
         </table>
       </div>
-      <div id="listaEmpty" class="empty-state" style="display:none;">Nenhum agendamento encontrado.</div>
+      <div id="listaEmpty" class="empty-state-rica" style="display:none;">
+        <div class="ico">🗓️</div>
+        <div class="titulo">Nenhum agendamento por aqui ainda</div>
+        <div class="sub">Assim que criar o primeiro, ele aparece nesta lista.</div>
+        <button class="btn btn-primary" id="btnListaEmptyNovo">+ Criar agendamento</button>
+      </div>
     </div>
   </section>
 
@@ -687,6 +791,18 @@
   </div>
 </div>
 
+<!-- MODAL LIXEIRA -->
+<div class="modal-bg" id="modalLixeira">
+  <div class="modal-shell" style="max-width:540px;">
+    <div class="modal-close"><span id="fecharModalLixeira">✕</span></div>
+    <div class="card" style="margin-bottom:0;">
+      <h2>🗑️ Lixeira</h2>
+      <p class="sub">Agendamentos excluídos ficam aqui por 30 dias antes de serem apagados de vez.</p>
+      <div id="lixeiraLista" style="max-height:60vh;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL AUDITORIA -->
 <div class="modal-bg" id="modalAuditoria">
   <div class="modal-shell" style="max-width:540px;">
@@ -762,6 +878,10 @@
       <div class="field">
         <label>Endereço completo</label>
         <textarea id="cfgEndereco" placeholder="Ex: Av. República Argentina, 1968, Bairro Maracanã, Foz do Iguaçu/PR"></textarea>
+      </div>
+      <div class="field">
+        <label>Horário de atendimento por dia da semana</label>
+        <div id="cfgHorariosDias"></div>
       </div>
       <div class="btn-row">
         <button class="btn btn-primary" id="btnSalvarConfigLoja">✓ Salvar configurações</button>
@@ -892,6 +1012,22 @@
   }catch(e){ console.warn('PWA não pôde ser configurado:', e); }
 })();
 
+/* ---------- modo escuro ---------- */
+const LS_TEMA = 'agenda_atlas_tema_v1';
+(function aplicarTemaSalvo(){
+  if(localStorage.getItem(LS_TEMA) === 'dark'){
+    document.body.classList.add('dark-mode');
+  }
+})();
+document.getElementById('btnTema').addEventListener('click', ()=>{
+  const escuro = document.body.classList.toggle('dark-mode');
+  localStorage.setItem(LS_TEMA, escuro ? 'dark' : 'light');
+  document.getElementById('btnTema').textContent = escuro ? '☀️' : '🌙';
+});
+if(document.body.classList.contains('dark-mode')){
+  document.getElementById('btnTema').textContent = '☀️';
+}
+
 /* =========================================================
    AGENDA ATLAS — configuração
    Substitua pelas credenciais do SEU projeto Firebase.
@@ -948,18 +1084,36 @@ function statusInfo(v){ return STATUS_LIST.find(s=>s.v===v) || STATUS_LIST[0]; }
 
 /* ---------- configuração da loja (editável — preparação para virar SaaS multi-loja) ---------- */
 const LS_CONFIG_LOJA = 'agenda_atlas_config_loja_v1';
+const HORARIOS_PADRAO = [
+  { aberto:false, inicio:'09:00', fim:'17:50' }, // 0 = domingo
+  { aberto:true,  inicio:'09:00', fim:'17:50' }, // 1 = segunda
+  { aberto:true,  inicio:'09:00', fim:'17:50' }, // 2 = terça
+  { aberto:true,  inicio:'09:00', fim:'17:50' }, // 3 = quarta
+  { aberto:true,  inicio:'09:00', fim:'17:50' }, // 4 = quinta
+  { aberto:true,  inicio:'09:00', fim:'17:50' }, // 5 = sexta
+  { aberto:true,  inicio:'09:00', fim:'17:50' }, // 6 = sábado
+];
 let CONFIG_LOJA = {
   nome: 'Zoom Tech',
-  endereco: 'Av. República Argentina, 1968, Bairro Maracanã, Foz do Iguaçu/PR'
+  endereco: 'Av. República Argentina, 1968, Bairro Maracanã, Foz do Iguaçu/PR',
+  horarios: HORARIOS_PADRAO.map(h=>({...h}))
 };
+function normalizarConfigLoja(obj){
+  // garante que configs salvas antes desse recurso existir continuem funcionando
+  if(!obj.horarios || !Array.isArray(obj.horarios) || obj.horarios.length!==7){
+    obj.horarios = HORARIOS_PADRAO.map(h=>({...h}));
+  }
+  return obj;
+}
 function carregarConfigLojaLocal(){
   try{
     const salvo = JSON.parse(localStorage.getItem(LS_CONFIG_LOJA));
-    if(salvo && salvo.nome && salvo.endereco) return salvo;
+    if(salvo && salvo.nome && salvo.endereco) return normalizarConfigLoja(salvo);
   }catch(e){}
   return { ...CONFIG_LOJA };
 }
 async function salvarConfigLoja(obj){
+  normalizarConfigLoja(obj);
   if(usandoFirestore){
     await db.collection('configuracoes').doc('loja').set(obj);
   } else {
@@ -1011,8 +1165,11 @@ function nomeFeriado(iso){
   const feriados = feriadosDoAno(ano);
   return feriados[iso] || null;
 }
-function ehDomingo(iso){
-  return new Date(iso+'T12:00:00').getDay() === 0;
+const NOMES_DIA_SEMANA = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+function diaDaSemanaFechado(iso){
+  const dow = new Date(iso+'T12:00:00').getDay();
+  const cfg = (CONFIG_LOJA.horarios && CONFIG_LOJA.horarios[dow]) || HORARIOS_PADRAO[dow];
+  return !cfg.aberto;
 }
 
 /* ---------- bloqueios manuais (dia inteiro ou horário específico) ---------- */
@@ -1039,11 +1196,14 @@ async function removerBloqueio(id){
   }
   cacheBloqueios = cacheBloqueios.filter(x=>x.id!==id);
 }
-// retorna {bloqueado, motivo} para o dia inteiro (feriado, domingo ou bloqueio manual sem horário)
+// retorna {bloqueado, motivo} para o dia inteiro (feriado, dia da semana fechado ou bloqueio manual sem horário)
 function diaBloqueadoInfo(iso){
   const feriado = nomeFeriado(iso);
   if(feriado) return {bloqueado:true, motivo:`Feriado — ${feriado}`, automatico:true};
-  if(ehDomingo(iso)) return {bloqueado:true, motivo:'Domingo (loja fechada)', automatico:true};
+  if(diaDaSemanaFechado(iso)){
+    const dow = new Date(iso+'T12:00:00').getDay();
+    return {bloqueado:true, motivo:`Loja fechada às ${NOMES_DIA_SEMANA[dow]}s`, automatico:true};
+  }
   const manual = cacheBloqueios.find(b=>b.data===iso && !b.horario);
   if(manual) return {bloqueado:true, motivo:manual.motivo || 'Bloqueado manualmente', automatico:false, id:manual.id};
   return {bloqueado:false};
@@ -1263,6 +1423,17 @@ function notificarNovoAgendamento(a){
 }
 
 function pad(n){return n.toString().padStart(2,'0');}
+// Escapa texto digitado por clientes (nome, CPF, celular, observações, etc.) antes de
+// colocar dentro de innerHTML — evita que alguém injete HTML/script no lugar do nome
+// e ele seja executado quando o admin (ou outro cliente) visualizar a tela.
+function esc(v){
+  return String(v??'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
 function fmtDataISOtoBR(iso){
   if(!iso) return '—';
   const [y,m,d] = iso.split('-');
@@ -1408,23 +1579,61 @@ async function atualizarAgendamento(id, dados){
   registrarAuditoria('Editou agendamento', `${dados.nome || (itemAntes&&itemAntes.nome) || '—'} (protocolo ${(itemAntes&&itemAntes.protocolo)||'—'})`);
 }
 
+let cacheLixeira = [];
+const DIAS_LIXEIRA = 30;
+
 async function excluirAgendamento(id){
+  // "Exclusão" agora é reversível: move para a lixeira por 30 dias em vez de apagar de vez.
   const itemAntes = cacheAgendamentos.find(x=>x.id===id);
+  const excluidoEm = new Date().toISOString();
+  await atualizarAgendamento(id, { excluidoEm });
+  cacheAgendamentos = cacheAgendamentos.filter(x=>x.id!==id);
+  if(itemAntes){
+    cacheLixeira.push({ ...itemAntes, excluidoEm });
+    registrarAuditoria('Excluiu agendamento (foi para a lixeira)', `${itemAntes.nome} — ${fmtDataISOtoBR(itemAntes.data)} às ${itemAntes.horario} (protocolo ${itemAntes.protocolo||'—'})`);
+  }
+}
+async function restaurarDaLixeira(id){
+  const item = cacheLixeira.find(x=>x.id===id);
+  if(usandoFirestore){
+    await db.collection('agendamentos').doc(id).update({ excluidoEm: firebase.firestore.FieldValue.delete() });
+  } else {
+    const lista = carregarLocal();
+    const it = lista.find(x=>x.id===id);
+    if(it){ delete it.excluidoEm; salvarLocal(lista); }
+  }
+  cacheLixeira = cacheLixeira.filter(x=>x.id!==id);
+  if(item){
+    delete item.excluidoEm;
+    cacheAgendamentos.push(item);
+    registrarAuditoria('Restaurou agendamento da lixeira', `${item.nome} — ${fmtDataISOtoBR(item.data)} às ${item.horario} (protocolo ${item.protocolo||'—'})`);
+  }
+}
+async function excluirPermanentemente(id){
+  const item = cacheLixeira.find(x=>x.id===id);
   if(usandoFirestore){
     await db.collection('agendamentos').doc(id).delete();
   } else {
     salvarLocal(carregarLocal().filter(x=>x.id!==id));
   }
-  cacheAgendamentos = cacheAgendamentos.filter(x=>x.id!==id);
-  if(itemAntes){
-    registrarAuditoria('Excluiu agendamento', `${itemAntes.nome} — ${fmtDataISOtoBR(itemAntes.data)} às ${itemAntes.horario} (protocolo ${itemAntes.protocolo||'—'})`);
+  cacheLixeira = cacheLixeira.filter(x=>x.id!==id);
+  if(item){
+    registrarAuditoria('Excluiu definitivamente (lixeira)', `${item.nome} — protocolo ${item.protocolo||'—'}`);
+  }
+}
+// limpeza automática: itens na lixeira há mais de 30 dias são apagados de vez, sem precisar de ação manual
+async function purgarLixeiraAntiga(){
+  const limite = Date.now() - DIAS_LIXEIRA*24*60*60*1000;
+  const antigos = cacheLixeira.filter(x=> x.excluidoEm && new Date(x.excluidoEm).getTime() < limite);
+  for(const item of antigos){
+    try{ await excluirPermanentemente(item.id); }catch(e){ console.warn('Falha ao purgar item antigo da lixeira:', e); }
   }
 }
 function confirmarExclusao(a){
-  const ok = window.confirm(`Excluir o agendamento de ${a.nome} (${fmtDataISOtoBR(a.data)} às ${a.horario})?\n\nEssa ação não pode ser desfeita. Se preferir manter o histórico, use "Cancelou" na Situação em vez de excluir.`);
+  const ok = window.confirm(`Excluir o agendamento de ${a.nome} (${fmtDataISOtoBR(a.data)} às ${a.horario})?\n\nEle vai para a Lixeira e pode ser restaurado em até ${DIAS_LIXEIRA} dias. Depois disso é apagado de vez.`);
   if(!ok) return;
   excluirAgendamento(a.id).then(()=>{
-    toast('Agendamento excluído.');
+    toast('Agendamento movido para a lixeira.');
     renderLista(); renderCalendario();
     if(diaSelecionado) renderDiaPanel(diaSelecionado);
   }).catch(e=>{ console.error(e); toast('Erro ao excluir agendamento.'); });
@@ -1434,12 +1643,14 @@ async function carregarTodos(){
   if(usandoFirestore){
     iniciarSincronizacaoTempoReal();
   } else {
-    cacheAgendamentos = carregarLocal().sort((a,b)=> (a.data+a.horario).localeCompare(b.data+b.horario));
+    cacheAgendamentos = carregarLocal().filter(a=>!a.excluidoEm).sort((a,b)=> (a.data+a.horario).localeCompare(b.data+b.horario));
+    cacheLixeira = carregarLocal().filter(a=>a.excluidoEm);
     cacheBloqueios = carregarBloqueiosLocal();
     cacheFila = carregarFilaLocal();
     CONFIG_LOJA = carregarConfigLojaLocal();
     aplicarConfigLoja();
     rerenderTudo();
+    purgarLixeiraAntiga();
   }
 }
 
@@ -1460,18 +1671,18 @@ function iniciarSincronizacaoTempoReal(){
 
   db.collection('agendamentos').onSnapshot(snap=>{
     const idsAntes = new Set(cacheAgendamentos.map(a=>a.id));
-    const novos = snap.docs
-      .map(d=>({id:d.id, ...d.data()}))
-      .filter(a=> !idsAntes.has(a.id));
+    const todos = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    const novos = todos.filter(a=> !a.excluidoEm && !idsAntes.has(a.id));
 
-    cacheAgendamentos = snap.docs
-      .map(d=>({id:d.id, ...d.data()}))
+    cacheAgendamentos = todos.filter(a=>!a.excluidoEm)
       .sort((a,b)=> (a.data+a.horario).localeCompare(b.data+b.horario));
+    cacheLixeira = todos.filter(a=>a.excluidoEm);
     rerenderTudo();
 
     if(!primeiraCargaAgendamentos && novos.length>0){
       novos.forEach(a=> notificarNovoAgendamento(a));
     }
+    if(primeiraCargaAgendamentos) purgarLixeiraAntiga();
     primeiraCargaAgendamentos = false;
   }, err=>{ console.error('Erro ao sincronizar agendamentos:', err); toast('Erro de conexão com o banco de dados — verifique as regras do Firestore.'); });
 
@@ -1488,7 +1699,7 @@ function iniciarSincronizacaoTempoReal(){
   db.collection('configuracoes').doc('loja').onSnapshot(doc=>{
     if(doc.exists){
       const dados = doc.data();
-      if(dados && dados.nome && dados.endereco){ CONFIG_LOJA = dados; aplicarConfigLoja(); }
+      if(dados && dados.nome && dados.endereco){ CONFIG_LOJA = normalizarConfigLoja(dados); aplicarConfigLoja(); gerarSlots(); }
     }
   }, err=>console.error('Erro ao sincronizar configurações da loja:', err));
 }
@@ -1557,7 +1768,7 @@ document.getElementById('btnAbrirLink').addEventListener('click', ()=>{
 function gerarOpcoesHorarioEdicao(data, idAtual){
   const ocupados = new Set(cacheAgendamentos.filter(a=>a.data===data && a.status!=='cancelado' && a.id!==idAtual).map(a=>a.horario));
   const bloqueados = new Set(horariosBloqueados(data).map(b=>b.horario));
-  return gerarHorariosDisponiveis().map(h=>{
+  return gerarHorariosDisponiveis(data).map(h=>{
     const indisponivel = ocupados.has(h) || bloqueados.has(h);
     const motivo = bloqueados.has(h) ? ' — bloqueado' : (ocupados.has(h) ? ' — ocupado' : '');
     return `<option value="${h}" ${indisponivel?'disabled':''}>${h}${motivo}</option>`;
@@ -1617,6 +1828,55 @@ document.getElementById('btnSalvarEdicao').addEventListener('click', async ()=>{
   finally{ btn.disabled = false; btn.textContent = '✓ Salvar alterações'; }
 });
 
+/* ---------- modal da lixeira ---------- */
+function diasRestantesLixeira(excluidoEm){
+  const passados = (Date.now() - new Date(excluidoEm).getTime()) / (24*60*60*1000);
+  return Math.max(0, Math.ceil(DIAS_LIXEIRA - passados));
+}
+function renderLixeira(){
+  const box = document.getElementById('lixeiraLista');
+  if(cacheLixeira.length===0){
+    box.innerHTML = `<div class="empty-state-rica"><div class="ico">🗑️</div><div class="titulo">Lixeira vazia</div><div class="sub">Agendamentos excluídos aparecem aqui.</div></div>`;
+    return;
+  }
+  const ordenada = [...cacheLixeira].sort((a,b)=> (b.excluidoEm||'').localeCompare(a.excluidoEm||''));
+  box.innerHTML = ordenada.map(a=>`
+    <div class="lixeira-item">
+      <div class="info">
+        <b>${esc(a.nome)}</b>
+        <span>${fmtDataISOtoBR(a.data)} às ${a.horario} · protocolo ${esc(a.protocolo)||'—'} · restam ${diasRestantesLixeira(a.excluidoEm)} dia(s)</span>
+      </div>
+      <div class="acoes">
+        <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;" data-restaurar="${a.id}">↩ Restaurar</button>
+        <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;color:#b3432b;" data-apagar="${a.id}">Apagar já</button>
+      </div>
+    </div>`).join('');
+  box.querySelectorAll('button[data-restaurar]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      await restaurarDaLixeira(btn.dataset.restaurar);
+      toast('Agendamento restaurado.');
+      renderLixeira(); renderLista(); renderCalendario();
+      if(diaSelecionado) renderDiaPanel(diaSelecionado);
+    });
+  });
+  box.querySelectorAll('button[data-apagar]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const item = cacheLixeira.find(x=>x.id===btn.dataset.apagar);
+      const ok = window.confirm(`Apagar definitivamente o agendamento de ${item?item.nome:''}? Essa ação não pode ser desfeita.`);
+      if(!ok) return;
+      await excluirPermanentemente(btn.dataset.apagar);
+      toast('Agendamento apagado definitivamente.');
+      renderLixeira();
+    });
+  });
+}
+document.getElementById('btnLixeira').addEventListener('click', ()=>{
+  renderLixeira();
+  document.getElementById('modalLixeira').classList.add('show');
+});
+document.getElementById('fecharModalLixeira').onclick = ()=> document.getElementById('modalLixeira').classList.remove('show');
+document.getElementById('modalLixeira').addEventListener('click', e=>{ if(e.target.id==='modalLixeira') document.getElementById('modalLixeira').classList.remove('show'); });
+
 /* ---------- modal de auditoria ---------- */
 function fmtDataHoraISO(iso){
   const d = new Date(iso);
@@ -1639,8 +1899,8 @@ document.getElementById('btnAuditoria').addEventListener('click', async ()=>{
     }
     box.innerHTML = registros.map(r=>`
       <div class="auditoria-item">
-        <div class="linha1"><span><b>${r.usuario||'—'}</b> — ${r.acao||''}</span><span class="quando">${r.quando?fmtDataHoraISO(r.quando):''}</span></div>
-        ${r.detalhes ? `<div class="detalhes">${r.detalhes}</div>` : ''}
+        <div class="linha1"><span><b>${esc(r.usuario)||'—'}</b> — ${esc(r.acao)||''}</span><span class="quando">${r.quando?fmtDataHoraISO(r.quando):''}</span></div>
+        ${r.detalhes ? `<div class="detalhes">${esc(r.detalhes)}</div>` : ''}
       </div>`).join('');
   }catch(e){
     console.error(e);
@@ -1651,9 +1911,31 @@ document.getElementById('fecharModalAuditoria').onclick = ()=> document.getEleme
 document.getElementById('modalAuditoria').addEventListener('click', e=>{ if(e.target.id==='modalAuditoria') document.getElementById('modalAuditoria').classList.remove('show'); });
 
 /* ---------- modal de configurações da loja ---------- */
+function renderCfgHorariosDias(){
+  const box = document.getElementById('cfgHorariosDias');
+  const horarios = CONFIG_LOJA.horarios || HORARIOS_PADRAO;
+  box.innerHTML = NOMES_DIA_SEMANA.map((nome,dow)=>{
+    const cfg = horarios[dow] || HORARIOS_PADRAO[dow];
+    return `<div class="cfg-dia-row">
+      <span class="cfg-dia-nome">${nome.charAt(0).toUpperCase()+nome.slice(1)}</span>
+      <label><input type="checkbox" data-dia-aberto="${dow}" ${cfg.aberto?'checked':''}> Aberto</label>
+      <input type="time" data-dia-inicio="${dow}" value="${cfg.inicio}" ${cfg.aberto?'':'disabled'}>
+      <span style="color:var(--muted);">às</span>
+      <input type="time" data-dia-fim="${dow}" value="${cfg.fim}" ${cfg.aberto?'':'disabled'}>
+    </div>`;
+  }).join('');
+  box.querySelectorAll('input[data-dia-aberto]').forEach(chk=>{
+    chk.addEventListener('change', ()=>{
+      const dow = chk.dataset.diaAberto;
+      box.querySelector(`input[data-dia-inicio="${dow}"]`).disabled = !chk.checked;
+      box.querySelector(`input[data-dia-fim="${dow}"]`).disabled = !chk.checked;
+    });
+  });
+}
 document.getElementById('btnConfigLoja').addEventListener('click', ()=>{
   document.getElementById('cfgNomeLoja').value = CONFIG_LOJA.nome;
   document.getElementById('cfgEndereco').value = CONFIG_LOJA.endereco;
+  renderCfgHorariosDias();
   document.getElementById('modalConfigLoja').classList.add('show');
 });
 document.getElementById('fecharModalConfig').onclick = ()=> document.getElementById('modalConfigLoja').classList.remove('show');
@@ -1663,12 +1945,21 @@ document.getElementById('btnSalvarConfigLoja').addEventListener('click', async (
   const nome = document.getElementById('cfgNomeLoja').value.trim();
   const endereco = document.getElementById('cfgEndereco').value.trim();
   if(!nome || !endereco){ toast('Preencha o nome e o endereço da loja.'); return; }
+
+  const horarios = [0,1,2,3,4,5,6].map(dow=>{
+    const chk = document.querySelector(`input[data-dia-aberto="${dow}"]`);
+    const ini = document.querySelector(`input[data-dia-inicio="${dow}"]`);
+    const fim = document.querySelector(`input[data-dia-fim="${dow}"]`);
+    return { aberto: chk.checked, inicio: ini.value || '09:00', fim: fim.value || '18:00' };
+  });
+
   const btn = document.getElementById('btnSalvarConfigLoja');
   btn.disabled = true; btn.textContent = 'Salvando...';
   try{
-    await salvarConfigLoja({ nome, endereco });
+    await salvarConfigLoja({ nome, endereco, horarios });
     toast('Configurações salvas com sucesso!');
     document.getElementById('modalConfigLoja').classList.remove('show');
+    gerarSlots();
   }catch(e){ console.error(e); toast('Erro ao salvar configurações.'); }
   finally{ btn.disabled = false; btn.textContent = '✓ Salvar configurações'; }
 });
@@ -1702,7 +1993,7 @@ function renderCalendario(){
     const isSelected = iso === diaSelecionado;
     const qtd = contagem[iso] || 0;
     const bloqueio = diaBloqueadoInfo(iso);
-    html += `<div class="cal-day ${isToday?'today':''} ${isPast?'past':''} ${isSelected?'selected':''} ${bloqueio.bloqueado?'day-blocked':''}" data-iso="${iso}" title="${bloqueio.bloqueado ? bloqueio.motivo : ''}">
+    html += `<div class="cal-day ${isToday?'today':''} ${isPast?'past':''} ${isSelected?'selected':''} ${bloqueio.bloqueado?'day-blocked':''}" data-iso="${iso}" title="${bloqueio.bloqueado ? esc(bloqueio.motivo) : ''}">
       <span>${d}</span>
       ${bloqueio.bloqueado ? `<span class="cal-count">🔒</span>` : (qtd>0 ? `<span class="cal-count">${qtd} ag.</span>` : '')}
     </div>`;
@@ -1726,20 +2017,23 @@ function renderDiaPanel(iso){
   const bloqueioDia = diaBloqueadoInfo(iso);
   const avisoBox = document.getElementById('diaBloqueadoAviso');
   avisoBox.innerHTML = bloqueioDia.bloqueado
-    ? `<div style="background:#fbe1da;color:#8a1f1f;padding:9px 12px;border-radius:9px;font-size:12.5px;margin-bottom:10px;">🔒 Dia bloqueado — ${bloqueioDia.motivo}</div>`
+    ? `<div style="background:#fbe1da;color:#8a1f1f;padding:9px 12px;border-radius:9px;font-size:12.5px;margin-bottom:10px;">🔒 Dia bloqueado — ${esc(bloqueioDia.motivo)}</div>`
     : '';
 
   const doDia = cacheAgendamentos.filter(a=>a.data===iso).sort((a,b)=>a.horario.localeCompare(b.horario));
   const box = document.getElementById('dayPanelList');
   if(doDia.length===0){
-    box.innerHTML = `<div class="empty-state" style="padding:20px 0;">Nenhum agendamento para este dia.</div>`;
+    box.innerHTML = `<div class="empty-state-rica" style="padding:20px 10px;">
+      <div class="ico" style="font-size:28px;">☕</div>
+      <div class="titulo" style="font-size:13.5px;">Dia livre, sem agendamentos</div>
+    </div>`;
   } else {
     box.innerHTML = doDia.map(a=>{
       const s = statusInfo(a.status);
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);gap:8px;">
         <div style="min-width:0;">
-          <div style="font-weight:700;font-size:13.5px;">${a.horario} · ${a.nome}</div>
-          <div style="font-size:11.5px;color:var(--muted);">${a.celular || ''}</div>
+          <div style="font-weight:700;font-size:13.5px;">${a.horario} · ${esc(a.nome)}</div>
+          <div style="font-size:11.5px;color:var(--muted);">${esc(a.celular) || ''}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
           <span class="badge" style="background:${s.bg};color:${s.color};">${s.label}</span>
@@ -1780,7 +2074,7 @@ document.getElementById('bloqueioTipo').addEventListener('change', e=>{
 });
 function renderBloqueiosPanel(iso){
   const horarioSel = document.getElementById('bloqueioHorario');
-  horarioSel.innerHTML = gerarHorariosDisponiveis().map(h=>`<option value="${h}">${h}</option>`).join('');
+  horarioSel.innerHTML = gerarHorariosDisponiveis(iso).map(h=>`<option value="${h}">${h}</option>`).join('');
 
   const ativos = cacheBloqueios.filter(b=>b.data===iso);
   const lista = document.getElementById('bloqueiosAtivosLista');
@@ -1789,7 +2083,7 @@ function renderBloqueiosPanel(iso){
   } else {
     lista.innerHTML = ativos.map(b=>`
       <div class="bloqueio-item">
-        <span>${b.horario ? `⏰ ${b.horario}` : '📅 Dia inteiro'} — ${b.motivo || 'Sem motivo informado'}</span>
+        <span>${b.horario ? `⏰ ${b.horario}` : '📅 Dia inteiro'} — ${esc(b.motivo) || 'Sem motivo informado'}</span>
         <button data-unlock="${b.id}">Desbloquear</button>
       </div>`).join('');
     lista.querySelectorAll('button[data-unlock]').forEach(btn=>{
@@ -1832,7 +2126,7 @@ function renderFilaPanel(iso){
   }
   lista.innerHTML = ativos.map(f=>`
     <div class="fila-item">
-      <span>⏰ ${f.horario} — ${f.nome} ${f.celular?('· '+f.celular):''}</span>
+      <span>⏰ ${f.horario} — ${esc(f.nome)} ${f.celular?('· '+esc(f.celular)):''}</span>
       <span class="acoes">
         <button data-notificar="${f.id}">Notificar</button>
         <button data-remover-fila="${f.id}">Remover</button>
@@ -1864,7 +2158,7 @@ document.getElementById('btnLembretesDia').addEventListener('click', ()=>{
   } else {
     box.innerHTML = doDia.map(a=>`
       <div class="lembrete-row">
-        <div class="info"><b>${a.horario} · ${a.nome}</b>${a.celular||''}</div>
+        <div class="info"><b>${a.horario} · ${esc(a.nome)}</b>${esc(a.celular)||''}</div>
         <button class="btn btn-gold" style="padding:8px 14px;font-size:12px;" data-send="${a.id}">📤 Enviar</button>
       </div>`).join('');
     box.querySelectorAll('button[data-send]').forEach(btn=>{
@@ -1914,10 +2208,15 @@ function atualizarRiscoCliente(cpf){
 document.getElementById('fCelular').addEventListener('input', e=>{ e.target.value = maskCelular(e.target.value); });
 
 let horarioSelecionado = null;
-function gerarHorariosDisponiveis(){
+function gerarHorariosDisponiveis(iso){
   const lista=[];
-  const inicio = 9*60;      // 09:00
-  const fim = 17*60+50;     // 17:50
+  const dow = iso ? new Date(iso+'T12:00:00').getDay() : 1;
+  const cfg = (CONFIG_LOJA.horarios && CONFIG_LOJA.horarios[dow]) || HORARIOS_PADRAO[dow];
+  if(!cfg.aberto) return lista;
+  const [hi,mi0] = cfg.inicio.split(':').map(Number);
+  const [hf,mf0] = cfg.fim.split(':').map(Number);
+  const inicio = hi*60+mi0;
+  const fim = hf*60+mf0;
   for(let m=inicio; m<=fim; m+=30){
     const h = Math.floor(m/60), mi = m%60;
     lista.push(`${pad(h)}:${pad(mi)}`);
@@ -1928,12 +2227,19 @@ function gerarSlots(){
   const data = document.getElementById('fData').value;
   const box = document.getElementById('slotsBox');
   const filaHint = document.getElementById('filaHint');
+  const horarioHint = document.getElementById('horarioAtendimentoHint');
   if(!data){ box.innerHTML = `<div class="hint">Escolha uma data primeiro.</div>`; filaHint.style.display='none'; return; }
+
+  const dow = new Date(data+'T12:00:00').getDay();
+  const cfgDia = (CONFIG_LOJA.horarios && CONFIG_LOJA.horarios[dow]) || HORARIOS_PADRAO[dow];
+  horarioHint.textContent = cfgDia.aberto
+    ? `Atendimento das ${cfgDia.inicio} às ${cfgDia.fim} neste dia, intervalos de 30 min.`
+    : `Loja fechada às ${NOMES_DIA_SEMANA[dow]}s.`;
 
   const bloqueioDia = diaBloqueadoInfo(data);
   if(bloqueioDia.bloqueado){
     horarioSelecionado = null;
-    box.innerHTML = `<div class="hint" style="color:var(--danger);">🔒 Loja fechada neste dia — ${bloqueioDia.motivo}. Escolha outra data.</div>`;
+    box.innerHTML = `<div class="hint" style="color:var(--danger);">🔒 Loja fechada neste dia — ${esc(bloqueioDia.motivo)}. Escolha outra data.</div>`;
     filaHint.style.display='none';
     return;
   }
@@ -1942,7 +2248,7 @@ function gerarSlots(){
   const bloqueados = new Set(horariosBloqueados(data).map(b=>b.horario));
   horarioSelecionado = null;
   let temOcupado = false;
-  box.innerHTML = gerarHorariosDisponiveis().map(h=>{
+  box.innerHTML = gerarHorariosDisponiveis(data).map(h=>{
     const travado = bloqueados.has(h);
     const cheio = ocupados.has(h) && !travado;
     if(cheio) temOcupado = true;
@@ -1994,6 +2300,7 @@ function limparForm(){
   document.getElementById('fStatus').value='agendado';
   document.getElementById('cpfHint').textContent='';
   document.getElementById('riscoBox').classList.remove('show');
+  document.getElementById('fConsentimentoLGPD').checked = false;
   gerarSlots();
 }
 document.getElementById('btnLimpar').onclick = limparForm;
@@ -2012,6 +2319,10 @@ document.getElementById('btnSalvar').onclick = async ()=>{
   if(!celular){ toast('Informe o celular do cliente.'); return; }
   if(!data){ toast('Selecione a data do agendamento.'); return; }
   if(!horarioSelecionado){ toast('Selecione um horário disponível.'); return; }
+  if(document.body.classList.contains('portal-publico') && !document.getElementById('fConsentimentoLGPD').checked){
+    toast('Marque a caixinha de concordância com o uso dos seus dados para continuar.');
+    return;
+  }
 
   const btn = document.getElementById('btnSalvar');
   btn.disabled = true; btn.textContent = 'Salvando...';
@@ -2023,6 +2334,10 @@ document.getElementById('btnSalvar').onclick = async ()=>{
       status, observacao: obs, atendente,
       criadoEm: new Date().toISOString()
     };
+    if(document.body.classList.contains('portal-publico')){
+      agendamento.consentimentoLGPD = true;
+      agendamento.consentimentoLGPDData = new Date().toISOString();
+    }
     const salvo = await salvarAgendamento(agendamento);
     cacheAgendamentos.push(salvo);
     toast('Agendamento confirmado com sucesso!');
@@ -2047,17 +2362,41 @@ function renderLista(){
 
   const body = document.getElementById('listaBody');
   const empty = document.getElementById('listaEmpty');
-  if(lista.length===0){ body.innerHTML=''; empty.style.display='block'; return; }
+  if(lista.length===0){
+    body.innerHTML='';
+    const filtrosAtivos = fStatus || fData;
+    empty.innerHTML = filtrosAtivos ? `
+      <div class="ico">🔍</div>
+      <div class="titulo">Nenhum resultado para esse filtro</div>
+      <div class="sub">Tente ajustar a situação ou a data escolhida.</div>
+      <button class="btn btn-ghost" id="btnListaEmptyLimpar">Limpar filtros</button>
+    ` : `
+      <div class="ico">🗓️</div>
+      <div class="titulo">Nenhum agendamento por aqui ainda</div>
+      <div class="sub">Assim que criar o primeiro, ele aparece nesta lista.</div>
+      <button class="btn btn-primary" id="btnListaEmptyNovo">+ Criar agendamento</button>
+    `;
+    empty.style.display='block';
+    const btnNovo = document.getElementById('btnListaEmptyNovo');
+    if(btnNovo) btnNovo.addEventListener('click', ()=> irParaAba('novo'));
+    const btnLimpar = document.getElementById('btnListaEmptyLimpar');
+    if(btnLimpar) btnLimpar.addEventListener('click', ()=>{
+      document.getElementById('filtroStatus').value='';
+      document.getElementById('filtroData').value='';
+      renderLista();
+    });
+    return;
+  }
   empty.style.display='none';
 
   body.innerHTML = lista.map(a=>{
     const s = statusInfo(a.status);
     let opts = STATUS_LIST.map(st=>`<option value="${st.v}" ${st.v===a.status?'selected':''}>${st.label}</option>`).join('');
     return `<tr>
-      <td class="protocolo-tag">${a.protocolo||'—'}</td>
-      <td>${a.nome}</td>
-      <td>${a.cpf||'—'}</td>
-      <td>${a.celular||'—'}</td>
+      <td class="protocolo-tag">${esc(a.protocolo)||'—'}</td>
+      <td>${esc(a.nome)}</td>
+      <td>${esc(a.cpf)||'—'}</td>
+      <td>${esc(a.celular)||'—'}</td>
       <td>${fmtDataISOtoBR(a.data)}</td>
       <td>${a.horario}</td>
       <td><select class="status-select" data-id="${a.id}" style="background:${s.bg};color:${s.color};border-color:transparent;font-weight:700;">${opts}</select></td>
@@ -2151,7 +2490,7 @@ function buscarPorProtocolo(){
   // mais de um resultado (busca parcial ambígua) -> lista pra escolher
   box.innerHTML = `<div class="busca-protocolo-resultados">` + encontrados.map(a=>`
     <div class="busca-protocolo-item">
-      <span><b>${a.protocolo}</b> — ${a.nome} · ${fmtDataISOtoBR(a.data)} ${a.horario}</span>
+      <span><b>${esc(a.protocolo)}</b> — ${esc(a.nome)} · ${fmtDataISOtoBR(a.data)} ${a.horario}</span>
       <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;" data-abrir="${a.id}">Ver recibo</button>
     </div>`).join('') + `</div>`;
   box.querySelectorAll('button[data-abrir]').forEach(btn=>{
@@ -2209,11 +2548,9 @@ function renderMetricas(){
   document.getElementById('mNaoComparecimento').textContent = pct(naoCompareceu, validos) + '%';
 
   const porHorario = {};
-  gerarHorariosDisponiveis().forEach(h=> porHorario[h]=0);
   base.forEach(a=>{ if(a.horario!=null) porHorario[a.horario] = (porHorario[a.horario]||0)+1; });
-
-  const labels = Object.keys(porHorario);
-  const valores = Object.values(porHorario);
+  const labels = Object.keys(porHorario).sort();
+  const valores = labels.map(h=>porHorario[h]);
 
   const ctx = document.getElementById('chartHorarios').getContext('2d');
   if(chartHorariosRef) chartHorariosRef.destroy();
@@ -2332,8 +2669,8 @@ function buscarCheckin(){
     const s = statusInfo(a.status);
     return `<div class="checkin-card">
       <div>
-        <b>${a.nome}</b>
-        <span>${a.horario} · ${s.label}${a.cpf?(' · '+a.cpf):''}</span>
+        <b>${esc(a.nome)}</b>
+        <span>${a.horario} · ${s.label}${a.cpf?(' · '+esc(a.cpf)):''}</span>
       </div>
       <button class="btn btn-primary" data-chegou="${a.id}">✅ Confirmar chegada</button>
     </div>`;
@@ -2436,6 +2773,7 @@ function ativarPortalPublico(){
   document.getElementById('portalSelo').style.display = 'block';
   document.getElementById('novoAgendamentoTitulo').textContent = 'Agende seu atendimento';
   document.getElementById('novoAgendamentoSub').textContent = `Escolha o melhor dia e horário para você na ${CONFIG_LOJA.nome}`;
+  document.getElementById('lgpdRow').style.display = 'block';
   irParaAba('novo');
 }
 
@@ -2484,11 +2822,11 @@ function renderTelaConfirmacao(a){
   conteudo.innerHTML = `
     <div class="icone">${icone}</div>
     <h2 style="font-family:'Playfair Display',serif;color:var(--navy);">${titulo}</h2>
-    <p class="sub">Olá, ${a.nome.split(' ')[0]}! Seu agendamento na ${CONFIG_LOJA.nome}:</p>
+    <p class="sub">Olá, ${esc(a.nome.split(' ')[0])}! Seu agendamento na ${esc(CONFIG_LOJA.nome)}:</p>
     <div class="r-grid" style="margin:16px 0;">
       <div class="r-cell"><p class="r-label">Data</p><p class="r-value">${fmtDataISOtoBR(a.data)}</p></div>
       <div class="r-cell"><p class="r-label">Horário</p><p class="r-value">${a.horario}</p></div>
-      <div class="r-cell full"><p class="r-label">Endereço</p><p class="r-value" style="font-size:12.5px;">${CONFIG_LOJA.endereco}</p></div>
+      <div class="r-cell full"><p class="r-label">Endereço</p><p class="r-value" style="font-size:12.5px;">${esc(CONFIG_LOJA.endereco)}</p></div>
     </div>
     ${jaConfirmado ? `<p class="sub">Te esperamos no dia e horário combinados. Até lá!</p>` : ''}
     ${jaCancelado ? `<p class="sub">Tudo bem, obrigado por avisar! Se quiser remarcar, é só entrar em contato com a gente.</p>` : ''}
@@ -2553,7 +2891,7 @@ function renderTelaAvaliacao(a){
   conteudo.innerHTML = `
     <div class="icone">⭐</div>
     <h2 style="font-family:'Playfair Display',serif;color:var(--navy);">Como foi seu atendimento?</h2>
-    <p class="sub">Olá, ${a.nome.split(' ')[0]}! De 0 a 10, o quanto você indicaria a ${CONFIG_LOJA.nome} para um amigo ou familiar?</p>
+    <p class="sub">Olá, ${esc(a.nome.split(' ')[0])}! De 0 a 10, o quanto você indicaria a ${esc(CONFIG_LOJA.nome)} para um amigo ou familiar?</p>
     <div class="nps-grid" id="npsGrid">
       ${[0,1,2,3,4,5,6,7,8,9,10].map(n=>`<button class="nps-btn" data-nota="${n}">${n}</button>`).join('')}
     </div>
