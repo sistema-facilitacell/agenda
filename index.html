@@ -90,6 +90,8 @@
   body.dark-mode .icon-btn{ background:var(--card-bg); color:var(--ink); border-color:var(--card-border); }
   body.dark-mode .slot{ background:var(--card-bg); color:var(--ink); border-color:var(--card-border); }
   body.dark-mode tbody tr:hover{ background:var(--table-hover); }
+  body.dark-mode tr.linha-atrasada{ background:#3a1e1a; }
+  body.dark-mode tr.linha-atrasada:hover{ background:#4a2620; }
   body.dark-mode .checkin-card{ background:#232838; border-color:var(--card-border); }
   body.dark-mode .login-card{ background:var(--card-bg); }
   body.dark-mode .login-title{ color:var(--ink); }
@@ -199,6 +201,9 @@
   textarea{resize:vertical;min-height:70px;}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px;margin-top:6px;}
+  .aviso-dia{border-radius:10px;padding:11px 14px;font-size:12.8px;margin-bottom:10px;display:flex;gap:8px;align-items:flex-start;}
+  .aviso-dia.reduzido{background:#fdf1d6;color:#8a6d1f;}
+  .aviso-dia.cheio{background:#eef3fb;color:#1a4a7a;}
   .slot{
     padding:9px 4px;text-align:center;border-radius:9px;border:1.5px solid var(--line);
     font-size:13px;font-weight:600;cursor:pointer;background:#fff;color:var(--ink);
@@ -237,8 +242,17 @@
   thead th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding:8px 10px;border-bottom:2px solid var(--line);}
   tbody td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle;}
   tbody tr:hover{background:#faf8f2;}
+  tr.linha-atrasada{background:#fdeeea;}
+  tr.linha-atrasada:hover{background:#fbe1da;}
+  tr.linha-atrasada td:first-child{border-left:3px solid var(--danger);}
   .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.2px;white-space:nowrap;}
   .filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .sublista-tabs{display:flex;gap:6px;margin-bottom:14px;}
+  .sublista-tab{padding:8px 16px;border-radius:9px;border:1.5px solid var(--line);background:#fff;color:var(--muted);font-weight:600;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:7px;}
+  .sublista-tab:hover{border-color:var(--gold);}
+  .sublista-tab.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .sublista-tab .cont{background:rgba(0,0,0,.12);border-radius:999px;padding:1px 8px;font-size:11px;}
+  .sublista-tab.active .cont{background:rgba(255,255,255,.2);}
   select.status-select{padding:6px 8px;font-size:12px;border-radius:8px;}
   .empty-state{text-align:center;padding:40px 10px;color:var(--muted);font-size:13.5px;}
   .empty-state-rica{text-align:center;padding:44px 20px;}
@@ -329,6 +343,21 @@
   .aviso-novo-fechar{margin-left:auto;cursor:pointer;opacity:.7;font-size:13px;flex-shrink:0;}
   .aviso-novo-fechar:hover{opacity:1;}
 
+  .aviso-alarme{position:fixed;top:100px;right:18px;z-index:299;display:flex;flex-direction:column;gap:8px;opacity:0;pointer-events:none;transform:translateX(20px);transition:.3s;}
+  .aviso-alarme.show{opacity:1;pointer-events:auto;transform:translateX(0);}
+  .aviso-alarme-item{
+    background:linear-gradient(135deg,#b3432b,#8a1f1f);color:#fff;border:1.5px solid #e07a5f;
+    border-radius:13px;padding:12px 15px;display:flex;align-items:center;gap:11px;
+    box-shadow:0 14px 34px rgba(138,31,31,.4);max-width:320px;
+    animation:avisoAlarmePulso 1.2s ease-in-out infinite;
+  }
+  @keyframes avisoAlarmePulso{0%,100%{box-shadow:0 14px 34px rgba(138,31,31,.4);}50%{box-shadow:0 14px 34px rgba(230,90,60,.7);}}
+  .aviso-alarme-icone{font-size:20px;flex-shrink:0;}
+  .aviso-alarme-item b{display:block;font-size:13px;}
+  .aviso-alarme-item div div{font-size:12px;color:#fbe1da;margin-top:2px;}
+  .aviso-alarme-fechar{margin-left:auto;cursor:pointer;opacity:.75;font-size:13px;flex-shrink:0;}
+  .aviso-alarme-fechar:hover{opacity:1;}
+
   .config-banner{background:#fff3e0;border:1px solid #f0c98a;color:#7a4a12;padding:12px 16px;border-radius:10px;font-size:12.5px;margin:0 auto 16px;max-width:1100px;}
   .config-banner code{background:#fdebcf;padding:1px 5px;border-radius:4px;}
 
@@ -368,6 +397,22 @@
 
   /* Métricas */
   .metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+  @media (max-width:700px){ #tab-hoje .metric-grid{grid-template-columns:repeat(2,1fr);} }
+
+  .hoje-proximo{background:linear-gradient(135deg,var(--navy),var(--navy-2));color:#fff;border-radius:14px;padding:18px 20px;margin-top:18px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;}
+  .hoje-proximo .rotulo{font-size:10.5px;text-transform:uppercase;letter-spacing:1px;color:var(--gold-2);font-weight:700;margin-bottom:4px;}
+  .hoje-proximo .nome{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;}
+  .hoje-proximo .detalhe{font-size:12.5px;color:#cdd6e5;margin-top:3px;}
+  .hoje-proximo .horario-grande{font-size:30px;font-weight:800;font-family:'Playfair Display',serif;color:var(--gold-2);}
+
+  .hoje-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);}
+  .hoje-item:last-child{border-bottom:none;}
+  .hoje-item .hora{width:56px;flex-shrink:0;font-weight:700;color:var(--navy);font-size:13.5px;}
+  .hoje-item .info{flex:1;min-width:0;}
+  .hoje-item .info b{font-size:13.5px;display:block;}
+  .hoje-item .info span{font-size:11.5px;color:var(--muted);}
+  .hoje-item.finalizado{opacity:.55;}
+  .hoje-item.atrasado{border-left:3px solid var(--danger);padding-left:9px;}
   @media (max-width:860px){.metric-grid{grid-template-columns:repeat(2,1fr);}}
   .metric-card{background:#fbf9f4;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;}
   .metric-card .num{font-family:'Playfair Display',serif;font-size:28px;font-weight:800;color:var(--navy);}
@@ -491,7 +536,8 @@
 </div>
 
 <div class="tabs">
-  <div class="tab active" data-tab="calendario"><span class="dot"></span>Calendário</div>
+  <div class="tab active" data-tab="hoje"><span class="dot"></span>🏠 Hoje</div>
+  <div class="tab" data-tab="calendario"><span class="dot"></span>Calendário</div>
   <div class="tab" data-tab="novo"><span class="dot"></span>Novo Agendamento</div>
   <div class="tab" data-tab="lista"><span class="dot"></span>Lista Geral</div>
   <div class="tab" data-tab="metricas"><span class="dot"></span>Métricas</div>
@@ -513,7 +559,32 @@
   </div>
 
   <!-- ABA CALENDÁRIO -->
-  <section id="tab-calendario">
+  <!-- ABA HOJE (painel inicial) -->
+  <section id="tab-hoje">
+    <div class="card">
+      <h2 id="hojeSaudacao">Olá!</h2>
+      <p class="sub" id="hojeDataCompleta">—</p>
+
+      <div id="hojeAvisoDia"></div>
+
+      <div class="metric-grid" style="margin-top:4px;">
+        <div class="metric-card"><div class="num" id="hojeTotal">0</div><div class="lbl">Agendamentos hoje</div></div>
+        <div class="metric-card"><div class="num" id="hojeRestantes">0</div><div class="lbl">Ainda por vir</div></div>
+        <div class="metric-card"><div class="num" id="hojeFinalizados">0</div><div class="lbl">Já finalizados</div></div>
+        <div class="metric-card"><div class="num" id="hojeFilaQtd">0</div><div class="lbl">Na fila de espera</div></div>
+      </div>
+
+      <div id="hojeProximoBox"></div>
+    </div>
+
+    <div class="card">
+      <h2>Agenda de hoje</h2>
+      <p class="sub">Todos os horários de hoje, em ordem</p>
+      <div id="hojeListaDia"></div>
+    </div>
+  </section>
+
+  <section id="tab-calendario" style="display:none;">
     <div class="grid2">
       <div class="card">
         <div class="cal-head">
@@ -540,14 +611,22 @@
           <div class="bloqueio-form">
             <label style="margin-top:6px;">Tipo de bloqueio</label>
             <select id="bloqueioTipo">
-              <option value="dia">Bloquear o dia inteiro</option>
+              <option value="dia">Bloquear o dia inteiro (loja não vai abrir)</option>
+              <option value="reduzido">Reduzir o expediente (atendimento só até tal hora)</option>
               <option value="horario">Bloquear um horário específico</option>
             </select>
             <div id="bloqueioHorarioBox" style="display:none;">
               <label>Horário</label>
               <select id="bloqueioHorario"></select>
             </div>
-            <label>Motivo (opcional)</label>
+            <div id="bloqueioReduzidoBox" style="display:none;">
+              <label>Atendimento até às</label>
+              <input type="time" id="bloqueioHorarioLimite" value="12:00">
+            </div>
+            <label>Mensagem para o cliente</label>
+            <select id="bloqueioMotivoPreset" style="margin-bottom:8px;">
+              <option value="">Escrever mensagem personalizada…</option>
+            </select>
             <input type="text" id="bloqueioMotivo" placeholder="Ex: Feriado, reunião de equipe, manutenção...">
             <button class="btn btn-ghost" id="btnConfirmarBloqueio" style="width:100%;">Bloquear</button>
           </div>
@@ -596,6 +675,7 @@
 
       <div class="field">
         <label>Horário disponível</label>
+        <div id="avisoDiaBox"></div>
         <div class="slots" id="slotsBox"></div>
         <div class="hint" id="horarioAtendimentoHint">Selecione a data para ver os horários livres.</div>
         <div class="hint" id="filaHint" style="display:none;color:#1a4a7a;">Horários em azul estão cheios — clique para entrar na fila de espera.</div>
@@ -646,6 +726,11 @@
         <div id="buscaProtocoloResultado"></div>
       </div>
 
+      <div class="sublista-tabs">
+        <button class="sublista-tab active" id="btnSubAbertos" data-sub="abertos">Abertos <span id="contAbertos" class="cont">0</span></button>
+        <button class="sublista-tab" id="btnSubFinalizados" data-sub="finalizados">Finalizados <span id="contFinalizados" class="cont">0</span></button>
+      </div>
+
       <div class="filters">
         <select id="filtroStatus" class="status-select"><option value="">Todas as situações</option></select>
         <input type="date" id="filtroData" style="max-width:170px;">
@@ -655,7 +740,7 @@
       <div style="overflow-x:auto;">
         <table>
           <thead>
-            <tr><th>Protocolo</th><th>Cliente</th><th>CPF</th><th>Celular</th><th>Data</th><th>Horário</th><th>Situação</th><th>Recibo</th><th>Mensagem</th><th>Editar</th><th>Excluir</th></tr>
+            <tr><th>Protocolo</th><th>Cliente</th><th>CPF</th><th>Celular</th><th>Data</th><th>Horário</th><th>Situação</th><th>Recibo</th><th>Mensagem</th><th>Editar</th><th>Repetir</th><th>Excluir</th></tr>
           </thead>
           <tbody id="listaBody"></tbody>
         </table>
@@ -972,6 +1057,7 @@
 
 <div class="toast" id="toast"></div>
 <div class="aviso-novo" id="avisoNovoAgendamento"></div>
+<div class="aviso-alarme" id="avisoAlarmeAtraso"></div>
 
 <script>
 /* =========================================================
@@ -1204,13 +1290,25 @@ function diaBloqueadoInfo(iso){
     const dow = new Date(iso+'T12:00:00').getDay();
     return {bloqueado:true, motivo:`Loja fechada às ${NOMES_DIA_SEMANA[dow]}s`, automatico:true};
   }
-  const manual = cacheBloqueios.find(b=>b.data===iso && !b.horario);
+  const manual = cacheBloqueios.find(b=>b.data===iso && !b.horario && !b.horarioLimite);
   if(manual) return {bloqueado:true, motivo:manual.motivo || 'Bloqueado manualmente', automatico:false, id:manual.id};
   return {bloqueado:false};
 }
-// retorna Set de horários bloqueados manualmente para um dia (dia não bloqueado por inteiro)
+// retorna o bloqueio de "horário reduzido" do dia (expediente encurtado), se houver
+function horarioReduzidoInfo(iso){
+  return cacheBloqueios.find(b=>b.data===iso && b.horarioLimite) || null;
+}
+// retorna um Set com todos os horários indisponíveis do dia por causa de bloqueios manuais
+// (tanto horários específicos quanto os que ficam depois do "atendimento até às X")
 function horariosBloqueados(iso){
-  return cacheBloqueios.filter(b=>b.data===iso && b.horario);
+  const bloqueados = new Set(
+    cacheBloqueios.filter(b=>b.data===iso && b.horario).map(b=>b.horario)
+  );
+  const reduzido = horarioReduzidoInfo(iso);
+  if(reduzido){
+    gerarHorariosDisponiveis(iso).forEach(h=>{ if(h > reduzido.horarioLimite) bloqueados.add(h); });
+  }
+  return bloqueados;
 }
 
 /* ---------- fila de espera ---------- */
@@ -1420,6 +1518,84 @@ function notificarNovoAgendamento(a){
   box.querySelector('.aviso-novo-fechar').addEventListener('click', fechar);
   clearTimeout(window.__timeoutAvisoNovo);
   window.__timeoutAvisoNovo = setTimeout(fechar, 7000);
+}
+
+/* ---------- alarme de cliente atrasado (horário passou e ainda não foi atendido) ---------- */
+function tocarSomAlarme(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const tocarNota = (freq, inicio, duracao)=>{
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime + inicio);
+      gain.gain.exponentialRampToValueAtTime(0.13, ctx.currentTime + inicio + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + inicio + duracao);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + inicio);
+      osc.stop(ctx.currentTime + inicio + duracao + 0.05);
+    };
+    tocarNota(420, 0, 0.16);
+    tocarNota(420, 0.22, 0.16);
+    tocarNota(420, 0.44, 0.28);
+  }catch(e){ /* sem problema se o navegador bloquear áudio */ }
+}
+let idsAlarmeAtivos = new Set();
+let idsJaAlarmados = new Set();
+let cacheAtrasadosHoje = [];
+function renderAlarmesAtraso(){
+  const box = document.getElementById('avisoAlarmeAtraso');
+  const lista = cacheAtrasadosHoje.filter(a=>idsAlarmeAtivos.has(a.id));
+  if(lista.length===0){ box.classList.remove('show'); box.innerHTML=''; return; }
+  box.innerHTML = lista.map(a=>`
+    <div class="aviso-alarme-item">
+      <span class="aviso-alarme-icone">🚨</span>
+      <div>
+        <b>Cliente atrasado!</b>
+        <div>${esc(a.nome)} — horário das ${a.horario}</div>
+      </div>
+      <span class="aviso-alarme-fechar" data-fechar="${a.id}">✕</span>
+    </div>`).join('');
+  box.classList.add('show');
+  box.querySelectorAll('[data-fechar]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      idsAlarmeAtivos.delete(btn.dataset.fechar);
+      renderAlarmesAtraso();
+    });
+  });
+}
+function verificarAtrasados(){
+  if(!cacheAgendamentos) return;
+  const hoje = hojeISO();
+  const agora = new Date();
+  const horaAtual = `${pad(agora.getHours())}:${pad(agora.getMinutes())}`;
+  const atrasadosAgora = cacheAgendamentos.filter(a=> a.data===hoje && a.horario < horaAtual && !STATUS_FINALIZADOS.includes(a.status));
+  const idsAtrasados = new Set(atrasadosAgora.map(a=>a.id));
+  cacheAtrasadosHoje = atrasadosAgora;
+
+  // se um item resolvido (status mudou) some do alarme automaticamente
+  idsAlarmeAtivos.forEach(id=>{ if(!idsAtrasados.has(id)) idsAlarmeAtivos.delete(id); });
+
+  let temNovo = false;
+  atrasadosAgora.forEach(a=>{
+    if(!idsJaAlarmados.has(a.id)){
+      idsJaAlarmados.add(a.id);
+      idsAlarmeAtivos.add(a.id);
+      temNovo = true;
+    }
+  });
+  if(temNovo){
+    tocarSomAlarme();
+    avisarNoTitulo('🚨 Cliente atrasado!');
+  }
+  renderAlarmesAtraso();
+}
+let intervaloAlarmes = null;
+function iniciarChecagemDeAtrasados(){
+  if(intervaloAlarmes) return;
+  verificarAtrasados();
+  intervaloAlarmes = setInterval(verificarAtrasados, 60000);
 }
 
 function pad(n){return n.toString().padStart(2,'0');}
@@ -1662,6 +1838,8 @@ function rerenderTudo(){
   if(diaSelecionado) renderDiaPanel(diaSelecionado);
   gerarSlots();
   if(document.getElementById('tab-metricas').style.display === 'block') renderMetricas();
+  if(document.getElementById('tab-hoje').style.display !== 'none') renderHoje();
+  if(intervaloAlarmes) verificarAtrasados(); // só roda no painel admin, nunca no portal público do cliente
 }
 // Sincronização em tempo real: qualquer agendamento feito pelo link público (?portal=cliente),
 // em outro computador ou celular, aparece automaticamente no painel — sem precisar recarregar a página.
@@ -1709,10 +1887,11 @@ document.querySelectorAll('.tab[data-tab]').forEach(tabEl=>{
   tabEl.addEventListener('click', ()=>{
     document.querySelectorAll('.tab[data-tab]').forEach(t=>t.classList.remove('active'));
     tabEl.classList.add('active');
-    ['calendario','novo','lista','metricas','checkin'].forEach(name=>{
+    ['hoje','calendario','novo','lista','metricas','checkin'].forEach(name=>{
       document.getElementById('tab-'+name).style.display = (name===tabEl.dataset.tab) ? 'block' : 'none';
     });
     if(tabEl.dataset.tab==='metricas') renderMetricas();
+    if(tabEl.dataset.tab==='hoje') renderHoje();
   });
 });
 function irParaAba(nome){
@@ -1767,7 +1946,7 @@ document.getElementById('btnAbrirLink').addEventListener('click', ()=>{
 /* ---------- modal de edição de agendamento ---------- */
 function gerarOpcoesHorarioEdicao(data, idAtual){
   const ocupados = new Set(cacheAgendamentos.filter(a=>a.data===data && a.status!=='cancelado' && a.id!==idAtual).map(a=>a.horario));
-  const bloqueados = new Set(horariosBloqueados(data).map(b=>b.horario));
+  const bloqueados = horariosBloqueados(data);
   return gerarHorariosDisponiveis(data).map(h=>{
     const indisponivel = ocupados.has(h) || bloqueados.has(h);
     const motivo = bloqueados.has(h) ? ' — bloqueado' : (ocupados.has(h) ? ' — ocupado' : '');
@@ -2038,6 +2217,7 @@ function renderDiaPanel(iso){
         <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
           <span class="badge" style="background:${s.bg};color:${s.color};">${s.label}</span>
           <button class="btn-editar" data-editar="${a.id}" title="Editar agendamento">✏️</button>
+          <button class="btn-editar" data-duplicar="${a.id}" title="Repetir esse agendamento para uma nova data">🔁</button>
           <button class="btn-editar" style="color:#b3432b;" data-excluir="${a.id}" title="Excluir agendamento">🗑️</button>
         </div>
       </div>`;
@@ -2046,6 +2226,12 @@ function renderDiaPanel(iso){
       btn.addEventListener('click', ()=>{
         const a = cacheAgendamentos.find(x=>x.id===btn.dataset.editar);
         if(a) abrirModalEditar(a);
+      });
+    });
+    box.querySelectorAll('button[data-duplicar]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const a = cacheAgendamentos.find(x=>x.id===btn.dataset.duplicar);
+        if(a) duplicarAgendamento(a);
       });
     });
     box.querySelectorAll('button[data-excluir]').forEach(btn=>{
@@ -2069,23 +2255,56 @@ document.getElementById('btnNovoDoDia').onclick = ()=>{
 document.getElementById('toggleBloqueio').addEventListener('click', ()=>{
   document.getElementById('bloqueioPanel').classList.toggle('show');
 });
+
+const PRESETS_BLOQUEIO = {
+  dia: [
+    'Não haverá atendimento neste dia.',
+    'Loja fechada — feriado.',
+    'Loja fechada — manutenção.',
+    'Loja fechada — equipe em treinamento.'
+  ],
+  reduzido: [
+    'HORARIO_LIMITE_PLACEHOLDER'
+  ],
+  horario: []
+};
+function atualizarPresetsMotivo(){
+  const tipo = document.getElementById('bloqueioTipo').value;
+  const sel = document.getElementById('bloqueioMotivoPreset');
+  const limite = document.getElementById('bloqueioHorarioLimite').value || '12:00';
+  const opcoes = (PRESETS_BLOQUEIO[tipo]||[]).map(t=>
+    t==='HORARIO_LIMITE_PLACEHOLDER' ? `O atendimento hoje será até às ${limite}.` : t
+  );
+  sel.innerHTML = `<option value="">Escrever mensagem personalizada…</option>` +
+    opcoes.map(t=>`<option value="${t.replace(/"/g,'&quot;')}">${t}</option>`).join('');
+}
 document.getElementById('bloqueioTipo').addEventListener('change', e=>{
   document.getElementById('bloqueioHorarioBox').style.display = e.target.value==='horario' ? 'block' : 'none';
+  document.getElementById('bloqueioReduzidoBox').style.display = e.target.value==='reduzido' ? 'block' : 'none';
+  atualizarPresetsMotivo();
 });
+document.getElementById('bloqueioHorarioLimite').addEventListener('change', atualizarPresetsMotivo);
+document.getElementById('bloqueioMotivoPreset').addEventListener('change', e=>{
+  if(e.target.value) document.getElementById('bloqueioMotivo').value = e.target.value;
+});
+
 function renderBloqueiosPanel(iso){
   const horarioSel = document.getElementById('bloqueioHorario');
   horarioSel.innerHTML = gerarHorariosDisponiveis(iso).map(h=>`<option value="${h}">${h}</option>`).join('');
+  atualizarPresetsMotivo();
 
   const ativos = cacheBloqueios.filter(b=>b.data===iso);
   const lista = document.getElementById('bloqueiosAtivosLista');
   if(ativos.length===0){
     lista.innerHTML = `<div class="hint" style="margin-bottom:8px;">Nenhum bloqueio manual neste dia.</div>`;
   } else {
-    lista.innerHTML = ativos.map(b=>`
-      <div class="bloqueio-item">
-        <span>${b.horario ? `⏰ ${b.horario}` : '📅 Dia inteiro'} — ${esc(b.motivo) || 'Sem motivo informado'}</span>
+    lista.innerHTML = ativos.map(b=>{
+      const rotulo = b.horarioLimite ? `⏰ Até ${b.horarioLimite}` : (b.horario ? `⏰ ${b.horario}` : '📅 Dia inteiro');
+      return `<div class="bloqueio-item">
+        <span>${rotulo} — ${esc(b.motivo) || 'Sem motivo informado'}</span>
         <button data-unlock="${b.id}">Desbloquear</button>
-      </div>`).join('');
+      </div>`;
+    }).join('');
     lista.querySelectorAll('button[data-unlock]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
         await removerBloqueio(btn.dataset.unlock);
@@ -2098,15 +2317,25 @@ function renderBloqueiosPanel(iso){
 document.getElementById('btnConfirmarBloqueio').addEventListener('click', async ()=>{
   if(!diaSelecionado){ toast('Selecione um dia no calendário.'); return; }
   const tipo = document.getElementById('bloqueioTipo').value;
-  const motivo = document.getElementById('bloqueioMotivo').value.trim();
-  const obj = { data: diaSelecionado, motivo, criadoEm: new Date().toISOString() };
-  if(tipo==='horario') obj.horario = document.getElementById('bloqueioHorario').value;
+  let motivo = document.getElementById('bloqueioMotivo').value.trim();
+  const obj = { data: diaSelecionado, criadoEm: new Date().toISOString() };
+  if(tipo==='horario'){
+    obj.horario = document.getElementById('bloqueioHorario').value;
+    if(!motivo) motivo = 'Horário indisponível.';
+  } else if(tipo==='reduzido'){
+    obj.horarioLimite = document.getElementById('bloqueioHorarioLimite').value || '12:00';
+    if(!motivo) motivo = `O atendimento hoje será até às ${obj.horarioLimite}.`;
+  } else {
+    if(!motivo) motivo = 'Não haverá atendimento neste dia.';
+  }
+  obj.motivo = motivo;
   const btn = document.getElementById('btnConfirmarBloqueio');
   btn.disabled = true; btn.textContent = 'Bloqueando...';
   try{
     const salvo = await salvarBloqueio(obj);
     cacheBloqueios.push(salvo);
     document.getElementById('bloqueioMotivo').value = '';
+    document.getElementById('bloqueioMotivoPreset').value = '';
     toast('Bloqueio criado com sucesso.');
     renderCalendario(); renderDiaPanel(diaSelecionado); gerarSlots();
   }catch(e){ console.error(e); toast('Erro ao criar bloqueio.'); }
@@ -2228,6 +2457,8 @@ function gerarSlots(){
   const box = document.getElementById('slotsBox');
   const filaHint = document.getElementById('filaHint');
   const horarioHint = document.getElementById('horarioAtendimentoHint');
+  const avisoDiaBox = document.getElementById('avisoDiaBox');
+  avisoDiaBox.innerHTML = '';
   if(!data){ box.innerHTML = `<div class="hint">Escolha uma data primeiro.</div>`; filaHint.style.display='none'; return; }
 
   const dow = new Date(data+'T12:00:00').getDay();
@@ -2239,25 +2470,37 @@ function gerarSlots(){
   const bloqueioDia = diaBloqueadoInfo(data);
   if(bloqueioDia.bloqueado){
     horarioSelecionado = null;
-    box.innerHTML = `<div class="hint" style="color:var(--danger);">🔒 Loja fechada neste dia — ${esc(bloqueioDia.motivo)}. Escolha outra data.</div>`;
+    box.innerHTML = `<div class="hint" style="color:var(--danger);">🔒 Loja fechada neste dia — ${esc(bloqueioDia.motivo).replace(/\.$/,'')}. Escolha outra data.</div>`;
     filaHint.style.display='none';
     return;
   }
 
+  const reduzido = horarioReduzidoInfo(data);
+  if(reduzido){
+    avisoDiaBox.innerHTML = `<div class="aviso-dia reduzido">⏰ ${esc(reduzido.motivo)}</div>`;
+  }
+
   const ocupados = new Set(cacheAgendamentos.filter(a=>a.data===data && a.status!=='cancelado').map(a=>a.horario));
-  const bloqueados = new Set(horariosBloqueados(data).map(b=>b.horario));
+  const bloqueados = horariosBloqueados(data);
   horarioSelecionado = null;
   let temOcupado = false;
-  box.innerHTML = gerarHorariosDisponiveis(data).map(h=>{
+  const todosHorarios = gerarHorariosDisponiveis(data);
+  let livres = 0;
+  box.innerHTML = todosHorarios.map(h=>{
     const travado = bloqueados.has(h);
     const cheio = ocupados.has(h) && !travado;
     if(cheio) temOcupado = true;
+    if(!travado && !cheio) livres++;
     const qtdFila = filaDoSlot(data, h).length;
     const cls = travado ? 'busy' : (cheio ? 'fila' : '');
     const titulo = travado ? 'Bloqueado' : (cheio ? 'Horário cheio — clique para entrar na fila de espera' : '');
     return `<div class="slot ${cls}" data-h="${h}" data-cheio="${cheio?'1':'0'}" title="${titulo}">${h}${qtdFila>0?` <small style="opacity:.7;">(${qtdFila})</small>`:''}</div>`;
   }).join('');
   filaHint.style.display = temOcupado ? 'block' : 'none';
+
+  if(todosHorarios.length>0 && livres===0){
+    avisoDiaBox.innerHTML += `<div class="aviso-dia cheio">📋 Os horários de hoje já foram todos preenchidos. Você pode entrar na fila de espera clicando em um horário abaixo.</div>`;
+  }
 
   document.querySelectorAll('.slot:not(.busy):not(.fila)').forEach(el=>{
     el.addEventListener('click', ()=>{
@@ -2304,6 +2547,22 @@ function limparForm(){
   gerarSlots();
 }
 document.getElementById('btnLimpar').onclick = limparForm;
+
+function duplicarAgendamento(a){
+  irParaAba('novo');
+  document.getElementById('fNome').value = a.nome || '';
+  document.getElementById('fCpf').value = a.cpf || '';
+  document.getElementById('fCelular').value = a.celular || '';
+  document.getElementById('fObs').value = a.observacao || '';
+  document.getElementById('fAtendente').value = a.atendente || '';
+  document.getElementById('fData').value = '';
+  document.getElementById('fStatus').value = 'agendado';
+  horarioSelecionado = null;
+  atualizarRiscoCliente(a.cpf || '');
+  gerarSlots();
+  toast('Dados do cliente preenchidos — escolha a nova data e horário.');
+  document.getElementById('fData').focus();
+}
 
 document.getElementById('btnSalvar').onclick = async ()=>{
   const nome = document.getElementById('fNome').value.trim();
@@ -2353,10 +2612,22 @@ document.getElementById('btnSalvar').onclick = async ()=>{
 };
 
 /* ---------- lista geral ---------- */
+const STATUS_FINALIZADOS = ['compareceu','nao_compareceu','comprou','cancelado','sem_interesse'];
+let listaSubView = 'abertos';
+
 function renderLista(){
   const fStatus = document.getElementById('filtroStatus').value;
   const fData = document.getElementById('filtroData').value;
-  let lista = [...cacheAgendamentos].sort((a,b)=> (b.data+b.horario).localeCompare(a.data+a.horario));
+
+  const abertos = cacheAgendamentos.filter(a=>!STATUS_FINALIZADOS.includes(a.status));
+  const finalizados = cacheAgendamentos.filter(a=>STATUS_FINALIZADOS.includes(a.status));
+  document.getElementById('contAbertos').textContent = abertos.length;
+  document.getElementById('contFinalizados').textContent = finalizados.length;
+
+  let lista = listaSubView==='abertos'
+    ? [...abertos].sort((a,b)=> (a.data+a.horario).localeCompare(b.data+b.horario))   // mais próximos primeiro (hoje, depois os próximos dias)
+    : [...finalizados].sort((a,b)=> (b.data+b.horario).localeCompare(a.data+a.horario)); // mais recentes primeiro
+
   if(fStatus) lista = lista.filter(a=>a.status===fStatus);
   if(fData) lista = lista.filter(a=>a.data===fData);
 
@@ -2370,12 +2641,16 @@ function renderLista(){
       <div class="titulo">Nenhum resultado para esse filtro</div>
       <div class="sub">Tente ajustar a situação ou a data escolhida.</div>
       <button class="btn btn-ghost" id="btnListaEmptyLimpar">Limpar filtros</button>
-    ` : `
+    ` : (listaSubView==='abertos' ? `
       <div class="ico">🗓️</div>
-      <div class="titulo">Nenhum agendamento por aqui ainda</div>
+      <div class="titulo">Nenhum agendamento em aberto</div>
       <div class="sub">Assim que criar o primeiro, ele aparece nesta lista.</div>
       <button class="btn btn-primary" id="btnListaEmptyNovo">+ Criar agendamento</button>
-    `;
+    ` : `
+      <div class="ico">✅</div>
+      <div class="titulo">Nenhum agendamento finalizado ainda</div>
+      <div class="sub">Quando marcar como Comprou, Compareceu, Cancelou etc., aparece aqui.</div>
+    `);
     empty.style.display='block';
     const btnNovo = document.getElementById('btnListaEmptyNovo');
     if(btnNovo) btnNovo.addEventListener('click', ()=> irParaAba('novo'));
@@ -2389,16 +2664,20 @@ function renderLista(){
   }
   empty.style.display='none';
 
+  const hojeISOStr = hojeISO();
+  const horaAtualStr = (()=>{ const d=new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; })();
+
   body.innerHTML = lista.map(a=>{
     const s = statusInfo(a.status);
+    const atrasado = a.data===hojeISOStr && a.horario<horaAtualStr && !STATUS_FINALIZADOS.includes(a.status);
     let opts = STATUS_LIST.map(st=>`<option value="${st.v}" ${st.v===a.status?'selected':''}>${st.label}</option>`).join('');
-    return `<tr>
+    return `<tr class="${atrasado?'linha-atrasada':''}">
       <td class="protocolo-tag">${esc(a.protocolo)||'—'}</td>
       <td>${esc(a.nome)}</td>
       <td>${esc(a.cpf)||'—'}</td>
       <td>${esc(a.celular)||'—'}</td>
       <td>${fmtDataISOtoBR(a.data)}</td>
-      <td>${a.horario}</td>
+      <td>${a.horario}${atrasado?' 🚨':''}</td>
       <td><select class="status-select" data-id="${a.id}" style="background:${s.bg};color:${s.color};border-color:transparent;font-weight:700;">${opts}</select></td>
       <td><button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;" data-ver="${a.id}">Ver recibo</button></td>
       <td>
@@ -2414,6 +2693,7 @@ function renderLista(){
         </select>
       </td>
       <td><button class="btn-editar" data-editar="${a.id}" title="Editar agendamento">✏️</button></td>
+      <td><button class="btn-editar" data-duplicar="${a.id}" title="Repetir esse agendamento para uma nova data">🔁</button></td>
       <td><button class="btn-editar" style="color:#b3432b;" data-excluir="${a.id}" title="Excluir agendamento">🗑️</button></td>
     </tr>`;
   }).join('');
@@ -2446,6 +2726,12 @@ function renderLista(){
       if(a) abrirModalEditar(a);
     });
   });
+  body.querySelectorAll('button[data-duplicar]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const a = cacheAgendamentos.find(x=>x.id===btn.dataset.duplicar);
+      if(a) duplicarAgendamento(a);
+    });
+  });
   body.querySelectorAll('button[data-excluir]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const a = cacheAgendamentos.find(x=>x.id===btn.dataset.excluir);
@@ -2460,6 +2746,14 @@ document.getElementById('btnLimparFiltro').onclick = ()=>{
   document.getElementById('filtroData').value='';
   renderLista();
 };
+document.querySelectorAll('.sublista-tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    listaSubView = btn.dataset.sub;
+    document.querySelectorAll('.sublista-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderLista();
+  });
+});
 
 /* ---------- busca de recibo pelo protocolo ---------- */
 function normalizarProtocolo(v){ return (v||'').trim().toUpperCase(); }
@@ -2527,6 +2821,71 @@ document.getElementById('btnMetricaTudo').addEventListener('click', ()=>{
   document.getElementById('metricaMes').value = '';
   renderMetricas();
 });
+
+/* ---------- painel "Hoje" ---------- */
+function renderHoje(){
+  const hoje = hojeISO();
+  const agora = new Date();
+  const horaAtual = `${pad(agora.getHours())}:${pad(agora.getMinutes())}`;
+
+  const h = agora.getHours();
+  const saudacao = h<12 ? 'Bom dia' : (h<18 ? 'Boa tarde' : 'Boa noite');
+  document.getElementById('hojeSaudacao').textContent = `${saudacao}!`;
+  document.getElementById('hojeDataCompleta').textContent = `${diaSemana(hoje)}, ${fmtDataISOtoBR(hoje)}`;
+
+  const avisoBox = document.getElementById('hojeAvisoDia');
+  const bloqueioDia = diaBloqueadoInfo(hoje);
+  const reduzido = horarioReduzidoInfo(hoje);
+  if(bloqueioDia.bloqueado){
+    avisoBox.innerHTML = `<div class="aviso-dia" style="background:#fbe1da;color:#8a1f1f;">🔒 ${esc(bloqueioDia.motivo)}</div>`;
+  } else if(reduzido){
+    avisoBox.innerHTML = `<div class="aviso-dia reduzido">⏰ ${esc(reduzido.motivo)}</div>`;
+  } else {
+    avisoBox.innerHTML = '';
+  }
+
+  const doHoje = cacheAgendamentos.filter(a=>a.data===hoje).sort((a,b)=>a.horario.localeCompare(b.horario));
+  const finalizados = doHoje.filter(a=>STATUS_FINALIZADOS.includes(a.status));
+  const restantes = doHoje.filter(a=>!STATUS_FINALIZADOS.includes(a.status));
+
+  document.getElementById('hojeTotal').textContent = doHoje.length;
+  document.getElementById('hojeRestantes').textContent = restantes.length;
+  document.getElementById('hojeFinalizados').textContent = finalizados.length;
+  document.getElementById('hojeFilaQtd').textContent = cacheFila.filter(f=>f.data===hoje).length;
+
+  const proximoBox = document.getElementById('hojeProximoBox');
+  const proximo = restantes.find(a=>a.horario >= horaAtual) || restantes[0];
+  if(proximo){
+    const s = statusInfo(proximo.status);
+    proximoBox.innerHTML = `
+      <div class="hoje-proximo">
+        <div>
+          <div class="rotulo">Próximo cliente</div>
+          <div class="nome">${esc(proximo.nome)}</div>
+          <div class="detalhe">${esc(proximo.celular)||''} · <span class="badge" style="background:${s.bg};color:${s.color};">${s.label}</span></div>
+        </div>
+        <div class="horario-grande">${proximo.horario}</div>
+      </div>`;
+  } else {
+    proximoBox.innerHTML = `<div class="empty-state-rica"><div class="ico">✅</div><div class="titulo">Nenhum agendamento pendente hoje</div><div class="sub">Todos os horários de hoje já foram atendidos, ou não há agendamentos.</div></div>`;
+  }
+
+  const listaBox = document.getElementById('hojeListaDia');
+  if(doHoje.length===0){
+    listaBox.innerHTML = `<div class="empty-state-rica"><div class="ico">🗓️</div><div class="titulo">Nenhum agendamento hoje</div><div class="sub">Aproveite pra planejar a semana ou revisar a fila de espera.</div></div>`;
+    return;
+  }
+  listaBox.innerHTML = doHoje.map(a=>{
+    const s = statusInfo(a.status);
+    const finalizado = STATUS_FINALIZADOS.includes(a.status);
+    const atrasado = !finalizado && a.horario < horaAtual;
+    return `<div class="hoje-item ${finalizado?'finalizado':''} ${atrasado?'atrasado':''}">
+      <div class="hora">${a.horario}</div>
+      <div class="info"><b>${esc(a.nome)}</b><span>${esc(a.celular)||''}</span></div>
+      <span class="badge" style="background:${s.bg};color:${s.color};">${s.label}</span>
+    </div>`;
+  }).join('');
+}
 
 function renderMetricas(){
   const mesFiltro = document.getElementById('metricaMes').value; // "2026-09" ou vazio
@@ -2943,12 +3302,14 @@ function mostrarPainelAdmin(){
   document.querySelector('.wrap').style.display = 'block';
   document.querySelector('.tabs').style.display = 'flex';
   document.getElementById('btnSair').style.display = 'inline-flex';
+  iniciarChecagemDeAtrasados();
 }
 function iniciarControleDeAcesso(){
   if(!usandoFirestore){
     // Sem Firebase configurado (ou ainda usando as credenciais de exemplo): não há como autenticar,
     // então libera o painel direto — modo local é só para teste.
     carregarTodos();
+    iniciarChecagemDeAtrasados();
     return;
   }
   mostrarTelaLogin();
