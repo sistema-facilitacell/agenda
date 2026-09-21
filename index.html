@@ -19,26 +19,18 @@
 })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Agenda Atlas — Zoom Tech</title>
-<meta property="og:type" content="website">
-<meta property="og:title" content="Agenda Atlas — Zoom Tech">
-<meta property="og:description" content="Agende seu atendimento na Zoom Tech em poucos cliques, sem precisar ligar.">
-<meta property="og:image" content="icon-512.png">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Agenda Atlas — Zoom Tech">
-<meta name="twitter:description" content="Agende seu atendimento na Zoom Tech em poucos cliques, sem precisar ligar.">
-<meta name="twitter:image" content="icon-512.png">
-<meta name="description" content="Agende seu atendimento na Zoom Tech de forma rápida e prática, direto pelo celular.">
+<title>Agenda Atlas</title>
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="Agenda Atlas">
-<meta property="og:title" content="Agenda Atlas — Zoom Tech">
-<meta property="og:description" content="Agende seu atendimento na Zoom Tech de forma rápida e prática, direto pelo celular.">
+<meta property="og:title" content="Agenda Atlas">
+<meta property="og:description" content="Agende seu atendimento em poucos cliques, sem precisar ligar.">
 <meta property="og:image" content="icon-512.png">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Agenda Atlas — Zoom Tech">
-<meta name="twitter:description" content="Agende seu atendimento na Zoom Tech de forma rápida e prática, direto pelo celular.">
+<meta name="twitter:title" content="Agenda Atlas">
+<meta name="twitter:description" content="Agende seu atendimento em poucos cliques, sem precisar ligar.">
 <meta name="twitter:image" content="icon-512.png">
+<meta name="description" content="Agende seu atendimento de forma rápida e prática, direto pelo celular.">
 <meta name="theme-color" content="#0B1E35">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -757,11 +749,11 @@
   <!-- ABA NOVO AGENDAMENTO -->
   <section id="tab-novo" style="display:none;">
     <div class="card">
-      <div class="portal-selo" id="portalSelo" style="display:none;">✦ Agendamento Online — <span id="portalSeloLojaNome">Zoom Tech</span> ✦</div>
+      <div class="portal-selo" id="portalSelo" style="display:none;">✦ Agendamento Online — <span id="portalSeloLojaNome">Minha Loja</span> ✦</div>
       <h2 id="novoAgendamentoTitulo">Novo Agendamento</h2>
       <p class="sub" id="novoAgendamentoSub">Preencha os dados do cliente para reservar o horário</p>
 
-      <div class="store-box">🏬 <span><b id="storeBoxNome">Zoom Tech</b> — <span id="storeBoxEndereco">Av. República Argentina, 1968, Bairro Maracanã, Foz do Iguaçu/PR</span></span></div>
+      <div class="store-box">🏬 <span><b id="storeBoxNome">Minha Loja</b> — <span id="storeBoxEndereco">Av. República Argentina, 1968, Bairro Maracanã, Foz do Iguaçu/PR</span></span></div>
 
       <div class="row2">
         <div class="field">
@@ -1196,7 +1188,7 @@
       <p class="sub">Esses dados aparecem no cabeçalho, no recibo e nas mensagens automáticas.</p>
       <div class="field">
         <label>Nome da loja</label>
-        <input type="text" id="cfgNomeLoja" placeholder="Ex: Zoom Tech">
+        <input type="text" id="cfgNomeLoja" placeholder="Ex: Nome da sua loja">
       </div>
       <div class="field">
         <label>Endereço completo</label>
@@ -1363,7 +1355,7 @@
             <p class="r-protocolo">Protocolo Nº <b id="rProtocolo">—</b></p>
           </div>
 
-          <p class="r-lead">Certificamos que <b id="rNome">—</b> possui agendamento confirmado junto à <b id="rLojaNomeLead">Zoom Tech</b>, conforme os dados abaixo.</p>
+          <p class="r-lead">Certificamos que <b id="rNome">—</b> possui agendamento confirmado junto à <b id="rLojaNomeLead">Minha Loja</b>, conforme os dados abaixo.</p>
 
           <div class="r-grid">
             <div class="r-cell"><p class="r-label">CPF</p><p class="r-value" id="rCpf">—</p></div>
@@ -1375,7 +1367,7 @@
 
           <div class="r-endereco">
             <p class="titulo">📍 Local de atendimento</p>
-            <p class="end"><span id="rEnderecoNome">Zoom Tech</span><small id="rEnderecoTexto">Av. República Argentina, 1968 — Bairro Maracanã, Foz do Iguaçu/PR</small></p>
+            <p class="end"><span id="rEnderecoNome">Minha Loja</span><small id="rEnderecoTexto">Av. República Argentina, 1968 — Bairro Maracanã, Foz do Iguaçu/PR</small></p>
           </div>
 
           <div class="r-aviso">
@@ -1566,7 +1558,7 @@ const SERVICOS_PADRAO = [
   { nome:'Retirada rápida',        duracao:30 }
 ];
 let CONFIG_LOJA = {
-  nome: 'Zoom Tech',
+  nome: 'Minha Loja',
   endereco: 'Av. República Argentina, 1968, Bairro Maracanã, Foz do Iguaçu/PR',
   horarios: HORARIOS_PADRAO.map(h=>({...h})),
   servicos: SERVICOS_PADRAO.map(s=>({...s})),
@@ -4503,7 +4495,7 @@ async function abrirTelaReagendar(id){
     box.innerHTML = `<div class="icone" style="text-align:center;font-size:38px;">⚠️</div><h2 style="text-align:center;">Agendamento não encontrado</h2><p class="sub" style="text-align:center;">Confira o link recebido ou fale com a loja.</p>`;
     return;
   }
-  if(['cancelado','compareceu','comprou','nao_compareceu'].includes(reagendarAgendamento.status)){
+  if(['compareceu','comprou','sem_interesse'].includes(reagendarAgendamento.status)){
     box.innerHTML = `<div class="icone" style="text-align:center;font-size:38px;">🗓️</div><h2 style="text-align:center;">Esse agendamento não pode mais ser alterado</h2><p class="sub" style="text-align:center;">Fale com a ${esc(CONFIG_LOJA.nome)} para marcar um novo horário.</p>`;
     return;
   }
