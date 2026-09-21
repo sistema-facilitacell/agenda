@@ -2,6 +2,22 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<script>
+/* ===== TRAVA DO PORTAL DO CLIENTE (roda antes de tudo) =====
+   Detecta ?portal=cliente (ou #portal=cliente / #cliente) e marca a pagina
+   como portal publico ANTES do CSS e do script principal carregarem. */
+(function(){
+  try{
+    var q = (window.location.search || '') + ' ' + (window.location.hash || '');
+    var publico = /(^|[?&#])portal=cliente/i.test(q) || /(^|[?&#/])cliente(\b|$)/i.test(window.location.hash || '');
+    if(publico){
+      window.__MODO_PUBLICO__ = true;
+      document.documentElement.classList.add('portal-publico');
+      document.documentElement.setAttribute('data-portal','cliente');
+    }
+  }catch(e){}
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Agenda Atlas — Zoom Tech</title>
 <meta property="og:type" content="website">
@@ -544,6 +560,22 @@
   /* Portal público do cliente */
   body.portal-publico .sidebar, body.portal-publico .config-banner{display:none !important;}
   body.portal-publico #statusAtendenteRow, body.portal-publico #riscoBox, body.portal-publico #categoriaRow{display:none !important;}
+  /* trava reforcada: vale ja no <html>, antes do JS principal rodar */
+  html.portal-publico .sidebar,
+  html.portal-publico #sidebarNav,
+  html.portal-publico .config-banner,
+  html.portal-publico #telaLogin,
+  html.portal-publico #btnSair{display:none !important;}
+  html.portal-publico #statusAtendenteRow,
+  html.portal-publico #riscoBox,
+  html.portal-publico #categoriaRow{display:none !important;}
+  html.portal-publico #tab-hoje,
+  html.portal-publico #tab-calendario,
+  html.portal-publico #tab-lista,
+  html.portal-publico #tab-metricas,
+  html.portal-publico #tab-checkin{display:none !important;}
+  html.portal-publico #tab-novo{display:block !important;}
+  html.portal-publico .wrap{display:block !important;}
   .portal-selo{text-align:center;margin-bottom:14px;color:var(--gold-dark);font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;}
 
   /* Tela de confirmação de presença (link público) */
@@ -2381,7 +2413,13 @@ document.querySelectorAll('.tab[data-tab]').forEach(tabEl=>{
   });
 });
 function irParaAba(nome){
-  document.querySelector(`.tab[data-tab="${nome}"]`).click();
+  if(window.__MODO_PUBLICO__) nome = 'novo';   // no portal do cliente so existe a aba de agendar
+  const el = document.querySelector(`.tab[data-tab="${nome}"]`);
+  if(el){ el.click(); return; }
+  ['hoje','calendario','novo','lista','metricas','checkin'].forEach(n=>{
+    const sec = document.getElementById('tab-'+n);
+    if(sec) sec.style.display = (n===nome) ? 'block' : 'none';
+  });
 }
 
 /* ---------- modal do link público de autoagendamento ---------- */
@@ -4105,11 +4143,17 @@ document.getElementById('btnConfirmarAssinatura').addEventListener('click', asyn
 
 /* ---------- portal público de autoagendamento (?portal=cliente) ---------- */
 function ativarPortalPublico(){
+  window.__MODO_PUBLICO__ = true;
+  document.documentElement.classList.add('portal-publico');
   document.body.classList.add('portal-publico');
-  document.getElementById('portalSelo').style.display = 'block';
-  document.getElementById('novoAgendamentoTitulo').textContent = 'Agende seu atendimento';
-  document.getElementById('novoAgendamentoSub').textContent = `Escolha o melhor dia e horário para você na ${CONFIG_LOJA.nome}`;
-  document.getElementById('lgpdRow').style.display = 'block';
+  const set = (id, fn)=>{ const el = document.getElementById(id); if(el) fn(el); };
+  set('portalSelo', el=> el.style.display = 'block');
+  set('novoAgendamentoTitulo', el=> el.textContent = 'Agende seu atendimento');
+  set('novoAgendamentoSub', el=> el.textContent = `Escolha o melhor dia e horário para você na ${CONFIG_LOJA.nome}`);
+  set('lgpdRow', el=> el.style.display = 'block');
+  set('sidebarNav', el=> el.style.setProperty('display','none','important'));
+  set('configBanner', el=> el.style.setProperty('display','none','important'));
+  set('telaLogin', el=> el.style.setProperty('display','none','important'));
   irParaAba('novo');
 }
 
@@ -4291,12 +4335,14 @@ function renderTelaAvaliacao(a){
 
 /* ---------- login / logout do painel administrativo ---------- */
 function mostrarTelaLogin(){
+  if(window.__MODO_PUBLICO__) return;
   document.getElementById('telaLogin').style.display = 'flex';
   document.querySelector('.wrap').style.display = 'none';
   document.querySelector('.sidebar').style.display = 'none';
   document.getElementById('btnSair').style.display = 'none';
 }
 function mostrarPainelAdmin(){
+  if(window.__MODO_PUBLICO__) return;   // cliente nunca ve o painel
   document.getElementById('telaLogin').style.display = 'none';
   document.querySelector('.wrap').style.display = 'block';
   document.querySelector('.sidebar').style.display = 'flex';
@@ -4305,6 +4351,7 @@ function mostrarPainelAdmin(){
   atualizarBotaoNotificacoes();
 }
 function iniciarControleDeAcesso(){
+  if(window.__MODO_PUBLICO__){ ativarPortalPublico(); carregarTodos(); return; }
   if(!usandoFirestore){
     // Sem Firebase configurado (ou ainda usando as credenciais de exemplo): não há como autenticar,
     // então libera o painel direto — modo local é só para teste.
@@ -4408,7 +4455,7 @@ diaSelecionado = hojeISO();
 const urlParams = new URLSearchParams(window.location.search);
 const idConfirmar = urlParams.get('confirmar');
 const idAvaliar = urlParams.get('avaliar');
-const modoPublico = urlParams.get('portal') === 'cliente';
+const modoPublico = window.__MODO_PUBLICO__ === true || urlParams.get('portal') === 'cliente';
 
 if(idConfirmar){
   abrirTelaConfirmacao(idConfirmar);
@@ -4420,6 +4467,55 @@ if(idConfirmar){
 } else {
   iniciarControleDeAcesso();
 }
+</script>
+<script>
+/* ===== REDE DE SEGURANCA DO PORTAL DO CLIENTE =====
+   Bloco separado: se o script principal der erro em qualquer ponto, este
+   ainda roda e garante que o cliente veja apenas a tela de agendamento. */
+(function(){
+  if(!window.__MODO_PUBLICO__) return;
+  function aplicar(){
+    try{
+      document.documentElement.classList.add('portal-publico');
+      if(document.body) document.body.classList.add('portal-publico');
+      ['sidebarNav','configBanner','telaLogin','btnSair'].forEach(function(id){
+        var el = document.getElementById(id);
+        if(el) el.style.setProperty('display','none','important');
+      });
+      var sb = document.querySelector('.sidebar');
+      if(sb) sb.style.setProperty('display','none','important');
+      var wrap = document.querySelector('.wrap');
+      if(wrap) wrap.style.setProperty('display','block','important');
+      ['hoje','calendario','lista','metricas','checkin'].forEach(function(n){
+        var s = document.getElementById('tab-'+n);
+        if(s) s.style.setProperty('display','none','important');
+      });
+      var novo = document.getElementById('tab-novo');
+      if(novo) novo.style.setProperty('display','block','important');
+      var selo = document.getElementById('portalSelo');
+      if(selo) selo.style.display = 'block';
+      var lgpd = document.getElementById('lgpdRow');
+      if(lgpd) lgpd.style.display = 'block';
+      var tit = document.getElementById('novoAgendamentoTitulo');
+      if(tit) tit.textContent = 'Agende seu atendimento';
+      document.querySelectorAll('.tab').forEach(function(t){
+        if(t.dataset && t.dataset.tab === 'novo') t.classList.add('active');
+        else t.classList.remove('active');
+      });
+    }catch(e){}
+  }
+  aplicar();
+  document.addEventListener('DOMContentLoaded', aplicar);
+  setTimeout(aplicar, 300);
+  setTimeout(aplicar, 1500);
+  document.addEventListener('click', function(ev){
+    var alvo = ev.target && ev.target.closest ? ev.target.closest('.tab') : null;
+    if(!alvo) return;
+    if(alvo.dataset && alvo.dataset.tab === 'novo') return;
+    ev.preventDefault();
+    ev.stopPropagation();
+  }, true);
+})();
 </script>
 </body>
 </html>
