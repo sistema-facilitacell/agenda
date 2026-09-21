@@ -701,6 +701,11 @@
       </div>
 
       <div id="hojeProximoBox"></div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="btn btn-ghost" id="btnSemAgendamento">🚶 Registrar cliente sem agendamento</button>
+      </div>
+      <div id="hojeEsperando"></div>
+      <div id="hojeNaoConfirmaram"></div>
     </div>
 
     <div class="card">
@@ -900,6 +905,19 @@
         <div class="metric-card"><div class="num" id="mNaoComparecimento">0%</div><div class="lbl">Taxa de não comparecimento</div></div>
       </div>
 
+      <div class="meta-card" id="cardEspera">
+        <h2 style="margin-bottom:2px;font-size:16px;">⏱️ Tempo de espera na loja</h2>
+        <p class="sub" style="margin:0 0 10px;">Da chegada (check-in) até a situação mudar para "Em atendimento" — mês atual</p>
+        <div id="esperaResumo"></div>
+      </div>
+
+      <div class="meta-card" id="cardAvaliacoes">
+        <h2 style="margin-bottom:2px;font-size:16px;">⭐ Avaliações dos clientes</h2>
+        <p class="sub" style="margin:0 0 10px;">Notas de 0 a 10 enviadas pelo link de avaliação (todas as avaliações recebidas)</p>
+        <div id="avaliacoesResumo"></div>
+        <div id="avaliacoesLista" style="max-height:320px;overflow-y:auto;margin-top:10px;"></div>
+      </div>
+
       <div class="meta-card">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
           <div>
@@ -1003,6 +1021,26 @@
 <!-- TELA DE CONFIRMAÇÃO DE PRESENÇA (acessada via link ?confirmar=ID) -->
 <div class="tela-cheia" id="telaConfirmacao" style="display:none;">
   <div class="card" id="confirmacaoConteudo"></div>
+</div>
+
+<!-- MODAL CLIENTE SEM AGENDAMENTO -->
+<div class="modal-bg" id="modalSemAgendamento">
+  <div class="modal-shell" style="max-width:420px;">
+    <div class="modal-close"><span id="fecharModalSemAgendamento">✕</span></div>
+    <div class="card" style="margin-bottom:0;">
+      <h2>🚶 Cliente sem agendamento</h2>
+      <p class="sub">Registra quem chegou direto na loja, pra as métricas mostrarem o movimento real. Já entra como "Compareceu", no horário de agora.</p>
+      <div class="field"><label>Nome</label><input type="text" id="saNome" placeholder="Nome do cliente"></div>
+      <div class="field"><label>Celular (opcional)</label><input type="tel" id="saCelular" placeholder="(45) 99999-9999"></div>
+      <div class="field"><label>Observação (opcional)</label><input type="text" id="saObs" placeholder="Ex: veio ver capinha, troca de tela..."></div>
+      <div class="btn-row"><button class="btn btn-primary" id="btnSalvarSemAgendamento" style="width:100%;">✓ Registrar chegada</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- TELA SÓ VISUALIZAR (acessada via link ?visualizar=1) -->
+<div class="tela-cheia" id="telaVisualizacao" style="display:none;max-width:680px;">
+  <div class="card" id="visualizacaoConteudo" style="text-align:left;"></div>
 </div>
 
 <!-- TELA DE AVALIAÇÃO PÓS-ATENDIMENTO (acessada via link ?avaliar=ID) -->
@@ -2237,15 +2275,20 @@ async function salvarAgendamento(obj){
 
 async function atualizarStatus(id, status){
   const itemAntes = cacheAgendamentos.find(x=>x.id===id);
+  // guarda os horarios reais pra medir o tempo de espera na loja
+  const agoraISO = new Date().toISOString();
+  const dados = { status };
+  if(itemAntes && status==='compareceu' && !itemAntes.chegadaEm) dados.chegadaEm = agoraISO;
+  if(itemAntes && status==='em_atendimento' && itemAntes.chegadaEm && !itemAntes.inicioAtendimentoEm) dados.inicioAtendimentoEm = agoraISO;
   if(usandoFirestore){
-    await db.collection('agendamentos').doc(id).update({status});
+    await db.collection('agendamentos').doc(id).update(dados);
   } else {
     const lista = carregarLocal();
     const item = lista.find(x=>x.id===id);
-    if(item){ item.status = status; salvarLocal(lista); }
+    if(item){ Object.assign(item, dados); salvarLocal(lista); }
   }
   const item = cacheAgendamentos.find(x=>x.id===id);
-  if(item) item.status = status;
+  if(item) Object.assign(item, dados);
 
   if(itemAntes){
     registrarAuditoria('Alterou situação', `${itemAntes.nome} (protocolo ${itemAntes.protocolo||'—'}) → ${statusInfo(status).label}`, id);
@@ -3642,6 +3685,7 @@ function duplicarAgendamento(a){
 }
 
 let salvandoAgendamento = false;
+const LIMITE_AGENDAMENTOS_PUBLICO = 2;
 document.getElementById('btnSalvar').onclick = async ()=>{
   if(salvandoAgendamento) return; // trava extra contra duplo clique/duplo envio, além do btn.disabled
   const nome = document.getElementById('fNome').value.trim();
@@ -3661,6 +3705,18 @@ document.getElementById('btnSalvar').onclick = async ()=>{
   if(document.body.classList.contains('portal-publico') && !document.getElementById('fConsentimentoLGPD').checked){
     toast('Marque a caixinha de concordância com o uso dos seus dados para continuar.');
     return;
+  }
+  if(window.__MODO_PUBLICO__){
+    // anti-abuso: no maximo 2 agendamentos em aberto por celular ou CPF no link publico
+    const celDig = apenasDigitos(celular), cpfDig = apenasDigitos(cpf);
+    const emAberto = cacheAgendamentos.filter(a=>
+      !STATUS_FINALIZADOS.includes(a.status) && (a.data||'') >= hojeISO() &&
+      ((celDig.length>=10 && apenasDigitos(a.celular)===celDig) || (cpfDig.length===11 && apenasDigitos(a.cpf)===cpfDig))
+    );
+    if(emAberto.length >= LIMITE_AGENDAMENTOS_PUBLICO){
+      toast(`Você já tem ${emAberto.length} agendamentos em aberto. Para marcar outro, fale com a loja.`);
+      return;
+    }
   }
   if(window.__MODO_PUBLICO__ && horarioJaPassou(data, horarioSelecionado)){
     toast('Esse horário já passou. Escolha outro, por favor.');
@@ -3893,6 +3949,7 @@ document.getElementById('btnMetricaTudo').addEventListener('click', ()=>{
 
 /* ---------- painel "Hoje" ---------- */
 function renderHoje(){
+  renderHojeExtras();
   const hoje = hojeISO();
   const agora = new Date();
   const horaAtual = `${pad(agora.getHours())}:${pad(agora.getMinutes())}`;
@@ -4036,6 +4093,132 @@ function renderMetricas(){
   });
 
   renderMetaMensal();
+  renderAvaliacoes();
+  renderEspera();
+}
+
+/* ---------- tempo de espera, nao confirmados e cliente sem agendamento ---------- */
+function minutosEntre(isoA, isoB){ return Math.max(0, Math.round((new Date(isoB)-new Date(isoA))/60000)); }
+function amanhaISO(){ const d=new Date(); d.setDate(d.getDate()+1); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function renderHojeExtras(){
+  const hoje = hojeISO(), amanha = amanhaISO(), agoraISO = new Date().toISOString();
+  const horaAtual = agoraISO ? `${pad(new Date().getHours())}:${pad(new Date().getMinutes())}` : '';
+
+  // quem chegou e ainda nao comecou a ser atendido
+  const esperando = cacheAgendamentos.filter(a=>a.data===hoje && a.status==='compareceu' && a.chegadaEm && !a.inicioAtendimentoEm && !a.excluidoEm);
+  document.getElementById('hojeEsperando').innerHTML = esperando.length===0 ? '' : `
+    <div class="aviso-dia cheio" style="margin-top:14px;display:block;">
+      <b>⏱️ Esperando atendimento agora:</b>
+      ${esperando.map(a=>`<div style="margin-top:4px;">${esc(nomeReduzido(a.nome))} — há ${minutosEntre(a.chegadaEm, agoraISO)} min</div>`).join('')}
+      <div class="hint" style="margin-top:6px;">Mude a situação para "Em atendimento" quando começar, pra medir o tempo de espera.</div>
+    </div>`;
+
+  // quem ainda nao confirmou (hoje com horario por vir, e amanha)
+  const naoConf = cacheAgendamentos.filter(a=>!a.excluidoEm && a.status==='agendado' &&
+    ((a.data===hoje && a.horario>=horaAtual) || a.data===amanha))
+    .sort((a,b)=>(a.data+a.horario).localeCompare(b.data+b.horario));
+  const box = document.getElementById('hojeNaoConfirmaram');
+  if(naoConf.length===0){ box.innerHTML=''; return; }
+  box.innerHTML = `
+    <div class="aviso-dia reduzido" style="margin-top:14px;display:block;">
+      <b>⏳ ${naoConf.length} cliente(s) ainda não confirmaram presença</b>
+      <div class="hint" style="margin:2px 0 6px;">São os que têm mais chance de faltar. Vale mandar um lembrete.</div>
+      ${naoConf.map(a=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px;">
+        <span>${a.data===hoje?'Hoje':'Amanhã'} ${a.horario} — ${esc(nomeReduzido(a.nome))}</span>
+        <button class="btn-editar" data-lembrar="${a.id}" title="Enviar lembrete por WhatsApp">📤</button>
+      </div>`).join('')}
+    </div>`;
+  box.querySelectorAll('[data-lembrar]').forEach(btn=>btn.addEventListener('click', ()=>{
+    const a = cacheAgendamentos.find(x=>x.id===btn.dataset.lembrar);
+    if(a) abrirWhatsAppComMensagem(a, a.data===hoje ? 'lembrete_hora' : 'lembrete_dia');
+  }));
+}
+function renderEspera(){
+  const box = document.getElementById('esperaResumo');
+  const mes = hojeISO().slice(0,7);
+  const doMes = cacheAgendamentos.filter(a=>(a.data||'').startsWith(mes) && !a.excluidoEm);
+  const medidos = doMes.filter(a=>a.chegadaEm && a.inicioAtendimentoEm).map(a=>minutosEntre(a.chegadaEm, a.inicioAtendimentoEm));
+  const semAg = doMes.filter(a=>a.origem==='sem_agendamento').length;
+  if(medidos.length===0){
+    box.innerHTML = `<div class="hint">Ainda sem medições este mês. O tempo é medido quando o cliente faz check-in e depois a situação muda para "Em atendimento".</div>
+      <div class="hint" style="margin-top:6px;">Clientes sem agendamento registrados no mês: <b>${semAg}</b></div>`;
+    return;
+  }
+  const media = Math.round(medidos.reduce((s,m)=>s+m,0)/medidos.length);
+  box.innerHTML = `<div class="metric-grid" style="margin-bottom:0;">
+    <div class="metric-card"><div class="num">${media} min</div><div class="lbl">Espera média</div></div>
+    <div class="metric-card"><div class="num">${Math.max(...medidos)} min</div><div class="lbl">Maior espera</div></div>
+    <div class="metric-card"><div class="num">${medidos.length}</div><div class="lbl">Atendimentos medidos</div></div>
+    <div class="metric-card"><div class="num">${semAg}</div><div class="lbl">Clientes sem agendamento</div></div>
+  </div>`;
+}
+document.getElementById('btnSemAgendamento').addEventListener('click', ()=>{
+  ['saNome','saCelular','saObs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('modalSemAgendamento').classList.add('show');
+});
+document.getElementById('saCelular').addEventListener('input', e=>{ e.target.value = maskCelular(e.target.value); });
+document.getElementById('fecharModalSemAgendamento').onclick = ()=> document.getElementById('modalSemAgendamento').classList.remove('show');
+document.getElementById('btnSalvarSemAgendamento').addEventListener('click', async ()=>{
+  const nome = document.getElementById('saNome').value.trim();
+  if(!nome){ toast('Informe o nome do cliente.'); return; }
+  const btn = document.getElementById('btnSalvarSemAgendamento');
+  btn.disabled = true; btn.textContent = 'Registrando...';
+  try{
+    const agora = new Date();
+    const obj = {
+      protocolo: await proximoProtocolo(), nome, cpf: '',
+      celular: document.getElementById('saCelular').value.trim(),
+      data: hojeISO(), horario: `${pad(agora.getHours())}:${pad(agora.getMinutes())}`,
+      status: 'compareceu', observacao: document.getElementById('saObs').value.trim(),
+      atendente: '', categoria: '', origem: 'sem_agendamento',
+      chegadaEm: agora.toISOString(), criadoEm: agora.toISOString()
+    };
+    const salvo = await salvarAgendamento(obj);
+    if(!cacheAgendamentos.some(a=>a.id===salvo.id)) cacheAgendamentos.push(salvo);
+    document.getElementById('modalSemAgendamento').classList.remove('show');
+    toast(`Chegada de ${nome} registrada.`);
+    rerenderTudo();
+  }catch(e){ console.error(e); toast('Erro ao registrar. Tente novamente.'); }
+  finally{ btn.disabled = false; btn.textContent = '✓ Registrar chegada'; }
+});
+
+/* ---------- painel de avaliações (NPS) ---------- */
+const LS_AVALIACOES = 'agenda_atlas_avaliacoes_v1';
+async function carregarAvaliacoes(){
+  if(usandoFirestore){
+    const snap = await db.collection('avaliacoes').get();
+    return snap.docs.map(d=>d.data());
+  }
+  return JSON.parse(localStorage.getItem(LS_AVALIACOES)||'[]');
+}
+async function renderAvaliacoes(){
+  const resumo = document.getElementById('avaliacoesResumo');
+  const lista = document.getElementById('avaliacoesLista');
+  resumo.innerHTML = '<div class="hint">Carregando...</div>'; lista.innerHTML = '';
+  let regs = [];
+  try{ regs = await carregarAvaliacoes(); }
+  catch(e){ console.error(e); resumo.innerHTML = '<div class="hint">Não foi possível carregar as avaliações.</div>'; return; }
+  regs = regs.filter(r=>typeof r.nota==='number').sort((a,b)=>(b.criadoEm||'').localeCompare(a.criadoEm||''));
+  if(regs.length===0){ resumo.innerHTML = '<div class="hint">Nenhuma avaliação recebida ainda. Use a mensagem "Pedir avaliação" para enviar o link aos clientes.</div>'; return; }
+  const total = regs.length;
+  const media = regs.reduce((s,r)=>s+r.nota,0)/total;
+  const prom = regs.filter(r=>r.nota>=9).length, det = regs.filter(r=>r.nota<=6).length;
+  const nps = Math.round(((prom-det)/total)*100);
+  const corNps = nps>=50 ? 'var(--ok)' : (nps>=0 ? 'var(--gold-dark)' : 'var(--danger)');
+  resumo.innerHTML = `<div class="metric-grid" style="margin-bottom:0;">
+    <div class="metric-card"><div class="num">${total}</div><div class="lbl">Avaliações</div></div>
+    <div class="metric-card"><div class="num">${media.toFixed(1)}</div><div class="lbl">Nota média</div></div>
+    <div class="metric-card"><div class="num" style="color:${corNps};">${nps}</div><div class="lbl">NPS (-100 a 100)</div></div>
+    <div class="metric-card"><div class="num">${prom} / ${det}</div><div class="lbl">Promotores (9-10) / Detratores (0-6)</div></div>
+  </div>`;
+  lista.innerHTML = regs.slice(0,50).map(r=>{
+    const cor = r.nota>=9 ? 'var(--ok)' : (r.nota<=6 ? 'var(--danger)' : 'var(--gold-dark)');
+    const quando = r.criadoEm ? fmtDataISOtoBR(r.criadoEm.slice(0,10)) : '';
+    return `<div class="auditoria-item">
+      <div class="linha1"><span><b style="color:${cor};">${r.nota}</b> — ${esc(nomeReduzido(r.nome))} <span style="color:var(--muted);">(${esc(r.protocolo||'—')})</span></span><span class="quando">${quando}</span></div>
+      ${r.comentario ? `<div class="detalhes">"${esc(r.comentario)}"</div>` : ''}
+    </div>`;
+  }).join('');
 }
 
 /* ---------- meta mensal ---------- */
@@ -4724,6 +4907,61 @@ function renderTelaConfirmacao(a){
 }
 
 /* ---------- avaliação pós-atendimento (link ?avaliar=ID) ---------- */
+/* ---------- modo só visualizar (link ?visualizar=1): agenda de hoje, sem editar nada ---------- */
+function nomeReduzido(nome){
+  // por privacidade: só primeiro nome + inicial do sobrenome, sem CPF nem celular
+  const partes = String(nome||'').trim().split(/\s+/);
+  if(partes.length<=1) return partes[0]||'—';
+  return `${partes[0]} ${partes[partes.length-1].charAt(0).toUpperCase()}.`;
+}
+function renderVisualizacao(){
+  const box = document.getElementById('visualizacaoConteudo');
+  const hoje = hojeISO();
+  const agora = new Date();
+  const horaAtual = `${pad(agora.getHours())}:${pad(agora.getMinutes())}`;
+  const doHoje = cacheAgendamentos.filter(a=>a.data===hoje && !a.excluidoEm).sort((a,b)=>a.horario.localeCompare(b.horario));
+  const finalizados = doHoje.filter(a=>STATUS_FINALIZADOS.includes(a.status)).length;
+  const lista = doHoje.length===0
+    ? `<div class="empty-state-rica"><div class="ico">🗓️</div><div class="titulo">Nenhum agendamento hoje</div></div>`
+    : doHoje.map(a=>{
+        const s = statusInfo(a.status);
+        const fin = STATUS_FINALIZADOS.includes(a.status);
+        const atrasado = !fin && a.horario < horaAtual;
+        return `<div class="hoje-item ${fin?'finalizado':''} ${atrasado?'atrasado':''}">
+          <div class="hora">${a.horario}</div>
+          <div class="info"><b>${esc(nomeReduzido(a.nome))}</b></div>
+          <span class="badge" style="background:${s.bg};color:${s.color};">${s.label}</span>
+        </div>`;
+      }).join('');
+  box.innerHTML = `
+    <p class="portal-selo" style="margin-bottom:8px;">✦ Agenda do dia — ${esc(CONFIG_LOJA.nome)} ✦</p>
+    <h2 style="margin-bottom:2px;">${diaSemana(hoje)}, ${fmtDataISOtoBR(hoje)}</h2>
+    <p class="sub">Somente visualização · atualiza sozinho · ${doHoje.length} agendamento(s), ${doHoje.length-finalizados} ainda por vir</p>
+    <div style="margin-top:12px;">${lista}</div>`;
+}
+async function abrirTelaVisualizacao(){
+  const sb = document.querySelector('.sidebar'); if(sb) sb.style.display = 'none';
+  const cb = document.getElementById('configBanner'); if(cb) cb.style.display = 'none';
+  document.querySelector('.wrap').style.display = 'none';
+  document.getElementById('telaVisualizacao').style.display = 'block';
+  document.getElementById('visualizacaoConteudo').innerHTML = `<p style="text-align:center;">⏳ Carregando...</p>`;
+  if(usandoFirestore){
+    try{
+      const cfgDoc = await db.collection('configuracoes').doc('loja').get();
+      if(cfgDoc.exists){ const d = cfgDoc.data(); if(d && d.nome && d.endereco) CONFIG_LOJA = normalizarConfigLoja(d); }
+    }catch(e){ console.error(e); }
+    db.collection('agendamentos').onSnapshot(snap=>{
+      cacheAgendamentos = snap.docs.map(d=>({id:d.id, ...d.data()})).filter(a=>!a.excluidoEm);
+      renderVisualizacao();
+    }, err=>{ console.error(err); document.getElementById('visualizacaoConteudo').innerHTML = '<p>Não foi possível carregar a agenda.</p>'; });
+  } else {
+    cacheAgendamentos = carregarLocal().filter(a=>!a.excluidoEm);
+    CONFIG_LOJA = carregarConfigLojaLocal();
+    renderVisualizacao();
+  }
+  setInterval(renderVisualizacao, 60000); // atualiza os "atrasados" mesmo sem mudança no banco
+}
+
 async function abrirTelaAvaliacao(id){
   document.querySelector('.topbar').style.display = 'none';
   document.querySelector('.sidebar').style.display = 'none';
@@ -4788,6 +5026,7 @@ function renderTelaAvaliacao(a){
         nota: notaEscolhida, comentario, criadoEm: new Date().toISOString()
       };
       if(usandoFirestore){ await db.collection('avaliacoes').add(registro); }
+      else { const lst = JSON.parse(localStorage.getItem(LS_AVALIACOES)||'[]'); lst.push(registro); localStorage.setItem(LS_AVALIACOES, JSON.stringify(lst)); }
       conteudo.innerHTML = `
         <div class="icone">💚</div>
         <h2 style="font-family:'Playfair Display',serif;color:var(--navy);">Obrigado pela avaliação!</h2>
@@ -4926,8 +5165,11 @@ const idConfirmar = urlParams.get('confirmar');
 const idAvaliar = urlParams.get('avaliar');
 const idReagendar = urlParams.get('reagendar');
 const modoPublico = window.__MODO_PUBLICO__ === true || urlParams.get('portal') === 'cliente';
+const modoVisualizar = urlParams.get('visualizar') === '1';
 
-if(idConfirmar){
+if(modoVisualizar && !modoPublico){
+  abrirTelaVisualizacao();
+} else if(idConfirmar){
   abrirTelaConfirmacao(idConfirmar);
 } else if(idReagendar){
   abrirTelaReagendar(idReagendar);
