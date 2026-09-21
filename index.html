@@ -275,6 +275,7 @@
   tr.linha-atrasada{background:#fdeeea;}
   tr.linha-atrasada:hover{background:#fbe1da;}
   tr.linha-atrasada td:first-child{border-left:3px solid var(--danger);}
+  .dot-categoria{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;flex-shrink:0;vertical-align:middle;}
   .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.2px;white-space:nowrap;}
   .filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
   .sublista-tabs{display:flex;gap:6px;margin-bottom:14px;}
@@ -542,7 +543,7 @@
 
   /* Portal público do cliente */
   body.portal-publico .tabs, body.portal-publico .config-banner{display:none !important;}
-  body.portal-publico #statusAtendenteRow, body.portal-publico #riscoBox{display:none !important;}
+  body.portal-publico #statusAtendenteRow, body.portal-publico #riscoBox, body.portal-publico #categoriaRow{display:none !important;}
   .portal-selo{text-align:center;margin-bottom:14px;color:var(--gold-dark);font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;}
 
   /* Tela de confirmação de presença (link público) */
@@ -636,11 +637,13 @@
   <div class="tab" data-tab="checkin"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>Check-in</span></div>
 
   <div class="sidebar-titulo">Ferramentas</div>
+  <div class="tab tab-config" id="btnMensagensWhats"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Mensagens</span></div>
   <div class="tab tab-config" id="btnAuditoria"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg><span>Auditoria</span></div>
   <div class="tab tab-config" id="btnBloqueios"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Bloqueios</span></div>
   <div class="tab tab-config" id="btnLixeira"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg><span>Lixeira</span></div>
   <div class="tab tab-config" id="btnConfigLoja"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Configurações</span></div>
   <div class="tab tab-link" id="btnLinkPublico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span>Link Autoagendamento</span></div>
+  <div class="tab tab-config" id="btnLinkVisualizacao"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span>Link só visualizar</span></div>
 
   <div class="sidebar-titulo">Preferências</div>
   <div class="tab tab-config" id="btnTema" title="Alternar modo escuro"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span class="tab-label">Modo escuro</span></div>
@@ -738,6 +741,7 @@
           <div class="hint" id="cpfHint"></div>
           <div class="risco-box" id="riscoBox"></div>
           <div class="risco-box risco-alto" id="duplicadoBox" style="display:none;"></div>
+          <div class="risco-box" id="sugestaoHorarioBox" style="display:none;background:#eef3fb;color:#1a4a7a;"></div>
         </div>
       </div>
 
@@ -760,6 +764,11 @@
         <div class="hint" id="filaHint" style="display:none;color:#1a4a7a;">Horários em azul estão cheios — clique para entrar na fila de espera.</div>
       </div>
 
+      <div class="field" id="categoriaRow">
+        <label>Categoria do atendimento</label>
+        <select id="fCategoria"></select>
+      </div>
+
       <div class="row2" id="statusAtendenteRow">
         <div class="field">
           <label>Situação</label>
@@ -774,6 +783,16 @@
       <div class="field">
         <label>Observações</label>
         <textarea id="fObs" placeholder="Ex: Cliente interessado em troca de aparelho, retirada de peça, etc."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Foto do aparelho/produto (opcional)</label>
+        <input type="file" id="fFoto" accept="image/*">
+        <div class="hint">Ex: foto da tela quebrada — ajuda a equipe já chegar sabendo o que esperar.</div>
+        <div id="fFotoPreviewBox" style="display:none;margin-top:8px;">
+          <img id="fFotoPreview" style="max-width:140px;max-height:140px;border-radius:10px;border:1px solid var(--line);">
+          <button type="button" class="btn btn-ghost" id="btnRemoverFoto" style="padding:6px 12px;font-size:12px;margin-left:8px;">Remover foto</button>
+        </div>
       </div>
 
       <div class="field" id="lgpdRow" style="display:none;">
@@ -1053,6 +1072,11 @@
       </div>
 
       <div class="field">
+        <label>Categoria do atendimento</label>
+        <select id="editCategoria"></select>
+      </div>
+
+      <div class="field">
         <label>Observações</label>
         <textarea id="editObs" placeholder="Ex: Cliente interessado em troca de aparelho, retirada de peça, etc."></textarea>
       </div>
@@ -1084,6 +1108,14 @@
           <option value="reduzido">Reduzir o expediente (atendimento só até tal hora)</option>
           <option value="horario">Bloquear um horário específico</option>
         </select>
+        <label class="lgpd-check" id="bloqueioPeriodoToggleBox" style="margin:10px 0 0;">
+          <input type="checkbox" id="bloqueioPeriodoToggle">
+          <span>Bloquear vários dias de uma vez (ex: férias coletivas, feriado prolongado)</span>
+        </label>
+        <div id="bloqueioPeriodoBox" style="display:none;margin-top:8px;">
+          <label>Até o dia</label>
+          <input type="date" id="bloqueioDataFim">
+        </div>
         <div id="bloqueioHorarioBox" style="display:none;">
           <label>Horário</label>
           <select id="bloqueioHorario"></select>
@@ -1158,6 +1190,90 @@
   </div>
 </div>
 
+<!-- MODAL MENSAGENS (hub central de WhatsApp) -->
+<div class="modal-bg" id="modalMensagensWhats">
+  <div class="modal-shell" style="max-width:520px;">
+    <div class="modal-close"><span id="fecharModalMensagens">✕</span></div>
+    <div class="card" style="margin-bottom:0;">
+      <h2>💬 Mensagens</h2>
+      <p class="sub">Envie qualquer mensagem pronta pra qualquer cliente — inclusive quem ainda não tem agendamento.</p>
+
+      <div class="row2">
+        <div class="field">
+          <label>Cliente</label>
+          <input type="text" id="msgHubNome" placeholder="Nome do cliente" list="msgHubClientesList">
+          <datalist id="msgHubClientesList"></datalist>
+        </div>
+        <div class="field">
+          <label>Celular / WhatsApp</label>
+          <input type="tel" id="msgHubCelular" placeholder="(45) 99999-9999">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Tipo de mensagem</label>
+        <select id="msgHubTipo">
+          <option value="precisa_agendar">Precisa agendar para comprar</option>
+          <option value="confirmacao">Confirmação de agendamento</option>
+          <option value="lembrete_dia">Lembrete (véspera)</option>
+          <option value="lembrete_hora">Lembrete (hoje)</option>
+          <option value="reagendamento">Pedir reagendamento</option>
+          <option value="cancelamento">Confirmar cancelamento</option>
+          <option value="pos_venda">Agradecimento pós-venda</option>
+          <option value="avaliacao">Pedir avaliação</option>
+        </select>
+        <div class="hint" id="msgHubAvisoContexto" style="display:none;color:var(--gold-dark);"></div>
+      </div>
+
+      <div class="field">
+        <label>Mensagem (gerada automaticamente — pode editar antes de enviar)</label>
+        <textarea id="msgHubTexto" style="min-height:130px;" placeholder="Clique em &quot;Gerar mensagem&quot;..."></textarea>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="btnGerarMsgHub" style="width:100%;">🔄 Gerar mensagem</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btnMsgHubEnviar">📤 WhatsApp</button>
+        <button class="btn btn-ghost" id="btnMsgHubSMS">💬 SMS</button>
+        <button class="btn btn-ghost" id="btnMsgHubCopiar">📋 Copiar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOTO DO APARELHO/PRODUTO -->
+<div class="modal-bg" id="modalFotoProduto">
+  <div class="modal-shell" style="max-width:480px;">
+    <div class="modal-close"><span id="fecharModalFotoProduto">✕</span></div>
+    <div class="card" style="margin-bottom:0;text-align:center;">
+      <h2>🖼️ Foto do aparelho/produto</h2>
+      <p class="sub" id="fotoProdutoSubtitulo">—</p>
+      <img id="fotoProdutoImg" style="max-width:100%;border-radius:10px;border:1px solid var(--line);margin-top:8px;">
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LINK SÓ VISUALIZAR -->
+<div class="modal-bg" id="modalLinkVisualizacao">
+  <div class="modal-shell" style="max-width:460px;">
+    <div class="modal-close"><span id="fecharModalLinkVisualizacao">✕</span></div>
+    <div class="card" style="margin-bottom:0;">
+      <h2>👁️ Link só visualizar</h2>
+      <p class="sub">Compartilhe com alguém da equipe pra ver a agenda de hoje sem precisar da senha do painel — mostra só os números do dia e a lista de horários, sem nenhum botão de editar, excluir ou mudar configuração.</p>
+      <div class="field">
+        <label>Link de visualização</label>
+        <input type="text" id="linkVisualizacaoInput" readonly>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btnCopiarLinkVisualizacao">📋 Copiar link</button>
+        <button class="btn btn-ghost" id="btnAbrirLinkVisualizacao">🔗 Abrir em nova aba</button>
+      </div>
+      <div class="hint" style="margin-top:10px;">Quem abrir esse link não consegue criar, editar nem excluir nada — só ver os agendamentos de hoje em tempo real.</div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL LEMBRETES DO DIA -->
 <div class="modal-bg" id="modalLembretes">
   <div class="modal-shell" style="max-width:460px;">
@@ -1216,6 +1332,7 @@
 
     <div class="modal-actions">
       <button class="btn btn-gold" id="btnBaixarImagem">⬇ Baixar Imagem</button>
+      <button class="btn btn-ghost" id="btnComoChegarRecibo">📍 Como chegar</button>
       <button class="btn btn-ghost" id="btnBaixarICS">📅 Adicionar ao Calendário</button>
       <button class="btn btn-primary" id="btnCompartilhar">📤 Enviar (WhatsApp)</button>
       <button class="btn btn-ghost" id="btnCompartilharSMS" title="Se o cliente não tiver WhatsApp">💬 SMS</button>
@@ -1356,6 +1473,18 @@ const STATUS_LIST = [
   {v:'sem_interesse', label:'Sem interesse', color:'#6b7280', bg:'#eceef1'},
 ];
 function statusInfo(v){ return STATUS_LIST.find(s=>s.v===v) || STATUS_LIST[0]; }
+
+const CATEGORIAS_LIST = [
+  {v:'', label:'Sem categoria', color:'#6b7280', bg:'#eceef1'},
+  {v:'venda', label:'Venda', color:'#2e6b47', bg:'#dcf3e4'},
+  {v:'troca_tela', label:'Troca de tela', color:'#1a4a7a', bg:'#dceafc'},
+  {v:'garantia', label:'Garantia', color:'#a4813a', bg:'#f5ecd6'},
+  {v:'manutencao', label:'Manutenção / retirada de peça', color:'#7a4a12', bg:'#fdf1d6'},
+  {v:'orcamento', label:'Orçamento', color:'#0e7c86', bg:'#dbf1f3'},
+  {v:'outro', label:'Outro', color:'#7c3a8a', bg:'#f1e2f7'},
+];
+function categoriaInfo(v){ return CATEGORIAS_LIST.find(c=>c.v===v) || CATEGORIAS_LIST[0]; }
+document.getElementById('fCategoria').innerHTML = CATEGORIAS_LIST.map(c=>`<option value="${c.v}">${c.label}</option>`).join('');
 
 /* ---------- configuração da loja (editável — preparação para virar SaaS multi-loja) ---------- */
 const LS_CONFIG_LOJA = 'agenda_atlas_config_loja_v1';
@@ -1575,22 +1704,25 @@ function gerarMensagem(a, tipo){
       return `Olá ${nomeCurto}! Abriu uma vaga no horário das ${a.horario} do dia ${dataBR} na ${CONFIG_LOJA.nome}, que era o horário que você estava aguardando. Quer confirmar esse horário? Responda aqui o quanto antes, pois é por ordem de chegada.`;
     case 'avaliacao':
       return `Olá ${nomeCurto}! Muito obrigado pela visita na ${CONFIG_LOJA.nome}. Poderia dar uma nota de 0 a 10 pro nosso atendimento? Leva só 10 segundos e ajuda muito a gente! 🙏`;
+    case 'precisa_agendar':
+      return `Olá ${nomeCurto}! Para prosseguir com sua compra, é necessário fazer o agendamento pelo nosso link. Assim garantimos um horário certinho pra te atender bem. Qualquer dúvida, estamos à disposição!`;
     default:
       return `Olá ${nomeCurto}! Aqui é da ${CONFIG_LOJA.nome}, sobre seu agendamento do dia ${dataBR} às ${a.horario}.`;
   }
 }
 const LINKS_POR_TIPO = {
-  confirmacao: { montar: (a)=>montarLinkConfirmacao(a), texto: 'Confirme sua presença (ou avise se não puder ir) aqui:' },
-  lembrete_dia: { montar: (a)=>montarLinkConfirmacao(a), texto: 'Confirme sua presença (ou avise se não puder ir) aqui:' },
-  lembrete_hora: { montar: (a)=>montarLinkConfirmacao(a), texto: 'Confirme sua presença (ou avise se não puder ir) aqui:' },
-  avaliacao: { montar: (a)=>montarLinkAvaliacao(a), texto: 'Deixe sua avaliação aqui, leva só 10 segundos:' }
+  confirmacao: { montar: (a)=>montarLinkConfirmacao(a), texto: 'Confirme sua presença (ou avise se não puder ir) aqui:', requerAgendamento: true },
+  lembrete_dia: { montar: (a)=>montarLinkConfirmacao(a), texto: 'Confirme sua presença (ou avise se não puder ir) aqui:', requerAgendamento: true },
+  lembrete_hora: { montar: (a)=>montarLinkConfirmacao(a), texto: 'Confirme sua presença (ou avise se não puder ir) aqui:', requerAgendamento: true },
+  avaliacao: { montar: (a)=>montarLinkAvaliacao(a), texto: 'Deixe sua avaliação aqui, leva só 10 segundos:', requerAgendamento: true },
+  precisa_agendar: { montar: ()=>montarLinkPublico(), texto: 'Agende pelo nosso link (é rapidinho):', requerAgendamento: false }
 };
 
 // monta o texto final da mensagem (IA + link, quando aplicável) — usado tanto pra enviar quanto pra copiar
 async function montarTextoMensagemFinal(a, tipo){
   const texto = await gerarMensagemComIA(a, tipo);
   const linkInfo = LINKS_POR_TIPO[tipo];
-  if(linkInfo && a.id){
+  if(linkInfo && (!linkInfo.requerAgendamento || a.id)){
     return texto + `\n\n${linkInfo.texto}\n${linkInfo.montar(a)}`;
   }
   return texto;
@@ -1649,21 +1781,25 @@ const GROQ_CONTEXTO_TIPO = {
   cancelamento: 'confirmar que o agendamento do cliente foi cancelado',
   pos_venda: 'agradecer o cliente por uma compra feita na loja',
   vaga_aberta: 'avisar o cliente que abriu uma vaga no horário que ele estava aguardando na fila de espera',
-  avaliacao: 'pedir, com simpatia, para o cliente avaliar o atendimento que acabou de receber na loja'
+  avaliacao: 'pedir, com simpatia, para o cliente avaliar o atendimento que acabou de receber na loja',
+  precisa_agendar: 'avisar com educação que, para prosseguir com a compra, o cliente precisa primeiro fazer um agendamento pelo link de autoagendamento da loja'
 };
 async function gerarMensagemComIA(a, tipo){
   const fallback = gerarMensagem(a, tipo);
   if(!GROQ_API_KEY) return fallback;
 
   const contexto = GROQ_CONTEXTO_TIPO[tipo] || 'falar sobre o agendamento do cliente';
+  const linhasDados = [
+    `- Cliente: ${(a.nome||'').split(' ')[0]}`,
+    `- Loja: ${CONFIG_LOJA.nome}`,
+    `- Endereço: ${CONFIG_LOJA.endereco}`
+  ];
+  if(a.data) linhasDados.push(`- Data: ${fmtDataISOtoBR(a.data)}`);
+  if(a.horario) linhasDados.push(`- Horário: ${a.horario}`);
+  if(a.protocolo) linhasDados.push(`- Protocolo: ${a.protocolo}`);
   const prompt = `Escreva uma mensagem curta de WhatsApp em português do Brasil para ${contexto}.
 Dados reais (use só o que for relevante, não invente nada além disso):
-- Cliente: ${(a.nome||'').split(' ')[0]}
-- Loja: ${CONFIG_LOJA.nome}
-- Endereço: ${CONFIG_LOJA.endereco}
-- Data: ${fmtDataISOtoBR(a.data)}
-- Horário: ${a.horario}
-- Protocolo: ${a.protocolo || '—'}
+${linhasDados.join('\n')}
 Regras: tom simpático e profissional, no máximo 3 frases curtas, no máximo 1 emoji, não inclua nenhum link (isso é adicionado depois automaticamente), responda somente com o texto final da mensagem, sem aspas e sem explicações.`;
 
   try{
@@ -2185,6 +2321,7 @@ function abrirMenuAcoesFlutuante(id, botaoEl){
 
   menu.innerHTML = `
     <button class="acoes-item" data-m-ver><span>📄</span> Ver recibo</button>
+    ${a.fotoProduto ? `<button class="acoes-item" data-m-foto><span>🖼️</span> Ver foto do aparelho</button>` : ''}
     <button class="acoes-item" data-m-editar><span>✏️</span> Editar</button>
     <button class="acoes-item" data-m-duplicar><span>🔁</span> Repetir agendamento</button>
     <button class="acoes-item" data-m-timeline><span>🕐</span> Histórico</button>
@@ -2198,6 +2335,7 @@ function abrirMenuAcoesFlutuante(id, botaoEl){
         <option value="cancelamento">Confirmar cancel.</option>
         <option value="pos_venda">Agradecimento</option>
         <option value="avaliacao">Pedir avaliação</option>
+        <option value="precisa_agendar">Precisa agendar p/ comprar</option>
       </select>
       <button data-m-msg-enviar title="Enviar por WhatsApp">📤</button>
       <button data-m-msg-sms title="Enviar por SMS (se o cliente não tiver WhatsApp)">💬</button>
@@ -2208,6 +2346,8 @@ function abrirMenuAcoesFlutuante(id, botaoEl){
   `;
 
   menu.querySelector('[data-m-ver]').addEventListener('click', ()=>{ menu.classList.remove('show'); abrirRecibo(a); });
+  const btnFoto = menu.querySelector('[data-m-foto]');
+  if(btnFoto) btnFoto.addEventListener('click', ()=>{ menu.classList.remove('show'); abrirFotoProduto(a); });
   menu.querySelector('[data-m-editar]').addEventListener('click', ()=>{ menu.classList.remove('show'); abrirModalEditar(a); });
   menu.querySelector('[data-m-duplicar]').addEventListener('click', ()=>{ menu.classList.remove('show'); duplicarAgendamento(a); });
   menu.querySelector('[data-m-timeline]').addEventListener('click', ()=>{ menu.classList.remove('show'); abrirTimeline(a); });
@@ -2266,6 +2406,122 @@ function montarLinkAvaliacao(a){
   url.searchParams.set('avaliar', a.id);
   return url.toString();
 }
+function montarLinkVisualizacao(){
+  const url = new URL(window.location.href);
+  url.search = '';
+  url.hash = '';
+  url.searchParams.set('visualizar', '1');
+  return url.toString();
+}
+document.getElementById('btnLinkVisualizacao').addEventListener('click', ()=>{
+  document.getElementById('linkVisualizacaoInput').value = montarLinkVisualizacao();
+  document.getElementById('modalLinkVisualizacao').classList.add('show');
+});
+document.getElementById('fecharModalLinkVisualizacao').onclick = ()=> document.getElementById('modalLinkVisualizacao').classList.remove('show');
+document.getElementById('modalLinkVisualizacao').addEventListener('click', e=>{ if(e.target.id==='modalLinkVisualizacao') document.getElementById('modalLinkVisualizacao').classList.remove('show'); });
+document.getElementById('btnCopiarLinkVisualizacao').addEventListener('click', async ()=>{
+  const link = document.getElementById('linkVisualizacaoInput').value;
+  try{
+    await navigator.clipboard.writeText(link);
+    toast('Link copiado!');
+  }catch(e){
+    const input = document.getElementById('linkVisualizacaoInput');
+    input.select(); input.setSelectionRange(0, 99999);
+    try{ document.execCommand('copy'); toast('Link copiado!'); }
+    catch(e2){ toast('Não foi possível copiar automaticamente — selecione e copie manualmente.'); }
+  }
+});
+document.getElementById('btnAbrirLinkVisualizacao').addEventListener('click', ()=>{
+  window.open(document.getElementById('linkVisualizacaoInput').value, '_blank');
+});
+
+/* ---------- hub central de mensagens (WhatsApp/SMS pra qualquer cliente, com ou sem agendamento) ---------- */
+function clientesUnicosPorCelular(){
+  const porCelular = new Map();
+  [...cacheAgendamentos]
+    .sort((a,b)=>(a.criadoEm||'').localeCompare(b.criadoEm||''))
+    .forEach(a=>{ if(a.celular) porCelular.set(apenasDigitos(a.celular), a); }); // o mais recente sobrescreve
+  return [...porCelular.values()];
+}
+function contextoAtualMsgHub(){
+  const nome = document.getElementById('msgHubNome').value.trim();
+  const celular = document.getElementById('msgHubCelular').value.trim();
+  const digitos = apenasDigitos(celular);
+  if(digitos.length>=10){
+    const encontrado = clientesUnicosPorCelular().find(a=>apenasDigitos(a.celular)===digitos);
+    if(encontrado) return encontrado;
+  }
+  return { nome, celular }; // cliente novo, sem agendamento — usado no tipo "precisa agendar"
+}
+function atualizarAvisoContextoMsgHub(){
+  const tipo = document.getElementById('msgHubTipo').value;
+  const ctx = contextoAtualMsgHub();
+  const aviso = document.getElementById('msgHubAvisoContexto');
+  if(tipo!=='precisa_agendar' && !ctx.data){
+    aviso.style.display = 'block';
+    aviso.textContent = '⚠️ Esse tipo de mensagem funciona melhor com um cliente que já tem agendamento — escolha um da lista pelo nome, ou a mensagem pode sair incompleta.';
+  } else {
+    aviso.style.display = 'none';
+  }
+}
+function abrirModalMensagens(){
+  document.getElementById('msgHubNome').value = '';
+  document.getElementById('msgHubCelular').value = '';
+  document.getElementById('msgHubTexto').value = '';
+  document.getElementById('msgHubTipo').value = 'precisa_agendar';
+  document.getElementById('msgHubClientesList').innerHTML = clientesUnicosPorCelular()
+    .map(a=>`<option value="${esc(a.nome)}"></option>`).join('');
+  atualizarAvisoContextoMsgHub();
+  document.getElementById('modalMensagensWhats').classList.add('show');
+}
+document.getElementById('btnMensagensWhats').addEventListener('click', abrirModalMensagens);
+document.getElementById('fecharModalMensagens').onclick = ()=> document.getElementById('modalMensagensWhats').classList.remove('show');
+document.getElementById('modalMensagensWhats').addEventListener('click', e=>{ if(e.target.id==='modalMensagensWhats') document.getElementById('modalMensagensWhats').classList.remove('show'); });
+
+document.getElementById('msgHubNome').addEventListener('input', e=>{
+  const encontrado = clientesUnicosPorCelular().find(a=>a.nome===e.target.value);
+  if(encontrado) document.getElementById('msgHubCelular').value = encontrado.celular || '';
+  atualizarAvisoContextoMsgHub();
+});
+document.getElementById('msgHubCelular').addEventListener('input', e=>{
+  e.target.value = maskCelular(e.target.value);
+  atualizarAvisoContextoMsgHub();
+});
+document.getElementById('msgHubTipo').addEventListener('change', atualizarAvisoContextoMsgHub);
+
+document.getElementById('btnGerarMsgHub').addEventListener('click', async ()=>{
+  const nome = document.getElementById('msgHubNome').value.trim();
+  const celular = document.getElementById('msgHubCelular').value.trim();
+  if(!nome || !celular){ toast('Preencha nome e celular do cliente.'); return; }
+  const tipo = document.getElementById('msgHubTipo').value;
+  const ctx = { ...contextoAtualMsgHub(), nome, celular };
+  const btn = document.getElementById('btnGerarMsgHub');
+  btn.disabled = true; btn.textContent = '⏳ Gerando...';
+  try{
+    document.getElementById('msgHubTexto').value = await montarTextoMensagemFinal(ctx, tipo);
+  }catch(e){ console.error(e); toast('Erro ao gerar a mensagem.'); }
+  finally{ btn.disabled = false; btn.textContent = '🔄 Gerar mensagem'; }
+});
+document.getElementById('btnMsgHubEnviar').addEventListener('click', ()=>{
+  const celular = apenasDigitos(document.getElementById('msgHubCelular').value);
+  const texto = document.getElementById('msgHubTexto').value.trim();
+  if(!celular){ toast('Preencha o celular do cliente.'); return; }
+  if(!texto){ toast('Gere ou escreva a mensagem antes de enviar.'); return; }
+  window.open(`https://wa.me/55${celular}?text=${encodeURIComponent(texto)}`, '_blank');
+});
+document.getElementById('btnMsgHubSMS').addEventListener('click', ()=>{
+  const celular = apenasDigitos(document.getElementById('msgHubCelular').value);
+  const texto = document.getElementById('msgHubTexto').value.trim();
+  if(!celular){ toast('Preencha o celular do cliente.'); return; }
+  if(!texto){ toast('Gere ou escreva a mensagem antes de enviar.'); return; }
+  window.open(`sms:+55${celular}?body=${encodeURIComponent(texto)}`, '_blank');
+});
+document.getElementById('btnMsgHubCopiar').addEventListener('click', async ()=>{
+  const texto = document.getElementById('msgHubTexto').value.trim();
+  if(!texto){ toast('Gere ou escreva a mensagem antes de copiar.'); return; }
+  try{ await navigator.clipboard.writeText(texto); toast('Mensagem copiada!'); }
+  catch(e){ toast('Não foi possível copiar automaticamente.'); }
+});
 document.getElementById('btnLinkPublico').addEventListener('click', ()=>{
   const link = montarLinkPublico();
   document.getElementById('linkPublicoInput').value = link;
@@ -2323,6 +2579,8 @@ function abrirModalEditar(a){
   document.getElementById('editCelular').value = a.celular || '';
   document.getElementById('editData').value = a.data || '';
   document.getElementById('editObs').value = a.observacao || '';
+  document.getElementById('editCategoria').innerHTML = CATEGORIAS_LIST.map(c=>`<option value="${c.v}">${c.label}</option>`).join('');
+  document.getElementById('editCategoria').value = a.categoria || '';
   document.getElementById('editHorario').innerHTML = gerarOpcoesHorarioEdicao(a.data, a.id);
   document.getElementById('editHorario').value = a.horario;
   window.__edicaoAtual = a;
@@ -2352,6 +2610,7 @@ document.getElementById('btnSalvarEdicao').addEventListener('click', async ()=>{
   const data = document.getElementById('editData').value;
   const horario = document.getElementById('editHorario').value;
   const observacao = document.getElementById('editObs').value.trim();
+  const categoria = document.getElementById('editCategoria').value;
 
   if(!nome){ toast('Informe o nome do cliente.'); return; }
   if(cpf.replace(/\D/g,'').length===11 && !validaCPF(cpf)){ toast('CPF inválido — confira os números.'); return; }
@@ -2361,7 +2620,7 @@ document.getElementById('btnSalvarEdicao').addEventListener('click', async ()=>{
   const btn = document.getElementById('btnSalvarEdicao');
   btn.disabled = true; btn.textContent = 'Salvando...';
   try{
-    await atualizarAgendamento(a.id, { nome, cpf, celular, data, horario, observacao });
+    await atualizarAgendamento(a.id, { nome, cpf, celular, data, horario, observacao, categoria });
     toast('Agendamento atualizado com sucesso!');
     document.getElementById('modalEditar').classList.remove('show');
     renderLista(); renderCalendario();
@@ -2626,9 +2885,10 @@ function renderDiaPanel(iso){
   } else {
     box.innerHTML = doDia.map(a=>{
       const s = statusInfo(a.status);
+      const cat = categoriaInfo(a.categoria);
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);gap:8px;">
         <div style="min-width:0;">
-          <div style="font-weight:700;font-size:13.5px;">${a.horario} · ${esc(a.nome)}</div>
+          <div style="font-weight:700;font-size:13.5px;">${a.horario} · ${a.categoria?`<span class="dot-categoria" style="background:${cat.color};" title="${esc(cat.label)}"></span>`:''}${esc(a.nome)}</div>
           <div style="font-size:11.5px;color:var(--muted);">${esc(a.celular) || ''}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
@@ -2678,6 +2938,13 @@ document.getElementById('btnNovoDoDia').onclick = ()=>{
 function abrirModalBloqueios(dataInicial){
   const inputData = document.getElementById('bloqueioData');
   inputData.value = dataInicial || diaSelecionado || hojeISO();
+  document.getElementById('bloqueioTipo').value = 'dia';
+  document.getElementById('bloqueioHorarioBox').style.display = 'none';
+  document.getElementById('bloqueioReduzidoBox').style.display = 'none';
+  document.getElementById('bloqueioPeriodoToggleBox').style.display = 'flex';
+  document.getElementById('bloqueioPeriodoToggle').checked = false;
+  document.getElementById('bloqueioPeriodoBox').style.display = 'none';
+  document.getElementById('bloqueioDataFim').value = '';
   renderBloqueiosPanel(inputData.value);
   document.getElementById('modalBloqueios').classList.add('show');
 }
@@ -2712,7 +2979,22 @@ function atualizarPresetsMotivo(){
 document.getElementById('bloqueioTipo').addEventListener('change', e=>{
   document.getElementById('bloqueioHorarioBox').style.display = e.target.value==='horario' ? 'block' : 'none';
   document.getElementById('bloqueioReduzidoBox').style.display = e.target.value==='reduzido' ? 'block' : 'none';
+  const ehDiaInteiro = e.target.value==='dia';
+  document.getElementById('bloqueioPeriodoToggleBox').style.display = ehDiaInteiro ? 'flex' : 'none';
+  if(!ehDiaInteiro){
+    document.getElementById('bloqueioPeriodoToggle').checked = false;
+    document.getElementById('bloqueioPeriodoBox').style.display = 'none';
+  }
   atualizarPresetsMotivo();
+});
+document.getElementById('bloqueioPeriodoToggle').addEventListener('change', e=>{
+  document.getElementById('bloqueioPeriodoBox').style.display = e.target.checked ? 'block' : 'none';
+  if(e.target.checked){
+    const dataInicio = document.getElementById('bloqueioData').value;
+    if(dataInicio && !document.getElementById('bloqueioDataFim').value){
+      document.getElementById('bloqueioDataFim').value = dataInicio;
+    }
+  }
 });
 document.getElementById('bloqueioHorarioLimite').addEventListener('change', atualizarPresetsMotivo);
 document.getElementById('bloqueioMotivoPreset').addEventListener('change', e=>{
@@ -2748,33 +3030,62 @@ function renderBloqueiosPanel(iso){
     });
   }
 }
+function listarDatasIntervalo(inicioISO, fimISO){
+  const datas = [];
+  let atual = new Date(inicioISO+'T12:00:00');
+  const fim = new Date(fimISO+'T12:00:00');
+  while(atual <= fim){
+    datas.push(`${atual.getFullYear()}-${pad(atual.getMonth()+1)}-${pad(atual.getDate())}`);
+    atual.setDate(atual.getDate()+1);
+  }
+  return datas;
+}
 document.getElementById('btnConfirmarBloqueio').addEventListener('click', async ()=>{
   const dataAlvo = document.getElementById('bloqueioData').value;
   if(!dataAlvo){ toast('Selecione um dia.'); return; }
   const tipo = document.getElementById('bloqueioTipo').value;
-  let motivo = document.getElementById('bloqueioMotivo').value.trim();
-  const obj = { data: dataAlvo, criadoEm: new Date().toISOString() };
-  if(tipo==='horario'){
-    obj.horario = document.getElementById('bloqueioHorario').value;
-    if(!motivo) motivo = 'Horário indisponível.';
-  } else if(tipo==='reduzido'){
-    obj.horarioLimite = document.getElementById('bloqueioHorarioLimite').value || '12:00';
-    if(!motivo) motivo = `O atendimento hoje será até às ${obj.horarioLimite}.`;
-  } else {
-    if(!motivo) motivo = 'Não haverá atendimento neste dia.';
+  const ehPeriodo = tipo==='dia' && document.getElementById('bloqueioPeriodoToggle').checked;
+  const dataFim = document.getElementById('bloqueioDataFim').value;
+  if(ehPeriodo && (!dataFim || dataFim < dataAlvo)){
+    toast('Selecione uma data final válida (igual ou depois da data inicial).');
+    return;
   }
-  obj.motivo = motivo;
+  let motivo = document.getElementById('bloqueioMotivo').value.trim();
+  const montarObj = (data)=>{
+    const obj = { data, criadoEm: new Date().toISOString() };
+    if(tipo==='horario'){
+      obj.horario = document.getElementById('bloqueioHorario').value;
+      if(!motivo) motivo = 'Horário indisponível.';
+    } else if(tipo==='reduzido'){
+      obj.horarioLimite = document.getElementById('bloqueioHorarioLimite').value || '12:00';
+      if(!motivo) motivo = `O atendimento hoje será até às ${obj.horarioLimite}.`;
+    } else {
+      if(!motivo) motivo = 'Não haverá atendimento neste dia.';
+    }
+    obj.motivo = motivo;
+    return obj;
+  };
+
   const btn = document.getElementById('btnConfirmarBloqueio');
   btn.disabled = true; btn.textContent = 'Bloqueando...';
   try{
-    const salvo = await salvarBloqueio(obj);
-    cacheBloqueios.push(salvo);
+    if(ehPeriodo){
+      const datas = listarDatasIntervalo(dataAlvo, dataFim);
+      for(const d of datas){
+        const salvo = await salvarBloqueio(montarObj(d));
+        cacheBloqueios.push(salvo);
+      }
+      toast(`${datas.length} dia(s) bloqueado(s) com sucesso.`);
+    } else {
+      const salvo = await salvarBloqueio(montarObj(dataAlvo));
+      cacheBloqueios.push(salvo);
+      toast('Bloqueio criado com sucesso.');
+    }
     document.getElementById('bloqueioMotivo').value = '';
     document.getElementById('bloqueioMotivoPreset').value = '';
-    toast('Bloqueio criado com sucesso.');
     renderBloqueiosPanel(dataAlvo);
     renderCalendario();
-    if(diaSelecionado===dataAlvo) renderDiaPanel(diaSelecionado);
+    if(diaSelecionado && diaSelecionado>=dataAlvo && diaSelecionado<=(ehPeriodo?dataFim:dataAlvo)) renderDiaPanel(diaSelecionado);
     gerarSlots();
   }catch(e){ console.error(e); toast('Erro ao criar bloqueio.'); }
   finally{ btn.disabled=false; btn.textContent='Bloquear'; }
@@ -2864,7 +3175,35 @@ document.getElementById('fCpf').addEventListener('input', e=>{
   } else { hint.textContent=''; }
   atualizarRiscoCliente(e.target.value);
   atualizarAvisoDuplicado(e.target.value);
+  atualizarSugestaoHorario(e.target.value);
 });
+// baseado no histórico real do cliente (não é uma IA de verdade, é estatística simples e honesta:
+// olha os agendamentos anteriores desse CPF e vê qual horário ele mais escolheu)
+function horarioMaisFrequenteCliente(cpf){
+  const alvo = apenasDigitos(cpf);
+  if(alvo.length!==11) return null;
+  const registros = cacheAgendamentos.filter(a=>apenasDigitos(a.cpf)===alvo && a.horario);
+  if(registros.length<2) return null;
+  const contagem = {};
+  registros.forEach(a=>{ contagem[a.horario] = (contagem[a.horario]||0)+1; });
+  let melhor=null, melhorQtd=0;
+  Object.entries(contagem).forEach(([h,q])=>{ if(q>melhorQtd){ melhor=h; melhorQtd=q; } });
+  if(melhorQtd<2) return null;
+  return { horario: melhor, vezes: melhorQtd, total: registros.length };
+}
+function atualizarSugestaoHorario(cpf){
+  const box = document.getElementById('sugestaoHorarioBox');
+  const sugestao = horarioMaisFrequenteCliente(cpf);
+  if(!sugestao){ box.style.display='none'; return; }
+  box.style.display = 'flex';
+  box.innerHTML = `<span>💡</span><span>Esse cliente costuma agendar às <b>${sugestao.horario}</b> (${sugestao.vezes} de ${sugestao.total} vezes) — <button type="button" id="btnUsarHorarioSugerido" style="background:none;border:none;color:#1a4a7a;font-weight:700;text-decoration:underline;cursor:pointer;padding:0;font-size:inherit;">usar esse horário</button></span>`;
+  const btn = document.getElementById('btnUsarHorarioSugerido');
+  if(btn) btn.addEventListener('click', ()=>{
+    const slot = document.querySelector(`.slot[data-h="${sugestao.horario}"]:not(.busy):not(.fila)`);
+    if(slot){ slot.click(); toast(`Horário das ${sugestao.horario} selecionado.`); }
+    else toast(`O horário das ${sugestao.horario} não está disponível na data escolhida.`);
+  });
+}
 function atualizarRiscoCliente(cpf){
   const box = document.getElementById('riscoBox');
   const h = historicoCliente(cpf);
@@ -2992,13 +3331,64 @@ function limparForm(){
   document.getElementById('fObs').value='';
   document.getElementById('fAtendente').value='';
   document.getElementById('fStatus').value='agendado';
+  document.getElementById('fCategoria').value='';
   document.getElementById('cpfHint').textContent='';
   document.getElementById('riscoBox').classList.remove('show');
   document.getElementById('duplicadoBox').style.display = 'none';
+  document.getElementById('sugestaoHorarioBox').style.display = 'none';
   document.getElementById('fConsentimentoLGPD').checked = false;
+  fotoProdutoAtual = null;
+  document.getElementById('fFoto').value = '';
+  document.getElementById('fFotoPreviewBox').style.display = 'none';
   gerarSlots();
 }
 document.getElementById('btnLimpar').onclick = limparForm;
+
+/* ---------- foto do aparelho/produto (opcional, comprimida antes de guardar) ---------- */
+let fotoProdutoAtual = null;
+function comprimirImagem(file, maxLargura=800, qualidade=0.6){
+  return new Promise((resolve, reject)=>{
+    const leitor = new FileReader();
+    leitor.onload = (e)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const escala = Math.min(1, maxLargura/img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width*escala);
+        canvas.height = Math.round(img.height*escala);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', qualidade));
+      };
+      img.onerror = ()=>reject(new Error('Não foi possível ler essa imagem.'));
+      img.src = e.target.result;
+    };
+    leitor.onerror = ()=>reject(new Error('Não foi possível ler esse arquivo.'));
+    leitor.readAsDataURL(file);
+  });
+}
+document.getElementById('fFoto').addEventListener('change', async e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ toast('Selecione um arquivo de imagem.'); e.target.value=''; return; }
+  try{
+    fotoProdutoAtual = await comprimirImagem(file);
+    document.getElementById('fFotoPreview').src = fotoProdutoAtual;
+    document.getElementById('fFotoPreviewBox').style.display = 'block';
+  }catch(err){ console.error(err); toast('Não foi possível processar essa imagem — tente outra.'); }
+});
+document.getElementById('btnRemoverFoto').addEventListener('click', ()=>{
+  fotoProdutoAtual = null;
+  document.getElementById('fFoto').value = '';
+  document.getElementById('fFotoPreviewBox').style.display = 'none';
+});
+function abrirFotoProduto(a){
+  document.getElementById('fotoProdutoSubtitulo').textContent = `${a.nome} — protocolo ${a.protocolo||'—'}`;
+  document.getElementById('fotoProdutoImg').src = a.fotoProduto;
+  document.getElementById('modalFotoProduto').classList.add('show');
+}
+document.getElementById('fecharModalFotoProduto').onclick = ()=> document.getElementById('modalFotoProduto').classList.remove('show');
+document.getElementById('modalFotoProduto').addEventListener('click', e=>{ if(e.target.id==='modalFotoProduto') document.getElementById('modalFotoProduto').classList.remove('show'); });
 
 function duplicarAgendamento(a){
   irParaAba('novo');
@@ -3007,10 +3397,12 @@ function duplicarAgendamento(a){
   document.getElementById('fCelular').value = a.celular || '';
   document.getElementById('fObs').value = a.observacao || '';
   document.getElementById('fAtendente').value = a.atendente || '';
+  document.getElementById('fCategoria').value = a.categoria || '';
   document.getElementById('fData').value = '';
   document.getElementById('fStatus').value = 'agendado';
   horarioSelecionado = null;
   atualizarRiscoCliente(a.cpf || '');
+  atualizarSugestaoHorario(a.cpf || '');
   gerarSlots();
   toast('Dados do cliente preenchidos — escolha a nova data e horário.');
   document.getElementById('fData').focus();
@@ -3026,6 +3418,7 @@ document.getElementById('btnSalvar').onclick = async ()=>{
   const status = document.getElementById('fStatus').value || 'agendado';
   const obs = document.getElementById('fObs').value.trim();
   const atendente = document.getElementById('fAtendente').value.trim();
+  const categoria = document.getElementById('fCategoria').value;
 
   if(!nome){ toast('Informe o nome do cliente.'); return; }
   if(cpf.replace(/\D/g,'').length===11 && !validaCPF(cpf)){ toast('CPF inválido — confira os números.'); return; }
@@ -3050,9 +3443,10 @@ document.getElementById('btnSalvar').onclick = async ()=>{
     const protocolo = await proximoProtocolo();
     const agendamento = {
       protocolo, nome, cpf, celular, data, horario: horarioSelecionado,
-      status, observacao: obs, atendente,
+      status, observacao: obs, atendente, categoria,
       criadoEm: new Date().toISOString()
     };
+    if(fotoProdutoAtual) agendamento.fotoProduto = fotoProdutoAtual;
     if(document.body.classList.contains('portal-publico')){
       agendamento.consentimentoLGPD = true;
       agendamento.consentimentoLGPDData = new Date().toISOString();
@@ -3130,11 +3524,12 @@ function renderLista(){
 
   body.innerHTML = lista.map(a=>{
     const s = statusInfo(a.status);
+    const cat = categoriaInfo(a.categoria);
     const atrasado = a.data===hojeISOStr && a.horario<horaAtualStr && !STATUS_FINALIZADOS.includes(a.status);
     let opts = STATUS_LIST.map(st=>`<option value="${st.v}" ${st.v===a.status?'selected':''}>${st.label}</option>`).join('');
     return `<tr class="${atrasado?'linha-atrasada':''}">
       <td class="protocolo-tag">${esc(a.protocolo)||'—'}</td>
-      <td>${esc(a.nome)}</td>
+      <td>${a.categoria?`<span class="dot-categoria" style="background:${cat.color};" title="${esc(cat.label)}"></span>`:''}${esc(a.nome)}</td>
       <td>${esc(a.cpf)||'—'}</td>
       <td>${esc(a.celular)||'—'}</td>
       <td>${fmtDataISOtoBR(a.data)}</td>
@@ -3300,11 +3695,12 @@ function renderHoje(){
   }
   listaBox.innerHTML = doHoje.map(a=>{
     const s = statusInfo(a.status);
+    const cat = categoriaInfo(a.categoria);
     const finalizado = STATUS_FINALIZADOS.includes(a.status);
     const atrasado = !finalizado && a.horario < horaAtual;
     return `<div class="hoje-item ${finalizado?'finalizado':''} ${atrasado?'atrasado':''}">
       <div class="hora">${a.horario}</div>
-      <div class="info"><b>${esc(a.nome)}</b><span>${esc(a.celular)||''}</span></div>
+      <div class="info"><b>${a.categoria?`<span class="dot-categoria" style="background:${cat.color};" title="${esc(cat.label)}"></span>`:''}${esc(a.nome)}</b><span>${esc(a.celular)||''}</span></div>
       <span class="badge" style="background:${s.bg};color:${s.color};">${s.label}</span>
     </div>`;
   }).join('');
@@ -3497,6 +3893,25 @@ function gerarICS(a){
   ];
   return linhas.join('\r\n');
 }
+document.getElementById('btnComoChegarRecibo').addEventListener('click', ()=>{
+  const destino = encodeURIComponent(CONFIG_LOJA.endereco);
+  if(!navigator.geolocation){
+    window.open(`https://www.google.com/maps/search/?api=1&query=${destino}`, '_blank');
+    return;
+  }
+  toast('Buscando sua localização...');
+  navigator.geolocation.getCurrentPosition(
+    (pos)=>{
+      const origem = `${pos.coords.latitude},${pos.coords.longitude}`;
+      window.open(`https://www.google.com/maps/dir/?api=1&origin=${origem}&destination=${destino}&travelmode=driving`, '_blank');
+    },
+    ()=>{
+      toast('Não conseguimos acessar sua localização — abrindo o endereço no mapa mesmo assim.');
+      window.open(`https://www.google.com/maps/search/?api=1&query=${destino}`, '_blank');
+    },
+    { timeout: 8000 }
+  );
+});
 document.getElementById('btnBaixarICS').onclick = ()=>{
   const a = window.__reciboAtual;
   if(!a){ toast('Não foi possível identificar o agendamento.'); return; }
@@ -3749,6 +4164,9 @@ function renderTelaConfirmacao(a){
       <div class="r-cell"><p class="r-label">Horário</p><p class="r-value">${a.horario}</p></div>
       <div class="r-cell full"><p class="r-label">Endereço</p><p class="r-value" style="font-size:12.5px;">${esc(CONFIG_LOJA.endereco)}</p></div>
     </div>
+    <div class="btn-row" style="margin-bottom:14px;">
+      <button class="btn btn-ghost" id="btnComoChegar" style="width:100%;">📍 Ver como chegar (com trânsito ao vivo)</button>
+    </div>
     ${jaConfirmado ? `<p class="sub">Te esperamos no dia e horário combinados. Até lá!</p>` : ''}
     ${jaCancelado ? `<p class="sub">Tudo bem, obrigado por avisar! Se quiser remarcar, é só entrar em contato com a gente.</p>` : ''}
     ${!decidido ? `
@@ -3757,6 +4175,25 @@ function renderTelaConfirmacao(a){
       <button class="btn btn-ghost" id="btnNegarPresencaPublica" style="width:100%;">✗ Não vou poder comparecer</button>
     ` : ''}
   `;
+  document.getElementById('btnComoChegar').addEventListener('click', ()=>{
+    const destino = encodeURIComponent(CONFIG_LOJA.endereco);
+    if(!navigator.geolocation){
+      window.open(`https://www.google.com/maps/search/?api=1&query=${destino}`, '_blank');
+      return;
+    }
+    toast('Buscando sua localização...');
+    navigator.geolocation.getCurrentPosition(
+      (pos)=>{
+        const origem = `${pos.coords.latitude},${pos.coords.longitude}`;
+        window.open(`https://www.google.com/maps/dir/?api=1&origin=${origem}&destination=${destino}&travelmode=driving`, '_blank');
+      },
+      ()=>{
+        toast('Não conseguimos acessar sua localização — abrindo o endereço no mapa mesmo assim.');
+        window.open(`https://www.google.com/maps/search/?api=1&query=${destino}`, '_blank');
+      },
+      { timeout: 8000 }
+    );
+  });
   if(!decidido){
     document.getElementById('btnConfirmarPresencaPublica').addEventListener('click', async (e)=>{
       e.target.disabled = true; e.target.textContent = 'Confirmando...';
