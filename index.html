@@ -302,7 +302,7 @@
   .acoes-menu{
     display:none;position:fixed;top:0;left:0;z-index:500;
     background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;
-    box-shadow:0 14px 34px rgba(11,30,53,.25);padding:6px;min-width:220px;text-align:left;
+    box-shadow:0 14px 34px rgba(11,30,53,.25);padding:6px;min-width:250px;text-align:left;
   }
   .acoes-menu.show{display:block;}
   .acoes-item{
@@ -318,8 +318,8 @@
   .acoes-msg-row{display:flex;gap:5px;padding:4px 6px;align-items:center;}
   .acoes-msg-row select{flex:1;min-width:0;padding:6px 6px;font-size:11.5px;border-radius:7px;border:1.5px solid var(--line);}
   .acoes-msg-row button{
-    flex-shrink:0;width:30px;height:30px;border-radius:7px;border:1.5px solid var(--line);
-    background:#fff;cursor:pointer;font-size:13px;
+    flex-shrink:0;width:28px;height:28px;border-radius:7px;border:1.5px solid var(--line);
+    background:#fff;cursor:pointer;font-size:12px;padding:0;
   }
   .acoes-msg-row button:hover{border-color:var(--gold);background:#f7f4ec;}
   body.dark-mode .acoes-menu{ background:var(--card-bg); }
@@ -492,6 +492,17 @@
   .hoje-item.atrasado{border-left:3px solid var(--danger);padding-left:9px;}
   @media (max-width:860px){.metric-grid{grid-template-columns:repeat(2,1fr);}}
   .metric-card{background:#fbf9f4;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;}
+
+  .meta-card{background:#fbf9f4;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:20px;}
+  .meta-edit-row{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;}
+  .meta-edit-row input{max-width:200px;padding:8px 10px;border-radius:8px;border:1.5px solid var(--line);font-size:12.5px;}
+  .meta-progresso-linha{margin-top:14px;}
+  .meta-progresso-topo{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600;}
+  .meta-barra{background:#e7e2d6;border-radius:999px;height:10px;overflow:hidden;}
+  .meta-barra-preenchida{background:var(--gold);height:100%;border-radius:999px;transition:width .4s;}
+  .meta-barra-preenchida.vendas{background:var(--ok);}
+  body.dark-mode .meta-card{background:var(--card-bg);border-color:var(--card-border);}
+  body.dark-mode .meta-barra{background:#333c4d;}
   .metric-card .num{font-family:'Playfair Display',serif;font-size:28px;font-weight:800;color:var(--navy);}
   .metric-card .lbl{font-size:11.5px;color:var(--muted);margin-top:4px;letter-spacing:.2px;}
   .metric-filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center;}
@@ -522,6 +533,8 @@
 
   /* Fila de espera */
   .fila-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#eef3fb;border-radius:8px;margin-bottom:6px;font-size:12px;color:#1a4a7a;gap:8px;}
+  .fila-item.fila-prioritaria{background:#fdf1d6;color:#8a6d1f;border:1px solid var(--gold-dark);}
+  .tag-prioridade{background:var(--gold-dark);color:#fff;font-size:9px;padding:2px 6px;border-radius:999px;letter-spacing:.4px;margin-left:4px;}
   .fila-item .acoes{display:flex;gap:6px;flex-shrink:0;}
   .fila-item button{border:none;background:none;font-weight:700;cursor:pointer;font-size:11.5px;text-decoration:underline;color:#1a4a7a;}
   .slot.fila{background:#eef3fb;color:#1a4a7a;border-color:#c7d9f0;text-decoration:none;cursor:pointer;}
@@ -836,6 +849,30 @@
         <div class="metric-card"><div class="num" id="mConversao">0%</div><div class="lbl">Taxa de conversão (compra)</div></div>
         <div class="metric-card"><div class="num" id="mNaoComparecimento">0%</div><div class="lbl">Taxa de não comparecimento</div></div>
       </div>
+
+      <div class="meta-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+          <div>
+            <h2 style="margin-bottom:2px;font-size:16px;">🎯 Meta do mês</h2>
+            <p class="sub" id="metaMesLabel" style="margin:0;">—</p>
+          </div>
+          <button class="btn btn-ghost" id="btnEditarMetas" style="padding:7px 13px;font-size:12px;">Editar metas</button>
+        </div>
+        <div class="meta-edit-row" id="metaEditRow" style="display:none;">
+          <input type="number" id="metaEditAgendamentos" min="0" placeholder="Meta de agendamentos">
+          <input type="number" id="metaEditVendas" min="0" placeholder="Meta de vendas">
+          <button class="btn btn-primary" id="btnSalvarMetas" style="padding:8px 14px;font-size:12px;">Salvar</button>
+        </div>
+        <div class="meta-progresso-linha">
+          <div class="meta-progresso-topo"><span>Agendamentos</span><span id="metaAgendamentosTexto">0 / 0</span></div>
+          <div class="meta-barra"><div class="meta-barra-preenchida" id="metaAgendamentosBarra" style="width:0%;"></div></div>
+        </div>
+        <div class="meta-progresso-linha">
+          <div class="meta-progresso-topo"><span>Vendas (Comprou)</span><span id="metaVendasTexto">0 / 0</span></div>
+          <div class="meta-barra"><div class="meta-barra-preenchida vendas" id="metaVendasBarra" style="width:0%;"></div></div>
+        </div>
+      </div>
+
       <div class="chart-box"><canvas id="chartHorarios"></canvas></div>
     </div>
   </section>
@@ -1088,6 +1125,11 @@
       <div class="btn-row">
         <button class="btn btn-primary" id="btnSalvarConfigLoja">✓ Salvar configurações</button>
       </div>
+      <div class="field" style="border-top:1px solid var(--line);padding-top:16px;margin-top:6px;">
+        <label>Backup completo do sistema</label>
+        <p class="hint" style="margin-top:-4px;">Baixa um arquivo com todos os agendamentos, bloqueios, fila de espera e configurações — guarde uma cópia de vez em quando, pra nunca depender só do Firestore.</p>
+        <button class="btn btn-ghost" id="btnBackupJSON" style="width:100%;">⬇ Baixar backup (.json)</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1174,7 +1216,9 @@
 
     <div class="modal-actions">
       <button class="btn btn-gold" id="btnBaixarImagem">⬇ Baixar Imagem</button>
+      <button class="btn btn-ghost" id="btnBaixarICS">📅 Adicionar ao Calendário</button>
       <button class="btn btn-primary" id="btnCompartilhar">📤 Enviar (WhatsApp)</button>
+      <button class="btn btn-ghost" id="btnCompartilharSMS" title="Se o cliente não tiver WhatsApp">💬 SMS</button>
       <button class="btn btn-ghost" id="btnFecharModal2">Fechar</button>
     </div>
   </div>
@@ -1333,6 +1377,9 @@ function normalizarConfigLoja(obj){
   // garante que configs salvas antes desse recurso existir continuem funcionando
   if(!obj.horarios || !Array.isArray(obj.horarios) || obj.horarios.length!==7){
     obj.horarios = HORARIOS_PADRAO.map(h=>({...h}));
+  }
+  if(!obj.metas || typeof obj.metas !== 'object'){
+    obj.metas = { agendamentos: 0, vendas: 0 };
   }
   return obj;
 }
@@ -1571,6 +1618,23 @@ async function copiarMensagem(a, tipo, btn){
   }catch(e){
     console.error(e);
     toast('Não foi possível copiar automaticamente — tente novamente.');
+  }finally{
+    btn.disabled = false; btn.textContent = textoOriginal;
+  }
+}
+
+async function enviarPorSMS(a, tipo, btn){
+  const textoOriginal = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳';
+  try{
+    const celular = apenasDigitos(a.celular);
+    const texto = await montarTextoMensagemFinal(a, tipo);
+    // sms: é o esquema padrão pra abrir o app de mensagens nativo do celular com o texto pronto
+    const url = `sms:+55${celular}?body=${encodeURIComponent(texto)}`;
+    window.open(url, '_blank');
+  }catch(e){
+    console.error(e);
+    toast('Não foi possível preparar o SMS — tente novamente.');
   }finally{
     btn.disabled = false; btn.textContent = textoOriginal;
   }
@@ -2057,9 +2121,20 @@ function iniciarSincronizacaoTempoReal(){
     const todos = snap.docs.map(d=>({id:d.id, ...d.data()}));
     const novos = todos.filter(a=> !a.excluidoEm && !idsAntes.has(a.id));
 
-    cacheAgendamentos = todos.filter(a=>!a.excluidoEm)
+    // salvaguarda: se por algum motivo existirem dois documentos com o mesmo protocolo
+    // (ex: reenvio duplicado do formulário), mantém só o mais antigo na exibição.
+    const vistosPorProtocolo = new Map();
+    const semDuplicata = [];
+    [...todos].sort((a,b)=> (a.criadoEm||'').localeCompare(b.criadoEm||'')).forEach(a=>{
+      const chave = a.protocolo || a.id;
+      if(vistosPorProtocolo.has(chave)) return;
+      vistosPorProtocolo.set(chave, true);
+      semDuplicata.push(a);
+    });
+
+    cacheAgendamentos = semDuplicata.filter(a=>!a.excluidoEm)
       .sort((a,b)=> (a.data+a.horario).localeCompare(b.data+b.horario));
-    cacheLixeira = todos.filter(a=>a.excluidoEm);
+    cacheLixeira = semDuplicata.filter(a=>a.excluidoEm);
     rerenderTudo();
 
     if(!primeiraCargaAgendamentos && novos.length>0){
@@ -2125,7 +2200,8 @@ function abrirMenuAcoesFlutuante(id, botaoEl){
         <option value="avaliacao">Pedir avaliação</option>
       </select>
       <button data-m-msg-enviar title="Enviar por WhatsApp">📤</button>
-      <button data-m-msg-copiar title="Copiar mensagem (pra SMS, Telegram, etc.)">📋</button>
+      <button data-m-msg-sms title="Enviar por SMS (se o cliente não tiver WhatsApp)">💬</button>
+      <button data-m-msg-copiar title="Copiar mensagem (pra colar em outro lugar)">📋</button>
     </div>
     <div class="acoes-divisor"></div>
     <button class="acoes-item acoes-item-danger" data-m-excluir><span>🗑️</span> Excluir</button>
@@ -2138,6 +2214,7 @@ function abrirMenuAcoesFlutuante(id, botaoEl){
   menu.querySelector('[data-m-excluir]').addEventListener('click', ()=>{ menu.classList.remove('show'); confirmarExclusao(a); });
   const sel = menu.querySelector('[data-m-msgtipo]');
   menu.querySelector('[data-m-msg-enviar]').addEventListener('click', ()=>{ menu.classList.remove('show'); abrirWhatsAppComMensagem(a, sel.value); });
+  menu.querySelector('[data-m-msg-sms]').addEventListener('click', (e)=>{ const btn=e.currentTarget; menu.classList.remove('show'); enviarPorSMS(a, sel.value, btn); });
   menu.querySelector('[data-m-msg-copiar]').addEventListener('click', (e)=>{ const btn=e.currentTarget; menu.classList.remove('show'); copiarMensagem(a, sel.value, btn); });
 
   // posiciona o menu logo abaixo do botão, alinhado à direita, sem deixar vazar da tela
@@ -2438,6 +2515,28 @@ document.getElementById('btnConfigLoja').addEventListener('click', ()=>{
 document.getElementById('fecharModalConfig').onclick = ()=> document.getElementById('modalConfigLoja').classList.remove('show');
 document.getElementById('modalConfigLoja').addEventListener('click', e=>{ if(e.target.id==='modalConfigLoja') document.getElementById('modalConfigLoja').classList.remove('show'); });
 
+document.getElementById('btnBackupJSON').addEventListener('click', ()=>{
+  const backup = {
+    geradoEm: new Date().toISOString(),
+    sistema: 'Agenda Atlas',
+    configuracoes: CONFIG_LOJA,
+    agendamentos: cacheAgendamentos,
+    lixeira: cacheLixeira,
+    bloqueios: cacheBloqueios,
+    filaDeEspera: cacheFila
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const hoje = hojeISO();
+  a.href = url;
+  a.download = `backup-agenda-atlas-${hoje}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Backup baixado com sucesso!');
+});
 document.getElementById('btnSalvarConfigLoja').addEventListener('click', async ()=>{
   const nome = document.getElementById('cfgNomeLoja').value.trim();
   const endereco = document.getElementById('cfgEndereco').value.trim();
@@ -2686,15 +2785,18 @@ document.getElementById('toggleFila').addEventListener('click', ()=>{
   document.getElementById('filaPanel').classList.toggle('show');
 });
 function renderFilaPanel(iso){
-  const ativos = cacheFila.filter(f=>f.data===iso).sort((a,b)=>a.horario.localeCompare(b.horario));
+  const ativos = cacheFila.filter(f=>f.data===iso).sort((a,b)=>{
+    if(!!a.prioritario !== !!b.prioritario) return a.prioritario ? -1 : 1; // prioritários primeiro
+    return a.horario.localeCompare(b.horario);
+  });
   const lista = document.getElementById('filaAtivaLista');
   if(ativos.length===0){
     lista.innerHTML = `<div class="hint" style="margin-bottom:4px;">Nenhum cliente na fila de espera para este dia.</div>`;
     return;
   }
   lista.innerHTML = ativos.map(f=>`
-    <div class="fila-item">
-      <span>⏰ ${f.horario} — ${esc(f.nome)} ${f.celular?('· '+esc(f.celular)):''}</span>
+    <div class="fila-item ${f.prioritario?'fila-prioritaria':''}">
+      <span>${f.prioritario?'⭐ ':'⏰ '}${f.horario} — ${esc(f.nome)} ${f.celular?('· '+esc(f.celular)):''}${f.prioritario?' <b class=\"tag-prioridade\">PRIORITÁRIO</b>':''}</span>
       <span class="acoes">
         <button data-notificar="${f.id}">Notificar</button>
         <button data-remover-fila="${f.id}">Remover</button>
@@ -2869,10 +2971,11 @@ async function entrarNaFila(data, horario){
   if(!nome || !celular){ toast('Preencha nome e celular antes de entrar na fila de espera.'); return; }
   const jaNaFila = cacheFila.some(f=>f.data===data && f.horario===horario && apenasDigitos(f.celular)===apenasDigitos(celular));
   if(jaNaFila){ toast('Este cliente já está na fila de espera para este horário.'); return; }
+  const prioritario = window.confirm('Marcar esse cliente como PRIORITÁRIO na fila (idoso, gestante, PCD)?\n\nClientes prioritários aparecem no topo da fila, na frente de quem entrou antes.');
   try{
-    const salvo = await salvarFila({ data, horario, nome, celular, cpf, criadoEm:new Date().toISOString() });
+    const salvo = await salvarFila({ data, horario, nome, celular, cpf, prioritario, criadoEm:new Date().toISOString() });
     cacheFila.push(salvo);
-    toast(`${nome} entrou na fila de espera das ${horario}.`);
+    toast(`${nome} entrou na fila de espera das ${horario}${prioritario?' (prioritário)':''}.`);
     gerarSlots();
     if(diaSelecionado===data) renderFilaPanel(data);
   }catch(e){ console.error(e); toast('Erro ao entrar na fila de espera.'); }
@@ -2913,7 +3016,9 @@ function duplicarAgendamento(a){
   document.getElementById('fData').focus();
 }
 
+let salvandoAgendamento = false;
 document.getElementById('btnSalvar').onclick = async ()=>{
+  if(salvandoAgendamento) return; // trava extra contra duplo clique/duplo envio, além do btn.disabled
   const nome = document.getElementById('fNome').value.trim();
   const cpf = document.getElementById('fCpf').value.trim();
   const celular = document.getElementById('fCelular').value.trim();
@@ -2938,6 +3043,7 @@ document.getElementById('btnSalvar').onclick = async ()=>{
   }
 
   const btn = document.getElementById('btnSalvar');
+  salvandoAgendamento = true;
   btn.disabled = true; btn.textContent = 'Salvando...';
 
   try{
@@ -2961,6 +3067,7 @@ document.getElementById('btnSalvar').onclick = async ()=>{
     console.error(e);
     toast('Erro ao salvar. Tente novamente.');
   }finally{
+    salvandoAgendamento = false;
     btn.disabled = false; btn.textContent = '✓ Confirmar Agendamento';
   }
 };
@@ -3280,7 +3387,55 @@ function renderMetricas(){
       scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } }, x:{ ticks:{ font:{size:10} } } }
     }
   });
+
+  renderMetaMensal();
 }
+
+/* ---------- meta mensal ---------- */
+const NOMES_MES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+function renderMetaMensal(){
+  const hoje = new Date();
+  const mesAtual = `${hoje.getFullYear()}-${pad(hoje.getMonth()+1)}`;
+  document.getElementById('metaMesLabel').textContent = `${NOMES_MES[hoje.getMonth()]} de ${hoje.getFullYear()}`;
+
+  const doMes = cacheAgendamentos.filter(a=>a.data && a.data.startsWith(mesAtual));
+  const totalAgendamentos = doMes.length;
+  const totalVendas = doMes.filter(a=>a.status==='comprou').length;
+
+  const metas = (CONFIG_LOJA.metas) || { agendamentos: 0, vendas: 0 };
+  const metaAg = metas.agendamentos || 0;
+  const metaVe = metas.vendas || 0;
+
+  document.getElementById('metaAgendamentosTexto').textContent = `${totalAgendamentos} / ${metaAg}`;
+  document.getElementById('metaVendasTexto').textContent = `${totalVendas} / ${metaVe}`;
+  document.getElementById('metaAgendamentosBarra').style.width = metaAg>0 ? Math.min(100,(totalAgendamentos/metaAg)*100)+'%' : '0%';
+  document.getElementById('metaVendasBarra').style.width = metaVe>0 ? Math.min(100,(totalVendas/metaVe)*100)+'%' : '0%';
+
+  document.getElementById('metaEditAgendamentos').value = metaAg || '';
+  document.getElementById('metaEditVendas').value = metaVe || '';
+}
+document.getElementById('btnEditarMetas').addEventListener('click', ()=>{
+  document.getElementById('metaEditRow').style.display =
+    document.getElementById('metaEditRow').style.display==='none' ? 'flex' : 'none';
+});
+async function salvarMetas(metas){
+  const novaConfig = { ...CONFIG_LOJA, metas };
+  await salvarConfigLoja(novaConfig);
+  CONFIG_LOJA = novaConfig;
+}
+document.getElementById('btnSalvarMetas').addEventListener('click', async ()=>{
+  const agendamentos = parseInt(document.getElementById('metaEditAgendamentos').value) || 0;
+  const vendas = parseInt(document.getElementById('metaEditVendas').value) || 0;
+  const btn = document.getElementById('btnSalvarMetas');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  try{
+    await salvarMetas({ agendamentos, vendas });
+    toast('Metas do mês salvas com sucesso!');
+    document.getElementById('metaEditRow').style.display = 'none';
+    renderMetaMensal();
+  }catch(e){ console.error(e); toast('Erro ao salvar metas.'); }
+  finally{ btn.disabled=false; btn.textContent='Salvar'; }
+});
 
 /* ---------- recibo cartorial ---------- */
 function abrirRecibo(a){
@@ -3318,6 +3473,45 @@ async function gerarImagemRecibo(){
   const canvas = await html2canvas(el, {scale:3, backgroundColor:'#FBF9F4', useCORS:true});
   return canvas;
 }
+function gerarICS(a){
+  const [ano,mes,dia] = a.data.split('-');
+  const [hh,mm] = a.horario.split(':');
+  const inicio = new Date(+ano, +mes-1, +dia, +hh, +mm);
+  const fim = new Date(inicio.getTime() + 30*60000);
+  const fmtICS = (d)=> `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+  const escapeICS = (s)=> String(s||'').replace(/[\\,;]/g, m=>'\\'+m).replace(/\n/g,'\\n');
+  const linhas = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Agenda Atlas//PT-BR',
+    'BEGIN:VEVENT',
+    `UID:${a.id}@agenda-atlas`,
+    `DTSTAMP:${fmtICS(new Date())}`,
+    `DTSTART:${fmtICS(inicio)}`,
+    `DTEND:${fmtICS(fim)}`,
+    `SUMMARY:${escapeICS('Agendamento — ' + CONFIG_LOJA.nome)}`,
+    `DESCRIPTION:${escapeICS('Protocolo ' + (a.protocolo||'—') + ' — ' + a.nome)}`,
+    `LOCATION:${escapeICS(CONFIG_LOJA.endereco)}`,
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ];
+  return linhas.join('\r\n');
+}
+document.getElementById('btnBaixarICS').onclick = ()=>{
+  const a = window.__reciboAtual;
+  if(!a){ toast('Não foi possível identificar o agendamento.'); return; }
+  const conteudo = gerarICS(a);
+  const blob = new Blob([conteudo], {type:'text/calendar;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `agendamento-${a.protocolo||a.id}.ics`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  toast('Arquivo de calendário baixado — abra para adicionar ao Google Calendar, Outlook, etc.');
+};
 document.getElementById('btnBaixarImagem').onclick = async ()=>{
   const btn = document.getElementById('btnBaixarImagem');
   btn.disabled = true; btn.textContent = 'Gerando...';
@@ -3333,6 +3527,14 @@ document.getElementById('btnBaixarImagem').onclick = async ()=>{
   finally{ btn.disabled=false; btn.textContent='⬇ Baixar Imagem'; }
 };
 
+document.getElementById('btnCompartilharSMS').onclick = ()=>{
+  const a = window.__reciboAtual;
+  if(!a){ toast('Não foi possível identificar o agendamento.'); return; }
+  const protocolo = a.protocolo || 'recibo';
+  const celular = apenasDigitos(a.celular);
+  const texto = `Ola ${a.nome}! Seu agendamento na ${CONFIG_LOJA.nome} foi confirmado para ${fmtDataISOtoBR(a.data)} as ${a.horario} (protocolo ${protocolo}). Endereco: ${CONFIG_LOJA.endereco}`;
+  window.open(`sms:+55${celular}?body=${encodeURIComponent(texto)}`, '_blank');
+};
 document.getElementById('btnCompartilhar').onclick = async ()=>{
   const btn = document.getElementById('btnCompartilhar');
   btn.disabled = true; btn.textContent = 'Preparando...';
