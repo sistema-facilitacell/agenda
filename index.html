@@ -554,6 +554,7 @@
   .tag-prioridade{background:var(--gold-dark);color:#fff;font-size:9px;padding:2px 6px;border-radius:999px;letter-spacing:.4px;margin-left:4px;}
   .fila-item .acoes{display:flex;gap:6px;flex-shrink:0;}
   .fila-item button{border:none;background:none;font-weight:700;cursor:pointer;font-size:11.5px;text-decoration:underline;color:#1a4a7a;}
+  .slot.passado{opacity:.4;text-decoration:line-through;cursor:not-allowed;}
   .slot.fila{background:#eef3fb;color:#1a4a7a;border-color:#c7d9f0;text-decoration:none;cursor:pointer;}
   .slot.fila:hover{border-color:#1a4a7a;}
 
@@ -796,6 +797,12 @@
         <div class="hint" id="filaHint" style="display:none;color:#1a4a7a;">Horários em azul estão cheios — clique para entrar na fila de espera.</div>
       </div>
 
+      <div class="field" id="servicoRow">
+        <label>Tipo de atendimento</label>
+        <select id="fServico"></select>
+        <div class="hint" id="servicoHint">Cada tipo de atendimento reserva um tempo diferente na agenda.</div>
+      </div>
+
       <div class="field" id="categoriaRow">
         <label>Categoria do atendimento</label>
         <select id="fCategoria"></select>
@@ -1011,6 +1018,19 @@
   <div class="card" id="avaliacaoConteudo"></div>
 </div>
 
+<!-- MODAL VAGA ABERTA (fila de espera avisada automaticamente) -->
+<div class="modal-bg" id="modalVagaAberta">
+  <div class="modal-shell" style="max-width:420px;">
+    <div class="modal-close"><span id="fecharModalVaga">✕</span></div>
+    <div class="card" id="vagaAbertaConteudo" style="margin-bottom:0;"></div>
+  </div>
+</div>
+
+<!-- TELA DE REAGENDAMENTO PELO CLIENTE (acessada via link ?reagendar=ID) -->
+<div class="tela-cheia" id="telaReagendar" style="display:none;">
+  <div class="card" id="reagendarConteudo"></div>
+</div>
+
 <!-- MODAL ASSINATURA DIGITAL (check-in) -->
 <div class="modal-bg" id="modalAssinatura">
   <div class="modal-shell" style="max-width:420px;">
@@ -1185,6 +1205,16 @@
       <div class="field">
         <label>Horário de atendimento por dia da semana</label>
         <div id="cfgHorariosDias"></div>
+      </div>
+      <div class="field">
+        <label>Tipos de atendimento e duração</label>
+        <p class="hint" style="margin-top:-4px;">Um por linha, no formato <code>Nome do serviço | minutos</code>. A duração define quanto tempo o atendimento ocupa na agenda.</p>
+        <textarea id="cfgServicos" rows="5" placeholder="Avaliação de aparelho | 30&#10;Manutenção / conserto | 60"></textarea>
+      </div>
+      <div class="field">
+        <label>Antecedência mínima para o cliente agendar (minutos)</label>
+        <input type="number" id="cfgAntecedencia" min="0" step="10" placeholder="60">
+        <p class="hint" style="margin-top:4px;">Horários que começam antes disso somem do link público. Use 0 para permitir agendamento para daqui a pouco.</p>
       </div>
       <div class="btn-row">
         <button class="btn btn-primary" id="btnSalvarConfigLoja">✓ Salvar configurações</button>
@@ -1529,10 +1559,19 @@ const HORARIOS_PADRAO = [
   { aberto:true,  inicio:'09:00', fim:'17:50' }, // 5 = sexta
   { aberto:true,  inicio:'09:00', fim:'17:50' }, // 6 = sábado
 ];
+const SERVICOS_PADRAO = [
+  { nome:'Atendimento padrão',     duracao:30 },
+  { nome:'Avaliação de aparelho',  duracao:30 },
+  { nome:'Manutenção / conserto',  duracao:60 },
+  { nome:'Retirada rápida',        duracao:30 }
+];
 let CONFIG_LOJA = {
   nome: 'Zoom Tech',
   endereco: 'Av. República Argentina, 1968, Bairro Maracanã, Foz do Iguaçu/PR',
-  horarios: HORARIOS_PADRAO.map(h=>({...h}))
+  horarios: HORARIOS_PADRAO.map(h=>({...h})),
+  servicos: SERVICOS_PADRAO.map(s=>({...s})),
+  antecedenciaMin: 60,      // minutos minimos de antecedencia para o cliente agendar
+  intervaloSlots: 30        // tamanho da grade de horarios, em minutos
 };
 function normalizarConfigLoja(obj){
   // garante que configs salvas antes desse recurso existir continuem funcionando
@@ -1542,6 +1581,14 @@ function normalizarConfigLoja(obj){
   if(!obj.metas || typeof obj.metas !== 'object'){
     obj.metas = { agendamentos: 0, vendas: 0 };
   }
+  if(!Array.isArray(obj.servicos) || obj.servicos.length===0){
+    obj.servicos = SERVICOS_PADRAO.map(s=>({...s}));
+  }
+  obj.servicos = obj.servicos
+    .filter(s=> s && s.nome)
+    .map(s=>({ nome:String(s.nome).trim(), duracao: Math.max(10, Number(s.duracao)||30) }));
+  if(!Number.isFinite(Number(obj.antecedenciaMin))) obj.antecedenciaMin = 60;
+  if(!Number.isFinite(Number(obj.intervaloSlots))) obj.intervaloSlots = 30;
   return obj;
 }
 function carregarConfigLojaLocal(){
@@ -1568,6 +1615,46 @@ function aplicarConfigLoja(){
   alvosNome.forEach(id=>{ const el = document.getElementById(id); if(el) el.textContent = CONFIG_LOJA.nome; });
   const alvosEndereco = ['topbarEndereco','storeBoxEndereco','rEnderecoTexto'];
   alvosEndereco.forEach(id=>{ const el = document.getElementById(id); if(el) el.textContent = CONFIG_LOJA.endereco; });
+}
+
+/* ---------- serviços, durações e utilidades de horário ---------- */
+function listaServicos(){
+  return (Array.isArray(CONFIG_LOJA.servicos) && CONFIG_LOJA.servicos.length)
+    ? CONFIG_LOJA.servicos
+    : SERVICOS_PADRAO;
+}
+function passoSlots(){ return Math.max(10, Number(CONFIG_LOJA.intervaloSlots) || 30); }
+function antecedenciaMinima(){ const v = Number(CONFIG_LOJA.antecedenciaMin); return Number.isFinite(v) ? Math.max(0, v) : 60; }
+function duracaoDoServico(nome){
+  const s = listaServicos().find(x=>x.nome===nome);
+  return s ? Math.max(10, Number(s.duracao)||passoSlots()) : passoSlots();
+}
+function minutosDoHorario(h){
+  const [a,b] = String(h||'00:00').split(':').map(Number);
+  return (a||0)*60 + (b||0);
+}
+function horarioDeMinutos(m){ return `${pad(Math.floor(m/60))}:${pad(m%60)}`; }
+function duracaoDoAgendamento(a){ return Math.max(10, Number(a && a.duracao) || passoSlots()); }
+function fimDoAgendamento(a){ return horarioDeMinutos(minutosDoHorario(a.horario) + duracaoDoAgendamento(a)); }
+// intervalos [inicio, fim) em minutos ja ocupados no dia
+function intervalosOcupados(data, ignorarId){
+  return cacheAgendamentos
+    .filter(a=> a.data===data && a.status!=='cancelado' && a.id!==ignorarId)
+    .map(a=>{ const ini = minutosDoHorario(a.horario); return [ini, ini + duracaoDoAgendamento(a)]; });
+}
+function conflitaComOcupados(ini, fim, intervalos){
+  return intervalos.some(([a,b])=> ini < b && fim > a);
+}
+// minutos "agora" considerando a antecedencia minima (usado pra bloquear horario que ja passou)
+function minutoLimiteHoje(){
+  const d = new Date();
+  return d.getHours()*60 + d.getMinutes() + antecedenciaMinima();
+}
+function horarioJaPassou(dataISO, horario){
+  const hoje = hojeISO();
+  if(dataISO < hoje) return true;
+  if(dataISO > hoje) return false;
+  return minutosDoHorario(horario) < minutoLimiteHoje();
 }
 
 /* ---------- feriados nacionais (fixos + móveis calculados) ---------- */
@@ -1747,6 +1834,8 @@ const LINKS_POR_TIPO = {
   lembrete_dia: { montar: (a)=>montarLinkConfirmacao(a), texto: 'Confirme sua presença (ou avise se não puder ir) aqui:', requerAgendamento: true },
   lembrete_hora: { montar: (a)=>montarLinkConfirmacao(a), texto: 'Confirme sua presença (ou avise se não puder ir) aqui:', requerAgendamento: true },
   avaliacao: { montar: (a)=>montarLinkAvaliacao(a), texto: 'Deixe sua avaliação aqui, leva só 10 segundos:', requerAgendamento: true },
+  reagendamento: { montar: (a)=>montarLinkReagendar(a), texto: 'Escolha um novo dia e horário por aqui, sem precisar ligar:', requerAgendamento: true },
+  vaga_aberta: { montar: (a)=>montarLinkPublico(), texto: 'Se quiser garantir, é só agendar por aqui:', requerAgendamento: false },
   precisa_agendar: { montar: ()=>montarLinkPublico(), texto: 'Agende pelo nosso link (é rapidinho):', requerAgendamento: false }
 };
 
@@ -2170,12 +2259,61 @@ async function atualizarStatus(id, status){
     registrarAuditoria('Alterou situação', `${itemAntes.nome} (protocolo ${itemAntes.protocolo||'—'}) → ${statusInfo(status).label}`, id);
   }
 
-  if(status==='cancelado' && itemAntes){
-    const naFila = filaDoSlot(itemAntes.data, itemAntes.horario);
-    if(naFila.length>0){
-      toast(`Vaga liberada às ${itemAntes.horario} — ${naFila.length} cliente(s) na fila de espera. Veja no painel do dia.`);
-    }
+  if((status==='cancelado' || status==='nao_compareceu') && itemAntes){
+    avisarFilaVagaAberta(itemAntes);
   }
+}
+
+/* ---------- fila de espera: aviso automático quando abre uma vaga ---------- */
+function proximoDaFila(data, horario){
+  const fila = filaDoSlot(data, horario).slice().sort((a,b)=>{
+    if(!!b.prioritario !== !!a.prioritario) return b.prioritario ? 1 : -1;
+    return (a.criadoEm||'').localeCompare(b.criadoEm||'');
+  });
+  return fila[0] || null;
+}
+// Abre a vaga e já oferece o WhatsApp pronto para o primeiro da fila (prioritários primeiro).
+function avisarFilaVagaAberta(agendamentoCancelado){
+  if(window.__MODO_PUBLICO__) return;
+  const { data, horario } = agendamentoCancelado;
+  const proximo = proximoDaFila(data, horario);
+  if(!proximo) return;
+  const total = filaDoSlot(data, horario).length;
+  mostrarNotificacaoNativa('Vaga aberta na agenda', `${horario} de ${fmtDataISOtoBR(data)} liberou. ${proximo.nome} está na fila.`);
+  const box = document.getElementById('vagaAbertaConteudo');
+  box.innerHTML = `
+    <div class="icone" style="font-size:38px;text-align:center;">🔔</div>
+    <h2 style="font-family:'Playfair Display',serif;color:var(--navy);text-align:center;">Vaga aberta às ${horario}</h2>
+    <p class="sub" style="text-align:center;">${fmtDataISOtoBR(data)} — ${total} cliente(s) na fila de espera deste horário.</p>
+    <div class="r-grid" style="margin:16px 0;">
+      <div class="r-cell"><p class="r-label">Primeiro da fila</p><p class="r-value">${esc(proximo.nome)}${proximo.prioritario ? ' <span class="tag-prioridade">prioritário</span>' : ''}</p></div>
+      <div class="r-cell"><p class="r-label">Celular</p><p class="r-value">${esc(proximo.celular)}</p></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnAvisarVaga" style="width:100%;">📲 Avisar no WhatsApp</button>
+    </div>
+    <div class="btn-row" style="margin-top:8px;">
+      <button class="btn btn-ghost" id="btnRemoverDaFilaVaga">Tirar da fila</button>
+      <button class="btn btn-ghost" id="btnDepoisVaga">Agora não</button>
+    </div>`;
+  document.getElementById('modalVagaAberta').classList.add('show');
+
+  const fechar = ()=> document.getElementById('modalVagaAberta').classList.remove('show');
+  document.getElementById('btnDepoisVaga').onclick = fechar;
+  document.getElementById('btnAvisarVaga').onclick = ()=>{
+    abrirWhatsAppComMensagem({ ...proximo, data, horario }, 'vaga_aberta');
+    registrarAuditoria('Avisou fila de espera', `${proximo.nome} avisado sobre a vaga de ${fmtDataISOtoBR(data)} às ${horario}`, null);
+    fechar();
+  };
+  document.getElementById('btnRemoverDaFilaVaga').onclick = async ()=>{
+    try{
+      await removerFila(proximo.id);
+      toast(`${proximo.nome} saiu da fila de espera.`);
+      if(diaSelecionado===data) renderFilaPanel(data);
+      gerarSlots();
+    }catch(e){ console.error(e); toast('Erro ao remover da fila.'); }
+    fechar();
+  };
 }
 
 async function atualizarAgendamento(id, dados){
@@ -2277,6 +2415,7 @@ function rerenderTudo(){
   if(document.getElementById('tab-metricas').style.display === 'block') renderMetricas();
   if(document.getElementById('tab-hoje').style.display !== 'none') renderHoje();
   if(intervaloAlarmes) verificarAtrasados(); // só roda no painel admin, nunca no portal público do cliente
+  if(intervaloLembretes) renderLembretesPendentes();
 }
 // Sincronização em tempo real: qualquer agendamento feito pelo link público (?portal=cliente),
 // em outro computador ou celular, aparece automaticamente no painel — sem precisar recarregar a página.
@@ -2442,6 +2581,13 @@ function montarLinkAvaliacao(a){
   url.search = '';
   url.hash = '';
   url.searchParams.set('avaliar', a.id);
+  return url.toString();
+}
+function montarLinkReagendar(a){
+  const url = new URL(window.location.href);
+  url.search = '';
+  url.hash = '';
+  url.searchParams.set('reagendar', a.id);
   return url.toString();
 }
 function montarLinkVisualizacao(){
@@ -2806,10 +2952,14 @@ function renderCfgHorariosDias(){
 document.getElementById('btnConfigLoja').addEventListener('click', ()=>{
   document.getElementById('cfgNomeLoja').value = CONFIG_LOJA.nome;
   document.getElementById('cfgEndereco').value = CONFIG_LOJA.endereco;
+  document.getElementById('cfgServicos').value = listaServicos().map(s=>`${s.nome} | ${s.duracao}`).join('\n');
+  document.getElementById('cfgAntecedencia').value = antecedenciaMinima();
   renderCfgHorariosDias();
   document.getElementById('modalConfigLoja').classList.add('show');
 });
 document.getElementById('fecharModalConfig').onclick = ()=> document.getElementById('modalConfigLoja').classList.remove('show');
+document.getElementById('fecharModalVaga').onclick = ()=> document.getElementById('modalVagaAberta').classList.remove('show');
+document.getElementById('modalVagaAberta').addEventListener('click', e=>{ if(e.target.id==='modalVagaAberta') document.getElementById('modalVagaAberta').classList.remove('show'); });
 document.getElementById('modalConfigLoja').addEventListener('click', e=>{ if(e.target.id==='modalConfigLoja') document.getElementById('modalConfigLoja').classList.remove('show'); });
 
 document.getElementById('btnBackupJSON').addEventListener('click', ()=>{
@@ -2846,12 +2996,25 @@ document.getElementById('btnSalvarConfigLoja').addEventListener('click', async (
     return { aberto: chk.checked, inicio: ini.value || '09:00', fim: fim.value || '18:00' };
   });
 
+  const servicos = document.getElementById('cfgServicos').value
+    .split('\n')
+    .map(l=>l.trim())
+    .filter(Boolean)
+    .map(l=>{
+      const partes = l.split('|');
+      return { nome: (partes[0]||'').trim(), duracao: Math.max(10, parseInt(partes[1]) || 30) };
+    })
+    .filter(s=>s.nome);
+  const antecedenciaMin = Math.max(0, parseInt(document.getElementById('cfgAntecedencia').value) || 0);
+
   const btn = document.getElementById('btnSalvarConfigLoja');
   btn.disabled = true; btn.textContent = 'Salvando...';
   try{
-    await salvarConfigLoja({ nome, endereco, horarios });
+    // preserva o resto da configuração (metas, etc) em vez de sobrescrever tudo
+    await salvarConfigLoja({ ...CONFIG_LOJA, nome, endereco, horarios, servicos, antecedenciaMin });
     toast('Configurações salvas com sucesso!');
     document.getElementById('modalConfigLoja').classList.remove('show');
+    preencherServicosSelect();
     gerarSlots();
   }catch(e){ console.error(e); toast('Erro ao salvar configurações.'); }
   finally{ btn.disabled = false; btn.textContent = '✓ Salvar configurações'; }
@@ -3287,11 +3450,17 @@ function gerarSlots(){
   const avisoDiaBox = document.getElementById('avisoDiaBox');
   avisoDiaBox.innerHTML = '';
   if(!data){ box.innerHTML = `<div class="hint">Escolha uma data primeiro.</div>`; filaHint.style.display='none'; return; }
+  if(window.__MODO_PUBLICO__ && data < hojeISO()){
+    horarioSelecionado = null;
+    box.innerHTML = `<div class="hint" style="color:var(--danger);">Essa data já passou. Escolha uma data de hoje em diante.</div>`;
+    filaHint.style.display='none';
+    return;
+  }
 
   const dow = new Date(data+'T12:00:00').getDay();
   const cfgDia = (CONFIG_LOJA.horarios && CONFIG_LOJA.horarios[dow]) || HORARIOS_PADRAO[dow];
   horarioHint.textContent = cfgDia.aberto
-    ? `Atendimento das ${cfgDia.inicio} às ${cfgDia.fim} neste dia, intervalos de 30 min.`
+    ? `Atendimento das ${cfgDia.inicio} às ${cfgDia.fim} neste dia. Este serviço reserva ${duracaoSelecionada()} min.`
     : `Loja fechada às ${NOMES_DIA_SEMANA[dow]}s.`;
 
   const bloqueioDia = diaBloqueadoInfo(data);
@@ -3307,26 +3476,43 @@ function gerarSlots(){
     avisoDiaBox.innerHTML = `<div class="aviso-dia reduzido">⏰ ${esc(reduzido.motivo)}</div>`;
   }
 
-  const ocupados = new Set(cacheAgendamentos.filter(a=>a.data===data && a.status!=='cancelado').map(a=>a.horario));
+  const dur = duracaoSelecionada();
+  const passo = passoSlots();
+  const intervalos = intervalosOcupados(data, null);
   const bloqueados = horariosBloqueados(data);
+  const limiteFim = minutosDoHorario(cfgDia.fim) + passo;  // ultimo minuto utilizavel da agenda
   horarioSelecionado = null;
   let temOcupado = false;
   const todosHorarios = gerarHorariosDisponiveis(data);
   let livres = 0;
   box.innerHTML = todosHorarios.map(h=>{
-    const travado = bloqueados.has(h);
-    const cheio = ocupados.has(h) && !travado;
+    const ini = minutosDoHorario(h);
+    const fim = ini + dur;
+    // algum horario da grade dentro do intervalo do servico esta bloqueado?
+    let travado = false;
+    for(let m=ini; m<fim; m+=passo){ if(bloqueados.has(horarioDeMinutos(m))) travado = true; }
+    const naoCabe = fim > limiteFim;                       // servico longo nao cabe antes de fechar
+    const passou = horarioJaPassou(data, h);               // horario que ja passou (ou sem antecedencia minima)
+    const cheio = !travado && !naoCabe && conflitaComOcupados(ini, fim, intervalos);
     if(cheio) temOcupado = true;
-    if(!travado && !cheio) livres++;
+    const indisponivel = travado || naoCabe || (passou && window.__MODO_PUBLICO__);
+    if(!indisponivel && !cheio && !passou) livres++;
     const qtdFila = filaDoSlot(data, h).length;
-    const cls = travado ? 'busy' : (cheio ? 'fila' : '');
-    const titulo = travado ? 'Bloqueado' : (cheio ? 'Horário cheio — clique para entrar na fila de espera' : '');
+    let cls = '';
+    if(indisponivel) cls = 'busy';
+    else if(cheio) cls = 'fila';
+    else if(passou) cls = 'passado';
+    let titulo = '';
+    if(travado) titulo = 'Bloqueado';
+    else if(naoCabe) titulo = `Não cabe um atendimento de ${dur} min antes do fechamento`;
+    else if(passou) titulo = 'Esse horário já passou';
+    else if(cheio) titulo = 'Horário ocupado — clique para entrar na fila de espera';
     return `<div class="slot ${cls}" data-h="${h}" data-cheio="${cheio?'1':'0'}" title="${titulo}">${h}${qtdFila>0?` <small style="opacity:.7;">(${qtdFila})</small>`:''}</div>`;
   }).join('');
   filaHint.style.display = temOcupado ? 'block' : 'none';
 
   if(todosHorarios.length>0 && livres===0){
-    avisoDiaBox.innerHTML += `<div class="aviso-dia cheio">📋 Os horários de hoje já foram todos preenchidos. Você pode entrar na fila de espera clicando em um horário abaixo.</div>`;
+    avisoDiaBox.innerHTML += `<div class="aviso-dia cheio">📋 Não há horários livres nesse dia para um atendimento de ${dur} min. Você pode entrar na fila de espera clicando em um horário ocupado.</div>`;
   }
 
   document.querySelectorAll('.slot:not(.busy):not(.fila)').forEach(el=>{
@@ -3339,6 +3525,19 @@ function gerarSlots(){
   document.querySelectorAll('.slot.fila').forEach(el=>{
     el.addEventListener('click', ()=> entrarNaFila(data, el.dataset.h));
   });
+}
+
+function duracaoSelecionada(){
+  const sel = document.getElementById('fServico');
+  if(!sel || !sel.value) return passoSlots();
+  return duracaoDoServico(sel.value);
+}
+function preencherServicosSelect(){
+  const sel = document.getElementById('fServico');
+  if(!sel) return;
+  const atual = sel.value;
+  sel.innerHTML = listaServicos().map(s=>`<option value="${esc(s.nome)}">${esc(s.nome)} — ${s.duracao} min</option>`).join('');
+  if(atual && listaServicos().some(s=>s.nome===atual)) sel.value = atual;
 }
 
 async function entrarNaFila(data, horario){
@@ -3359,6 +3558,10 @@ async function entrarNaFila(data, horario){
 }
 document.getElementById('fData').addEventListener('change', gerarSlots);
 if(!document.getElementById('fData').value) document.getElementById('fData').value = hojeISO();
+preencherServicosSelect();
+document.getElementById('fServico').addEventListener('change', gerarSlots);
+// no portal do cliente, a data minima e hoje (o proprio navegador ja bloqueia datas anteriores)
+if(window.__MODO_PUBLICO__) document.getElementById('fData').min = hojeISO();
 gerarSlots();
 
 function limparForm(){
@@ -3467,6 +3670,21 @@ document.getElementById('btnSalvar').onclick = async ()=>{
     toast('Marque a caixinha de concordância com o uso dos seus dados para continuar.');
     return;
   }
+  if(window.__MODO_PUBLICO__ && horarioJaPassou(data, horarioSelecionado)){
+    toast('Esse horário já passou. Escolha outro, por favor.');
+    gerarSlots();
+    return;
+  }
+  // ultima checagem: alguem pode ter pego o horario enquanto o formulario estava aberto
+  {
+    const ini = minutosDoHorario(horarioSelecionado);
+    const durAgora = duracaoSelecionada();
+    if(conflitaComOcupados(ini, ini + durAgora, intervalosOcupados(data, null))){
+      toast('Esse horário acabou de ser ocupado. Escolha outro, por favor.');
+      gerarSlots();
+      return;
+    }
+  }
   const duplicado = agendamentoAbertoDoCpf(cpf, null);
   if(duplicado){
     const confirmou = window.confirm(`Esse cliente já tem um agendamento em aberto para ${fmtDataISOtoBR(duplicado.data)} às ${duplicado.horario} (${statusInfo(duplicado.status).label}).\n\nDeseja continuar mesmo assim e criar um novo agendamento?`);
@@ -3478,10 +3696,13 @@ document.getElementById('btnSalvar').onclick = async ()=>{
   btn.disabled = true; btn.textContent = 'Salvando...';
 
   try{
+    const servicoSel = (document.getElementById('fServico') || {}).value || '';
+    const duracaoSel = servicoSel ? duracaoDoServico(servicoSel) : passoSlots();
     const protocolo = await proximoProtocolo();
     const agendamento = {
       protocolo, nome, cpf, celular, data, horario: horarioSelecionado,
       status, observacao: obs, atendente, categoria,
+      servico: servicoSel, duracao: duracaoSel,
       criadoEm: new Date().toISOString()
     };
     if(fotoProdutoAtual) agendamento.fotoProduto = fotoProdutoAtual;
@@ -4072,7 +4293,9 @@ function coordenadaCanvas(canvas, evento){
 }
 (function configurarCanvasAssinatura(){
   const canvas = document.getElementById('assinaturaCanvas');
-  const ctx = canvas.getContext('2d');
+  // se o canvas nao existir ou o navegador nao suportar, o resto do sistema continua funcionando
+  const ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
+  if(!ctx) return;
   ctx.lineWidth = 2.4;
   ctx.lineCap = 'round';
   ctx.strokeStyle = '#0B1E35';
@@ -4140,6 +4363,258 @@ document.getElementById('btnConfirmarAssinatura').addEventListener('click', asyn
   }catch(e){ console.error(e); toast('Erro ao confirmar chegada.'); }
   finally{ btn.disabled = false; btn.textContent = '✓ Confirmar chegada'; }
 });
+
+
+/* ================= LEMBRETES AUTOMÁTICOS (24h e 2h antes) ================= */
+/* Observação honesta: o navegador só consegue avisar/enviar enquanto o painel
+   está aberto. O envio 100% desacompanhado exige uma Cloud Function + API do
+   WhatsApp. Aqui o sistema monta a fila de lembretes, avisa o atendente e
+   deixa o WhatsApp pronto em um clique, marcando quem já foi avisado. */
+const JANELA_LEMBRETE_24H = 26*60;  // minutos ate o atendimento para disparar o lembrete de vespera
+const JANELA_LEMBRETE_2H  = 150;    // minutos ate o atendimento para disparar o lembrete do dia
+let intervaloLembretes = null;
+let idsLembretesAvisados = new Set();
+
+function minutosAteAgendamento(a){
+  const alvo = new Date(`${a.data}T${a.horario}:00`);
+  return Math.round((alvo.getTime() - Date.now()) / 60000);
+}
+function lembretesPendentes(){
+  const pendentes = [];
+  cacheAgendamentos.forEach(a=>{
+    if(!a.data || !a.horario) return;
+    if(['cancelado','compareceu','nao_compareceu','comprou','sem_interesse'].includes(a.status)) return;
+    const faltam = minutosAteAgendamento(a);
+    if(faltam < 0) return;
+    if(faltam <= JANELA_LEMBRETE_2H && !a.lembrete2Em){
+      pendentes.push({ agendamento:a, tipo:'lembrete_hora', rotulo:'Hoje, em breve', campo:'lembrete2Em', faltam });
+    } else if(faltam <= JANELA_LEMBRETE_24H && faltam > JANELA_LEMBRETE_2H && !a.lembrete24Em){
+      pendentes.push({ agendamento:a, tipo:'lembrete_dia', rotulo:'Amanhã', campo:'lembrete24Em', faltam });
+    }
+  });
+  return pendentes.sort((x,y)=> x.faltam - y.faltam);
+}
+async function marcarLembreteEnviado(a, campo){
+  try{
+    await atualizarAgendamento(a.id, { [campo]: new Date().toISOString() });
+    a[campo] = new Date().toISOString();
+    renderLembretesPendentes();
+  }catch(e){ console.error(e); }
+}
+function renderLembretesPendentes(){
+  const card = document.getElementById('cardLembretesAuto');
+  if(!card) return;
+  const pendentes = lembretesPendentes();
+  if(pendentes.length === 0){ card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  const box = document.getElementById('listaLembretesAuto');
+  box.innerHTML = pendentes.map(p=>{
+    const a = p.agendamento;
+    const horas = p.faltam >= 60 ? `em ${Math.floor(p.faltam/60)}h` : `em ${p.faltam} min`;
+    return `<div class="lembrete-row">
+      <div class="info"><b>${a.horario} · ${esc(a.nome)}</b>${p.rotulo} — ${horas}${a.celular ? ' · ' + esc(a.celular) : ''}</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-gold" style="padding:8px 12px;font-size:12px;" data-lembrar="${a.id}">📲 Enviar</button>
+        <button class="btn btn-ghost" style="padding:8px 12px;font-size:12px;" data-pular="${a.id}">Já avisei</button>
+      </div>
+    </div>`;
+  }).join('');
+  box.querySelectorAll('button[data-lembrar]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const p = pendentes.find(x=>x.agendamento.id===btn.dataset.lembrar);
+      if(!p) return;
+      abrirWhatsAppComMensagem(p.agendamento, p.tipo);
+      marcarLembreteEnviado(p.agendamento, p.campo);
+    });
+  });
+  box.querySelectorAll('button[data-pular]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const p = pendentes.find(x=>x.agendamento.id===btn.dataset.pular);
+      if(p) marcarLembreteEnviado(p.agendamento, p.campo);
+    });
+  });
+}
+function verificarLembretes(){
+  if(window.__MODO_PUBLICO__) return;
+  const pendentes = lembretesPendentes();
+  const novos = pendentes.filter(p=> !idsLembretesAvisados.has(p.agendamento.id + p.campo));
+  if(novos.length > 0){
+    novos.forEach(p=> idsLembretesAvisados.add(p.agendamento.id + p.campo));
+    mostrarNotificacaoNativa('Lembretes para enviar', `${novos.length} cliente(s) esperando lembrete de agendamento.`);
+    avisarNoTitulo(`${pendentes.length} lembrete(s)`);
+  }
+  renderLembretesPendentes();
+}
+function montarCardLembretes(){
+  const tabHoje = document.getElementById('tab-hoje');
+  if(!tabHoje || document.getElementById('cardLembretesAuto')) return;
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.id = 'cardLembretesAuto';
+  card.style.display = 'none';
+  card.innerHTML = `
+    <h2>🔔 Lembretes para enviar</h2>
+    <p class="sub">Clientes com atendimento nas próximas horas que ainda não receberam lembrete.</p>
+    <div id="listaLembretesAuto"></div>`;
+  tabHoje.insertBefore(card, tabHoje.firstChild);
+}
+function iniciarLembretesAutomaticos(){
+  if(window.__MODO_PUBLICO__ || intervaloLembretes) return;
+  montarCardLembretes();
+  verificarLembretes();
+  intervaloLembretes = setInterval(verificarLembretes, 5*60*1000);
+}
+
+/* ================= REAGENDAMENTO PELO PRÓPRIO CLIENTE (?reagendar=ID) ================= */
+let reagendarAgendamento = null;
+let reagendarHorario = null;
+
+async function abrirTelaReagendar(id){
+  document.querySelector('.topbar').style.display = 'none';
+  const sb = document.querySelector('.sidebar'); if(sb) sb.style.display = 'none';
+  const cb = document.getElementById('configBanner'); if(cb) cb.style.display = 'none';
+  document.querySelector('.wrap').style.display = 'none';
+  const tela = document.getElementById('telaReagendar');
+  const box = document.getElementById('reagendarConteudo');
+  tela.style.display = 'block';
+  box.innerHTML = `<div class="icone" style="text-align:center;font-size:38px;">⏳</div><p style="text-align:center;">Carregando seu agendamento...</p>`;
+
+  try{
+    if(usandoFirestore){
+      const [doc, cfgDoc, todos, bloqs] = await Promise.all([
+        db.collection('agendamentos').doc(id).get(),
+        db.collection('configuracoes').doc('loja').get(),
+        db.collection('agendamentos').get(),
+        db.collection('bloqueios').get()
+      ]);
+      if(doc.exists) reagendarAgendamento = { id:doc.id, ...doc.data() };
+      if(cfgDoc.exists){ const d = cfgDoc.data(); if(d && d.nome && d.endereco) CONFIG_LOJA = normalizarConfigLoja(d); }
+      cacheAgendamentos = todos.docs.map(d=>({id:d.id, ...d.data()})).filter(a=>!a.excluidoEm);
+      cacheBloqueios = bloqs.docs.map(d=>({id:d.id, ...d.data()}));
+    } else {
+      cacheAgendamentos = carregarLocal().filter(a=>!a.excluidoEm);
+      cacheBloqueios = carregarBloqueiosLocal();
+      CONFIG_LOJA = carregarConfigLojaLocal();
+      reagendarAgendamento = cacheAgendamentos.find(a=>a.id===id) || null;
+    }
+  }catch(e){ console.error(e); }
+
+  if(!reagendarAgendamento){
+    box.innerHTML = `<div class="icone" style="text-align:center;font-size:38px;">⚠️</div><h2 style="text-align:center;">Agendamento não encontrado</h2><p class="sub" style="text-align:center;">Confira o link recebido ou fale com a loja.</p>`;
+    return;
+  }
+  if(['cancelado','compareceu','comprou','nao_compareceu'].includes(reagendarAgendamento.status)){
+    box.innerHTML = `<div class="icone" style="text-align:center;font-size:38px;">🗓️</div><h2 style="text-align:center;">Esse agendamento não pode mais ser alterado</h2><p class="sub" style="text-align:center;">Fale com a ${esc(CONFIG_LOJA.nome)} para marcar um novo horário.</p>`;
+    return;
+  }
+  renderTelaReagendar();
+}
+
+function renderTelaReagendar(){
+  const a = reagendarAgendamento;
+  const box = document.getElementById('reagendarConteudo');
+  box.innerHTML = `
+    <div class="portal-selo" style="display:block;">✦ Reagendamento — ${esc(CONFIG_LOJA.nome)} ✦</div>
+    <h2 style="font-family:'Playfair Display',serif;color:var(--navy);">Escolha um novo horário</h2>
+    <p class="sub">Olá, ${esc((a.nome||'').split(' ')[0])}! Seu horário atual é ${fmtDataISOtoBR(a.data)} às ${a.horario}${a.servico ? ' — ' + esc(a.servico) : ''}.</p>
+    <div class="field">
+      <label>Nova data</label>
+      <input type="date" id="reagData" min="${hojeISO()}" value="${hojeISO()}">
+    </div>
+    <div class="field">
+      <label>Horários disponíveis</label>
+      <div id="reagAviso"></div>
+      <div class="slots" id="reagSlots"></div>
+      <div class="hint" id="reagHint"></div>
+    </div>
+    <button class="btn btn-primary" id="btnConfirmarReagendamento" style="width:100%;">✓ Confirmar novo horário</button>
+    <p class="hint" style="margin-top:10px;text-align:center;">Se preferir manter o horário atual, é só fechar esta página.</p>`;
+  document.getElementById('reagData').addEventListener('change', renderSlotsReagendar);
+  document.getElementById('btnConfirmarReagendamento').addEventListener('click', confirmarReagendamento);
+  renderSlotsReagendar();
+}
+
+function renderSlotsReagendar(){
+  const a = reagendarAgendamento;
+  const data = document.getElementById('reagData').value;
+  const box = document.getElementById('reagSlots');
+  const aviso = document.getElementById('reagAviso');
+  const hint = document.getElementById('reagHint');
+  reagendarHorario = null;
+  aviso.innerHTML = '';
+  if(!data){ box.innerHTML = ''; return; }
+  if(data < hojeISO()){
+    box.innerHTML = `<div class="hint" style="color:var(--danger);">Escolha uma data de hoje em diante.</div>`;
+    return;
+  }
+  const bloqueioDia = diaBloqueadoInfo(data);
+  if(bloqueioDia.bloqueado){
+    box.innerHTML = `<div class="hint" style="color:var(--danger);">🔒 ${esc(bloqueioDia.motivo)}. Escolha outra data.</div>`;
+    return;
+  }
+  const dow = new Date(data+'T12:00:00').getDay();
+  const cfgDia = (CONFIG_LOJA.horarios && CONFIG_LOJA.horarios[dow]) || HORARIOS_PADRAO[dow];
+  const dur = duracaoDoAgendamento(a);
+  const passo = passoSlots();
+  const limiteFim = minutosDoHorario(cfgDia.fim) + passo;
+  const intervalos = intervalosOcupados(data, a.id);   // ignora o proprio agendamento
+  const bloqueados = horariosBloqueados(data);
+  const horarios = gerarHorariosDisponiveis(data);
+  let livres = 0;
+  box.innerHTML = horarios.map(hh=>{
+    const ini = minutosDoHorario(hh);
+    const fim = ini + dur;
+    let travado = false;
+    for(let m=ini; m<fim; m+=passo){ if(bloqueados.has(horarioDeMinutos(m))) travado = true; }
+    const indisponivel = travado || fim > limiteFim || horarioJaPassou(data, hh) || conflitaComOcupados(ini, fim, intervalos);
+    if(!indisponivel) livres++;
+    return `<div class="slot ${indisponivel ? 'busy' : ''}" data-h="${hh}">${hh}</div>`;
+  }).join('');
+  hint.textContent = `Atendimento de ${dur} min. ${livres} horário(s) livre(s) neste dia.`;
+  if(livres === 0){
+    aviso.innerHTML = `<div class="aviso-dia cheio">Nenhum horário livre nesse dia. Tente outra data.</div>`;
+  }
+  box.querySelectorAll('.slot:not(.busy)').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      box.querySelectorAll('.slot').forEach(s=>s.classList.remove('active'));
+      el.classList.add('active');
+      reagendarHorario = el.dataset.h;
+    });
+  });
+}
+
+async function confirmarReagendamento(){
+  const a = reagendarAgendamento;
+  const data = document.getElementById('reagData').value;
+  const btn = document.getElementById('btnConfirmarReagendamento');
+  if(!data || !reagendarHorario){ toast('Escolha a data e o horário novo.'); return; }
+  if(horarioJaPassou(data, reagendarHorario)){ toast('Esse horário já passou. Escolha outro.'); renderSlotsReagendar(); return; }
+  btn.disabled = true; btn.textContent = 'Confirmando...';
+  try{
+    const antes = { data: a.data, horario: a.horario };
+    await atualizarAgendamento(a.id, {
+      data,
+      horario: reagendarHorario,
+      status: 'reagendado',
+      reagendadoPeloClienteEm: new Date().toISOString(),
+      horarioAnterior: `${antes.data} ${antes.horario}`
+    });
+    a.data = data; a.horario = reagendarHorario; a.status = 'reagendado';
+    document.getElementById('reagendarConteudo').innerHTML = `
+      <div class="icone" style="text-align:center;font-size:42px;">✅</div>
+      <h2 style="font-family:'Playfair Display',serif;color:var(--navy);text-align:center;">Horário alterado!</h2>
+      <p class="sub" style="text-align:center;">Seu novo atendimento na ${esc(CONFIG_LOJA.nome)} é ${fmtDataISOtoBR(data)} às ${reagendarHorario}.</p>
+      <div class="r-grid" style="margin:16px 0;">
+        <div class="r-cell"><p class="r-label">Protocolo</p><p class="r-value">${esc(a.protocolo||'—')}</p></div>
+        <div class="r-cell"><p class="r-label">Endereço</p><p class="r-value" style="font-size:12.5px;">${esc(CONFIG_LOJA.endereco)}</p></div>
+      </div>
+      <p class="hint" style="text-align:center;">Guarde este protocolo. Até lá!</p>`;
+  }catch(e){
+    console.error(e);
+    toast('Não foi possível reagendar. Tente novamente.');
+    btn.disabled = false; btn.textContent = '✓ Confirmar novo horário';
+  }
+}
 
 /* ---------- portal público de autoagendamento (?portal=cliente) ---------- */
 function ativarPortalPublico(){
@@ -4357,6 +4832,7 @@ function iniciarControleDeAcesso(){
     // então libera o painel direto — modo local é só para teste.
     carregarTodos();
     iniciarChecagemDeAtrasados();
+    iniciarLembretesAutomaticos();
     atualizarBotaoNotificacoes();
     return;
   }
@@ -4365,6 +4841,7 @@ function iniciarControleDeAcesso(){
     if(user){
       mostrarPainelAdmin();
       carregarTodos();
+      iniciarLembretesAutomaticos();
     } else {
       mostrarTelaLogin();
     }
@@ -4455,10 +4932,13 @@ diaSelecionado = hojeISO();
 const urlParams = new URLSearchParams(window.location.search);
 const idConfirmar = urlParams.get('confirmar');
 const idAvaliar = urlParams.get('avaliar');
+const idReagendar = urlParams.get('reagendar');
 const modoPublico = window.__MODO_PUBLICO__ === true || urlParams.get('portal') === 'cliente';
 
 if(idConfirmar){
   abrirTelaConfirmacao(idConfirmar);
+} else if(idReagendar){
+  abrirTelaReagendar(idReagendar);
 } else if(idAvaliar){
   abrirTelaAvaliacao(idAvaliar);
 } else if(modoPublico){
