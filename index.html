@@ -701,6 +701,7 @@
       </div>
 
       <div id="hojeProximoBox"></div>
+      <div id="hojeProximoLivre"></div>
       <div class="btn-row" style="margin-top:14px;">
         <button class="btn btn-ghost" id="btnSemAgendamento">🚶 Registrar cliente sem agendamento</button>
       </div>
@@ -1238,8 +1239,18 @@
       </div>
       <div class="field">
         <label>Tipos de atendimento e duração</label>
-        <p class="hint" style="margin-top:-4px;">Um por linha, no formato <code>Nome do serviço | minutos</code>. A duração define quanto tempo o atendimento ocupa na agenda.</p>
-        <textarea id="cfgServicos" rows="5" placeholder="Avaliação de aparelho | 30&#10;Manutenção / conserto | 60"></textarea>
+        <p class="hint" style="margin-top:-4px;">Um por linha, no formato <code>Nome do serviço | minutos</code>. A duração define quanto tempo o atendimento ocupa na agenda. Acrescente <code>| docs</code> no final para o cliente receber a lista de documentos (ex: <code>Compra parcelada no boleto | 60 | docs</code>).</p>
+        <textarea id="cfgServicos" rows="5" placeholder="Avaliação de aparelho | 30&#10;Compra parcelada no boleto | 60 | docs"></textarea>
+      </div>
+      <div class="field">
+        <label>Documentos que o cliente deve trazer</label>
+        <p class="hint" style="margin-top:-4px;">Vai no recibo e nas mensagens de confirmação e lembrete dos serviços marcados com <code>| docs</code>.</p>
+        <textarea id="cfgDocumentos" rows="2"></textarea>
+      </div>
+      <div class="field">
+        <label>Bloquear agendamento online após quantas faltas?</label>
+        <p class="hint" style="margin-top:-4px;">Quem atingir esse número de "Não compareceu" não consegue mais agendar pelo link e é orientado a falar com a loja. Use 0 para desativar.</p>
+        <input type="number" id="cfgLimiteFaltas" min="0" step="1" placeholder="3">
       </div>
       <div class="field">
         <label>Antecedência mínima para o cliente agendar (minutos)</label>
@@ -1406,6 +1417,10 @@
           <div class="r-endereco">
             <p class="titulo">📍 Local de atendimento</p>
             <p class="end"><span id="rEnderecoNome">Minha Loja</span><small id="rEnderecoTexto">Av. República Argentina, 1968 — Bairro Maracanã, Foz do Iguaçu/PR</small></p>
+          </div>
+
+          <div class="r-aviso" id="rDocumentosBox" style="display:none;">
+            <p>📄 <b>Traga no dia:</b> <span id="rDocumentosTexto"></span>.</p>
           </div>
 
           <div class="r-aviso">
@@ -1593,8 +1608,13 @@ const SERVICOS_PADRAO = [
   { nome:'Atendimento padrão',     duracao:30 },
   { nome:'Avaliação de aparelho',  duracao:30 },
   { nome:'Manutenção / conserto',  duracao:60 },
-  { nome:'Retirada rápida',        duracao:30 }
+  { nome:'Retirada rápida',        duracao:30 },
+  { nome:'Compra parcelada no boleto', duracao:60, documentos:true }
 ];
+const DOCUMENTOS_PADRAO = 'RG ou CNH, CPF e comprovante de residência atualizado (conta de água, luz ou internet)';
+function documentosTexto(){ return (CONFIG_LOJA.documentosTexto || '').trim() || DOCUMENTOS_PADRAO; }
+function servicoPedeDocumentos(nome){ const s = listaServicos().find(x=>x.nome===nome); return !!(s && s.documentos); }
+function limiteFaltas(){ const v = Number(CONFIG_LOJA.limiteFaltas); return Number.isFinite(v) ? Math.max(0, v) : 3; }
 let CONFIG_LOJA = {
   nome: 'Minha Loja',
   endereco: 'Av. República Argentina, 1968, Bairro Maracanã, Foz do Iguaçu/PR',
@@ -1871,7 +1891,11 @@ const LINKS_POR_TIPO = {
 
 // monta o texto final da mensagem (IA + link, quando aplicável) — usado tanto pra enviar quanto pra copiar
 async function montarTextoMensagemFinal(a, tipo){
-  const texto = await gerarMensagemComIA(a, tipo);
+  let texto = await gerarMensagemComIA(a, tipo);
+  // lista de documentos colada por fora da IA, pra chegar sempre completa e igual
+  if(['confirmacao','lembrete_dia','lembrete_hora'].includes(tipo) && servicoPedeDocumentos(a.servico)){
+    texto += `\n\n📄 Para esse atendimento, traga: ${documentosTexto()}.`;
+  }
   const linkInfo = LINKS_POR_TIPO[tipo];
   if(linkInfo && (!linkInfo.requerAgendamento || a.id)){
     return texto + `\n\n${linkInfo.texto}\n${linkInfo.montar(a)}`;
@@ -2987,7 +3011,9 @@ function renderCfgHorariosDias(){
 document.getElementById('btnConfigLoja').addEventListener('click', ()=>{
   document.getElementById('cfgNomeLoja').value = CONFIG_LOJA.nome;
   document.getElementById('cfgEndereco').value = CONFIG_LOJA.endereco;
-  document.getElementById('cfgServicos').value = listaServicos().map(s=>`${s.nome} | ${s.duracao}`).join('\n');
+  document.getElementById('cfgServicos').value = listaServicos().map(s=>`${s.nome} | ${s.duracao}${s.documentos?' | docs':''}`).join('\n');
+  document.getElementById('cfgDocumentos').value = documentosTexto();
+  document.getElementById('cfgLimiteFaltas').value = limiteFaltas();
   document.getElementById('cfgAntecedencia').value = antecedenciaMinima();
   renderCfgHorariosDias();
   document.getElementById('modalConfigLoja').classList.add('show');
@@ -3037,7 +3063,7 @@ document.getElementById('btnSalvarConfigLoja').addEventListener('click', async (
     .filter(Boolean)
     .map(l=>{
       const partes = l.split('|');
-      return { nome: (partes[0]||'').trim(), duracao: Math.max(10, parseInt(partes[1]) || 30) };
+      return { nome: (partes[0]||'').trim(), duracao: Math.max(10, parseInt(partes[1]) || 30), documentos: /doc/i.test(partes[2]||'') };
     })
     .filter(s=>s.nome);
   const antecedenciaMin = Math.max(0, parseInt(document.getElementById('cfgAntecedencia').value) || 0);
@@ -3046,7 +3072,9 @@ document.getElementById('btnSalvarConfigLoja').addEventListener('click', async (
   btn.disabled = true; btn.textContent = 'Salvando...';
   try{
     // preserva o resto da configuração (metas, etc) em vez de sobrescrever tudo
-    await salvarConfigLoja({ ...CONFIG_LOJA, nome, endereco, horarios, servicos, antecedenciaMin });
+    const documentosTextoCfg = document.getElementById('cfgDocumentos').value.trim();
+    const limiteFaltasCfg = Math.max(0, parseInt(document.getElementById('cfgLimiteFaltas').value) || 0);
+    await salvarConfigLoja({ ...CONFIG_LOJA, nome, endereco, horarios, servicos, antecedenciaMin, documentosTexto: documentosTextoCfg, limiteFaltas: limiteFaltasCfg });
     toast('Configurações salvas com sucesso!');
     document.getElementById('modalConfigLoja').classList.remove('show');
     preencherServicosSelect();
@@ -3595,6 +3623,18 @@ document.getElementById('fData').addEventListener('change', gerarSlots);
 if(!document.getElementById('fData').value) document.getElementById('fData').value = hojeISO();
 preencherServicosSelect();
 document.getElementById('fServico').addEventListener('change', gerarSlots);
+function atualizarHintServico(){
+  const hint = document.getElementById('servicoHint');
+  const nome = document.getElementById('fServico').value;
+  if(servicoPedeDocumentos(nome)){
+    hint.innerHTML = `📄 <b>Para esse atendimento, traga:</b> ${esc(documentosTexto())}.`;
+    hint.style.color = 'var(--gold-dark)';
+  } else {
+    hint.textContent = 'Cada tipo de atendimento reserva um tempo diferente na agenda.';
+    hint.style.color = '';
+  }
+}
+document.getElementById('fServico').addEventListener('change', atualizarHintServico);
 // no portal do cliente, a data minima e hoje (o proprio navegador ja bloqueia datas anteriores)
 if(window.__MODO_PUBLICO__) document.getElementById('fData').min = hojeISO();
 gerarSlots();
@@ -3713,6 +3753,13 @@ document.getElementById('btnSalvar').onclick = async ()=>{
       !STATUS_FINALIZADOS.includes(a.status) && (a.data||'') >= hojeISO() &&
       ((celDig.length>=10 && apenasDigitos(a.celular)===celDig) || (cpfDig.length===11 && apenasDigitos(a.cpf)===cpfDig))
     );
+    const faltas = cacheAgendamentos.filter(a=> a.status==='nao_compareceu' &&
+      ((celDig.length>=10 && apenasDigitos(a.celular)===celDig) || (cpfDig.length===11 && apenasDigitos(a.cpf)===cpfDig))
+    ).length;
+    if(limiteFaltas()>0 && faltas >= limiteFaltas()){
+      toast('Não foi possível concluir o agendamento online. Por favor, entre em contato direto com a loja para marcar seu horário.');
+      return;
+    }
     if(emAberto.length >= LIMITE_AGENDAMENTOS_PUBLICO){
       toast(`Você já tem ${emAberto.length} agendamentos em aberto. Para marcar outro, fale com a loja.`);
       return;
@@ -4100,7 +4147,44 @@ function renderMetricas(){
 /* ---------- tempo de espera, nao confirmados e cliente sem agendamento ---------- */
 function minutosEntre(isoA, isoB){ return Math.max(0, Math.round((new Date(isoB)-new Date(isoA))/60000)); }
 function amanhaISO(){ const d=new Date(); d.setDate(d.getDate()+1); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function proximoHorarioLivreHoje(){
+  const hoje = hojeISO();
+  if(diaBloqueadoInfo(hoje).bloqueado) return null;
+  const bloq = horariosBloqueados(hoje);
+  const bSet = bloq instanceof Set ? bloq : new Set((bloq||[]).map(b=>b.horario||b));
+  const ocupados = intervalosOcupados(hoje);
+  const dur = passoSlots();
+  const d = new Date(); const agoraMin = d.getHours()*60 + d.getMinutes();
+  for(const h of gerarHorariosDisponiveis(hoje)){
+    const ini = minutosDoHorario(h);
+    if(ini < agoraMin || bSet.has(h)) continue;
+    if(conflitaComOcupados(ini, ini+dur, ocupados)) continue;
+    return h;
+  }
+  return null;
+}
 function renderHojeExtras(){
+  const livreBox = document.getElementById('hojeProximoLivre');
+  if(livreBox){
+    const h = proximoHorarioLivreHoje();
+    livreBox.innerHTML = h
+      ? `<div class="aviso-dia cheio" style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+           <span>⚡ <b>Próximo horário livre hoje: ${h}</b></span>
+           <button class="btn btn-primary" id="btnEncaixarLivre" style="padding:7px 14px;font-size:12px;">Agendar nesse horário</button>
+         </div>`
+      : `<div class="aviso-dia reduzido" style="margin-top:14px;">⚡ Sem horários livres no resto do dia.</div>`;
+    const btn = document.getElementById('btnEncaixarLivre');
+    if(btn) btn.addEventListener('click', ()=>{
+      irParaAba('novo');
+      document.getElementById('fData').value = hojeISO();
+      gerarSlots();
+      setTimeout(()=>{
+        const slot = document.querySelector(`#slotsBox .slot[data-h="${h}"]:not(.busy):not(.fila)`);
+        if(slot){ slot.click(); toast(`Horário das ${h} selecionado — preencha os dados do cliente.`); }
+        document.getElementById('fNome').focus();
+      }, 50);
+    });
+  }
   const hoje = hojeISO(), amanha = amanhaISO(), agoraISO = new Date().toISOString();
   const horaAtual = agoraISO ? `${pad(new Date().getHours())}:${pad(new Date().getMinutes())}` : '';
 
@@ -4269,6 +4353,9 @@ document.getElementById('btnSalvarMetas').addEventListener('click', async ()=>{
 
 /* ---------- recibo cartorial ---------- */
 function abrirRecibo(a){
+  const pedeDocs = servicoPedeDocumentos(a.servico);
+  document.getElementById('rDocumentosBox').style.display = pedeDocs ? 'block' : 'none';
+  document.getElementById('rDocumentosTexto').textContent = pedeDocs ? documentosTexto() : '';
   const s = statusInfo(a.status);
   document.getElementById('rProtocolo').textContent = a.protocolo || '—';
   document.getElementById('rNome').textContent = a.nome;
