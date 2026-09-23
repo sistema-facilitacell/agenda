@@ -1875,17 +1875,32 @@ async function removerBloqueio(id){
   }
   cacheBloqueios = cacheBloqueios.filter(x=>x.id!==id);
 }
+// retorna o registro de "exceção de abertura" do dia (loja aberta mesmo sendo feriado ou dia da semana fechado), se houver
+function excecaoAberturaAtiva(iso){
+  return cacheBloqueios.find(b=>b.data===iso && b.excecaoAbertura);
+}
 // retorna {bloqueado, motivo} para o dia inteiro (feriado, dia da semana fechado ou bloqueio manual sem horário)
 function diaBloqueadoInfo(iso){
+  const manual = cacheBloqueios.find(b=>b.data===iso && !b.horario && !b.horarioLimite && !b.excecaoAbertura);
+  if(manual) return {bloqueado:true, motivo:manual.motivo || 'Bloqueado manualmente', automatico:false, id:manual.id};
+  if(excecaoAberturaAtiva(iso)) return {bloqueado:false};
   const feriado = nomeFeriado(iso);
   if(feriado) return {bloqueado:true, motivo:`Feriado — ${feriado}`, automatico:true};
   if(diaDaSemanaFechado(iso)){
     const dow = new Date(iso+'T12:00:00').getDay();
     return {bloqueado:true, motivo:`Loja fechada às ${NOMES_DIA_SEMANA[dow]}s`, automatico:true};
   }
-  const manual = cacheBloqueios.find(b=>b.data===iso && !b.horario && !b.horarioLimite);
-  if(manual) return {bloqueado:true, motivo:manual.motivo || 'Bloqueado manualmente', automatico:false, id:manual.id};
   return {bloqueado:false};
+}
+// cria/remove uma exceção que reabre um dia normalmente fechado (feriado ou dia da semana fechado)
+async function abrirDiaExcecao(iso){
+  const obj = await salvarBloqueio({ data: iso, excecaoAbertura:true, motivo:'Aberto por exceção', criadoEm: new Date().toISOString() });
+  cacheBloqueios.push(obj);
+  return obj;
+}
+async function cancelarExcecaoAbertura(iso){
+  const ex = excecaoAberturaAtiva(iso);
+  if(ex) await removerBloqueio(ex.id);
 }
 // retorna o bloqueio de "horário reduzido" do dia (expediente encurtado), se houver
 function horarioReduzidoInfo(iso){
@@ -3499,7 +3514,10 @@ function renderBloqueiosPanel(iso){
     const podeLiberar = !info.automatico && info.id;
     avisoBox.innerHTML = `<div class="bloqueio-item" style="display:block;">
       🔒 <b>Dia inteiro bloqueado</b> — ${esc(info.motivo)}
-      ${podeLiberar ? `<button data-liberar-dia="${info.id}" style="margin-top:6px;">Liberar o dia</button>` : `<div class="hint" style="margin-top:4px;">Bloqueio automático (feriado ou dia de fechamento).</div>`}
+      ${podeLiberar
+        ? `<button data-liberar-dia="${info.id}" style="margin-top:6px;">Liberar o dia</button>`
+        : `<div class="hint" style="margin-top:4px;">Bloqueio automático (feriado ou dia de fechamento).</div>
+           <button data-abrir-excecao="1" style="margin-top:6px;">Abrir este dia mesmo assim</button>`}
     </div>`;
     const bl = avisoBox.querySelector('[data-liberar-dia]');
     if(bl) bl.addEventListener('click', async ()=>{
@@ -3508,9 +3526,32 @@ function renderBloqueiosPanel(iso){
       renderBloqueiosPanel(iso); renderCalendario();
       if(diaSelecionado===iso) renderDiaPanel(diaSelecionado); gerarSlots();
     });
+    const abrirEx = avisoBox.querySelector('[data-abrir-excecao]');
+    if(abrirEx) abrirEx.addEventListener('click', async ()=>{
+      try{
+        await abrirDiaExcecao(iso);
+        toast('Dia aberto por exceção.');
+        renderBloqueiosPanel(iso); renderCalendario();
+        if(diaSelecionado===iso) renderDiaPanel(diaSelecionado); gerarSlots();
+      }catch(e){ console.error(e); toast('Não foi possível abrir o dia.'); }
+    });
     return;
   }
-  avisoBox.innerHTML = '';
+
+  const excecao = excecaoAberturaAtiva(iso);
+  avisoBox.innerHTML = excecao ? `<div class="bloqueio-item" style="display:block;">
+      🔓 <b>Dia aberto por exceção</b> — normalmente estaria fechado (feriado ou dia de fechamento).
+      <button data-cancelar-excecao="1" style="margin-top:6px;">Voltar ao fechamento automático</button>
+    </div>` : '';
+  const cancelEx = avisoBox.querySelector('[data-cancelar-excecao]');
+  if(cancelEx) cancelEx.addEventListener('click', async ()=>{
+    try{
+      await cancelarExcecaoAbertura(iso);
+      toast('Exceção removida — dia volta a seguir a regra automática.');
+      renderBloqueiosPanel(iso); renderCalendario();
+      if(diaSelecionado===iso) renderDiaPanel(diaSelecionado); gerarSlots();
+    }catch(e){ console.error(e); toast('Não foi possível remover a exceção.'); }
+  });
   gradeBox.style.display = 'block';
 
   // grade de horários clicável
