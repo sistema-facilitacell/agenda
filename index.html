@@ -156,6 +156,24 @@
   .brand-text p{margin:2px 0 0;font-size:12.5px;color:#cfd8e6;letter-spacing:.3px;}
   .brand-sub{margin-left:auto;text-align:right;font-size:12px;color:#c9d3e2;line-height:1.5;}
   .brand-sub b{color:var(--gold-2);font-weight:600;}
+  .sino-wrap{position:relative;flex-shrink:0;margin-left:14px;}
+  .sino-btn{position:relative;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;}
+  .sino-btn:hover{background:rgba(255,255,255,.2);}
+  .sino-badge{position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--navy);}
+  .sino-painel{position:absolute;top:48px;right:0;width:300px;max-height:400px;overflow-y:auto;background:#fff;border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.3);padding:8px;display:none;z-index:250;}
+  .sino-painel.show{display:block;}
+  .sino-cabecalho{font-weight:700;font-size:13px;color:var(--navy);padding:8px 10px 10px;border-bottom:1px solid var(--line);margin-bottom:4px;}
+  .sino-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:.12s;}
+  .sino-item:hover{background:#f3f0e7;}
+  .sino-item .sino-hora{background:var(--navy);color:#fff;font-size:11px;font-weight:700;border-radius:7px;padding:4px 7px;white-space:nowrap;flex-shrink:0;text-align:center;line-height:1.3;}
+  .sino-item .sino-info{min-width:0;}
+  .sino-item .sino-info b{display:block;font-size:12.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sino-item .sino-info span{font-size:11px;color:var(--muted);}
+  .sino-vazio{text-align:center;color:var(--muted);font-size:12px;padding:20px 10px;}
+  body.dark-mode .sino-painel{background:var(--card-bg);}
+  body.dark-mode .sino-cabecalho{color:var(--gold-2);border-color:var(--card-border);}
+  body.dark-mode .sino-item:hover{background:#2a2f3d;}
+  @media (max-width:600px){ .sino-painel{width:calc(100vw - 40px);right:-8px;} }
 
   .app-shell{max-width:1300px;margin:18px auto 0;display:flex;align-items:flex-start;gap:0;padding:0 22px;}
   .sidebar{
@@ -345,6 +363,11 @@
   .modal-bg.show{display:flex;}
   .modal-shell{width:100%;max-width:480px;}
   .modal-actions{display:flex;gap:10px;margin-top:16px;justify-content:center;flex-wrap:wrap;}
+  /* recibo: comprovante rola dentro, botões ficam fixos no rodapé (não some ao rolar) */
+  #modalRecibo .modal-shell{display:flex;flex-direction:column;max-height:92vh;}
+  #modalRecibo .recibo-scroll{overflow-y:auto;flex:1;min-height:0;}
+  #modalRecibo .modal-actions{margin-top:0;padding:12px 4px 4px;position:sticky;bottom:0;background:var(--paper);border-top:1px solid var(--line);border-radius:0 0 14px 14px;box-shadow:0 -6px 16px rgba(0,0,0,.06);}
+  body.dark-mode #modalRecibo .modal-actions{background:var(--card-bg);border-top-color:var(--card-border);}
   .modal-close{position:sticky;top:0;text-align:right;margin-bottom:8px;}
   .modal-close span{cursor:pointer;background:#fff;border-radius:50%;width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(0,0,0,.2);font-size:16px;color:var(--navy);font-weight:700;}
 
@@ -581,7 +604,7 @@
   .slot.fila:hover{border-color:#1a4a7a;}
 
   /* Portal público do cliente */
-  body.portal-publico .sidebar, body.portal-publico .config-banner{display:none !important;}
+  body.portal-publico .sidebar, body.portal-publico .config-banner, body.portal-publico .sino-wrap{display:none !important;}
   body.portal-publico #statusAtendenteRow, body.portal-publico #riscoBox, body.portal-publico #categoriaRow, body.portal-publico #nascRow{display:none !important;}
   /* trava reforcada: vale ja no <html>, antes do JS principal rodar */
   html.portal-publico .sidebar,
@@ -677,6 +700,16 @@
     <div class="brand-sub">
       <span>Soluções em agendamento para o seu dia a dia</span><br>
       <b id="hojeLabel">—</b>
+    </div>
+    <div class="sino-wrap" id="sinoWrap">
+      <button class="sino-btn" id="sinoBtn" title="Próximos agendamentos" aria-label="Notificações">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        <span class="sino-badge" id="sinoBadge" style="display:none;">0</span>
+      </button>
+      <div class="sino-painel" id="sinoPainel">
+        <div class="sino-cabecalho">🔔 Próximos agendamentos</div>
+        <div id="sinoLista"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -944,6 +977,12 @@
         <div class="metric-card"><div class="num" id="mNaoComparecimento">0%</div><div class="lbl">Taxa de não comparecimento</div></div>
       </div>
 
+      <div class="meta-card" id="cardFaturamento">
+        <h2 style="margin-bottom:2px;font-size:16px;">💰 Faturamento estimado</h2>
+        <p class="sub" style="margin:0 0 10px;">Soma do valor dos serviços que resultaram em venda (status "Comprou") — período selecionado</p>
+        <div id="faturamentoResumo"></div>
+      </div>
+
       <div class="meta-card" id="cardAtendentes">
         <h2 style="margin-bottom:2px;font-size:16px;">🧑‍💼 Desempenho por atendente</h2>
         <p class="sub" style="margin:0 0 10px;">Quem agendou e quanto converteu em venda — no período selecionado acima</p>
@@ -1157,7 +1196,19 @@
     <div class="card" style="margin-bottom:0;">
       <h2>📋 Histórico de Ações</h2>
       <p class="sub">Registro de quem fez o quê no sistema (mais recentes primeiro)</p>
-      <div id="auditoriaLista" style="max-height:60vh;overflow-y:auto;"></div>
+      <div class="filters" style="margin-bottom:12px;">
+        <input type="text" id="auditoriaBusca" placeholder="Buscar por nome, protocolo, usuário..." style="flex:1;min-width:140px;">
+        <select id="auditoriaTipo" style="max-width:170px;">
+          <option value="">Todas as ações</option>
+          <option value="Criou">Criações</option>
+          <option value="Editou">Edições</option>
+          <option value="Alterou">Mudanças de situação</option>
+          <option value="Excluiu">Exclusões</option>
+          <option value="Restaurou">Restaurações</option>
+        </select>
+        <button class="btn btn-ghost" id="btnExportarAuditoria" style="padding:8px 12px;font-size:12px;">⬇ Exportar</button>
+      </div>
+      <div id="auditoriaLista" style="max-height:55vh;overflow-y:auto;"></div>
     </div>
   </div>
 </div>
@@ -1195,6 +1246,7 @@
       <div class="field">
         <label>Horário</label>
         <select id="editHorario"></select>
+        <div class="hint" id="editDataAviso" style="display:none;color:var(--danger);"></div>
         <div class="hint">Horários já ocupados por outro cliente aparecem desabilitados.</div>
       </div>
 
@@ -1322,7 +1374,7 @@
       <div class="cfg-painel" data-cfgpainel="servicos">
         <div class="field">
           <label>Tipos de atendimento e duração</label>
-          <p class="hint" style="margin-top:-4px;">Um por linha, no formato <code>Nome do serviço | minutos</code>. A duração define quanto tempo o atendimento ocupa na agenda. Acrescente <code>| docs</code> no final para o cliente receber a lista de documentos (ex: <code>Compra parcelada no boleto | 60 | docs</code>).</p>
+          <p class="hint" style="margin-top:-4px;">Um por linha, no formato <code>Nome | minutos</code>. Opcionalmente adicione um valor médio (<code>| R$ 50</code>) para estimar faturamento nas Métricas, e <code>| docs</code> para o cliente receber a lista de documentos. Ex: <code>Compra parcelada | 60 | R$ 80 | docs</code>.</p>
           <textarea id="cfgServicos" rows="5" placeholder="Avaliação de aparelho | 30&#10;Compra parcelada no boleto | 60 | docs"></textarea>
         </div>
         <div class="field">
@@ -1414,6 +1466,7 @@
           <option value="reagendamento">Pedir reagendamento</option>
           <option value="cancelamento">Confirmar cancelamento</option>
           <option value="pos_venda">Agradecimento pós-venda</option>
+          <option value="vaga_aberta">Avisar vaga aberta na fila</option>
           <option value="avaliacao">Pedir avaliação</option>
         </select>
         <div class="hint" id="msgHubAvisoContexto" style="display:none;color:var(--gold-dark);"></div>
@@ -1497,6 +1550,7 @@
   <div class="modal-shell">
     <div class="modal-close"><span id="fecharModal">✕</span></div>
 
+    <div class="recibo-scroll">
     <div id="reciboCard">
       <div class="r-border">
         <div class="r-inner" id="reciboInner">
@@ -1538,6 +1592,7 @@
           </div>
         </div>
       </div>
+    </div>
     </div>
 
     <div class="modal-actions">
@@ -1739,7 +1794,7 @@ function normalizarConfigLoja(obj){
   }
   obj.servicos = obj.servicos
     .filter(s=> s && s.nome)
-    .map(s=>({ nome:String(s.nome).trim(), duracao: Math.max(10, Number(s.duracao)||30) }));
+    .map(s=>({ nome:String(s.nome).trim(), duracao: Math.max(10, Number(s.duracao)||30), documentos: !!s.documentos, valor: Math.max(0, Number(s.valor)||0) }));
   if(!Number.isFinite(Number(obj.antecedenciaMin))) obj.antecedenciaMin = 60;
   if(!Number.isFinite(Number(obj.intervaloSlots))) obj.intervaloSlots = 30;
   return obj;
@@ -1875,32 +1930,17 @@ async function removerBloqueio(id){
   }
   cacheBloqueios = cacheBloqueios.filter(x=>x.id!==id);
 }
-// retorna o registro de "exceção de abertura" do dia (loja aberta mesmo sendo feriado ou dia da semana fechado), se houver
-function excecaoAberturaAtiva(iso){
-  return cacheBloqueios.find(b=>b.data===iso && b.excecaoAbertura);
-}
 // retorna {bloqueado, motivo} para o dia inteiro (feriado, dia da semana fechado ou bloqueio manual sem horário)
 function diaBloqueadoInfo(iso){
-  const manual = cacheBloqueios.find(b=>b.data===iso && !b.horario && !b.horarioLimite && !b.excecaoAbertura);
-  if(manual) return {bloqueado:true, motivo:manual.motivo || 'Bloqueado manualmente', automatico:false, id:manual.id};
-  if(excecaoAberturaAtiva(iso)) return {bloqueado:false};
   const feriado = nomeFeriado(iso);
   if(feriado) return {bloqueado:true, motivo:`Feriado — ${feriado}`, automatico:true};
   if(diaDaSemanaFechado(iso)){
     const dow = new Date(iso+'T12:00:00').getDay();
     return {bloqueado:true, motivo:`Loja fechada às ${NOMES_DIA_SEMANA[dow]}s`, automatico:true};
   }
+  const manual = cacheBloqueios.find(b=>b.data===iso && !b.horario && !b.horarioLimite);
+  if(manual) return {bloqueado:true, motivo:manual.motivo || 'Bloqueado manualmente', automatico:false, id:manual.id};
   return {bloqueado:false};
-}
-// cria/remove uma exceção que reabre um dia normalmente fechado (feriado ou dia da semana fechado)
-async function abrirDiaExcecao(iso){
-  const obj = await salvarBloqueio({ data: iso, excecaoAbertura:true, motivo:'Aberto por exceção', criadoEm: new Date().toISOString() });
-  cacheBloqueios.push(obj);
-  return obj;
-}
-async function cancelarExcecaoAbertura(iso){
-  const ex = excecaoAberturaAtiva(iso);
-  if(ex) await removerBloqueio(ex.id);
 }
 // retorna o bloqueio de "horário reduzido" do dia (expediente encurtado), se houver
 function horarioReduzidoInfo(iso){
@@ -2593,6 +2633,7 @@ function rerenderTudo(){
   if(document.getElementById('tab-hoje').style.display !== 'none') renderHoje();
   if(intervaloAlarmes) verificarAtrasados(); // só roda no painel admin, nunca no portal público do cliente
   if(intervaloLembretes) renderLembretesPendentes();
+  if(!window.__MODO_PUBLICO__ && document.getElementById('sinoBadge')) renderSino();
 }
 // Sincronização em tempo real: qualquer agendamento feito pelo link público (?portal=cliente),
 // em outro computador ou celular, aparece automaticamente no painel — sem precisar recarregar a página.
@@ -3012,11 +3053,19 @@ function abrirModalEditar(a){
 document.getElementById('editData').addEventListener('change', ()=>{
   const a = window.__edicaoAtual;
   if(!a) return;
-  const bloqueioDia = diaBloqueadoInfo(document.getElementById('editData').value);
+  const novaData = document.getElementById('editData').value;
+  const bloqueioDia = diaBloqueadoInfo(novaData);
   if(bloqueioDia.bloqueado){
     toast(`Atenção: esse dia está bloqueado (${bloqueioDia.motivo}), mas você ainda pode salvar se necessário.`);
   }
-  document.getElementById('editHorario').innerHTML = gerarOpcoesHorarioEdicao(document.getElementById('editData').value, a.id);
+  document.getElementById('editHorario').innerHTML = gerarOpcoesHorarioEdicao(novaData, a.id);
+  // avisa se o novo dia não tem nenhum horário livre
+  const temLivre = Array.from(document.getElementById('editHorario').options).some(o=>!o.disabled);
+  const aviso = document.getElementById('editDataAviso');
+  if(aviso){
+    aviso.style.display = temLivre ? 'none' : 'block';
+    aviso.textContent = temLivre ? '' : '⚠️ Esse dia não tem nenhum horário livre — só o horário atual do cliente aparece disponível.';
+  }
 });
 document.getElementById('editCpf').addEventListener('input', e=>{ e.target.value = maskCPF(e.target.value); });
 document.getElementById('editCelular').addEventListener('input', e=>{ e.target.value = maskCelular(e.target.value); });
@@ -3134,8 +3183,32 @@ function fmtDataHoraISO(iso){
   const d = new Date(iso);
   return `${pad(d.getDate())}/${pad(d.getMonth()+1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
+let cacheAuditoria = [];
+function renderAuditoriaFiltrada(){
+  const box = document.getElementById('auditoriaLista');
+  const termo = document.getElementById('auditoriaBusca').value.trim().toLowerCase();
+  const tipo = document.getElementById('auditoriaTipo').value;
+  let regs = cacheAuditoria;
+  if(tipo) regs = regs.filter(r=>(r.acao||'').startsWith(tipo));
+  if(termo) regs = regs.filter(r=>
+    (r.usuario||'').toLowerCase().includes(termo) ||
+    (r.acao||'').toLowerCase().includes(termo) ||
+    (r.detalhes||'').toLowerCase().includes(termo)
+  );
+  if(regs.length===0){
+    box.innerHTML = `<div class="empty-state">Nenhum registro para esse filtro.</div>`;
+    return;
+  }
+  box.innerHTML = regs.slice(0,300).map(r=>`
+    <div class="auditoria-item">
+      <div class="linha1"><span><b>${esc(r.usuario)||'—'}</b> — ${esc(r.acao)||''}</span><span class="quando">${r.quando?fmtDataHoraISO(r.quando):''}</span></div>
+      ${r.detalhes ? `<div class="detalhes">${esc(r.detalhes)}</div>` : ''}
+    </div>`).join('');
+}
 document.getElementById('btnAuditoria').addEventListener('click', async ()=>{
   const box = document.getElementById('auditoriaLista');
+  document.getElementById('auditoriaBusca').value = '';
+  document.getElementById('auditoriaTipo').value = '';
   box.innerHTML = `<div class="empty-state">Carregando...</div>`;
   document.getElementById('modalAuditoria').classList.add('show');
   if(!usandoFirestore){
@@ -3144,20 +3217,31 @@ document.getElementById('btnAuditoria').addEventListener('click', async ()=>{
   }
   try{
     const snap = await db.collection('auditoria').get();
-    const registros = snap.docs.map(d=>d.data()).sort((a,b)=> (b.quando||'').localeCompare(a.quando||'')).slice(0,150);
-    if(registros.length===0){
+    cacheAuditoria = snap.docs.map(d=>d.data()).sort((a,b)=> (b.quando||'').localeCompare(a.quando||'')).slice(0,500);
+    if(cacheAuditoria.length===0){
       box.innerHTML = `<div class="empty-state">Nenhum registro ainda.</div>`;
       return;
     }
-    box.innerHTML = registros.map(r=>`
-      <div class="auditoria-item">
-        <div class="linha1"><span><b>${esc(r.usuario)||'—'}</b> — ${esc(r.acao)||''}</span><span class="quando">${r.quando?fmtDataHoraISO(r.quando):''}</span></div>
-        ${r.detalhes ? `<div class="detalhes">${esc(r.detalhes)}</div>` : ''}
-      </div>`).join('');
+    renderAuditoriaFiltrada();
   }catch(e){
     console.error(e);
     box.innerHTML = `<div class="empty-state">Erro ao carregar o histórico.</div>`;
   }
+});
+document.getElementById('auditoriaBusca').addEventListener('input', renderAuditoriaFiltrada);
+document.getElementById('auditoriaTipo').addEventListener('change', renderAuditoriaFiltrada);
+document.getElementById('btnExportarAuditoria').addEventListener('click', ()=>{
+  if(cacheAuditoria.length===0){ toast('Nada para exportar.'); return; }
+  const linhas = [['Quando','Usuário','Ação','Detalhes']];
+  cacheAuditoria.forEach(r=> linhas.push([r.quando?fmtDataHoraISO(r.quando):'', r.usuario||'', r.acao||'', (r.detalhes||'').replace(/[\r\n]+/g,' ')]));
+  const csv = linhas.map(l=>l.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `auditoria-agenda-atlas-${hojeISO()}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Histórico exportado.');
 });
 document.getElementById('fecharModalAuditoria').onclick = ()=> document.getElementById('modalAuditoria').classList.remove('show');
 document.getElementById('modalAuditoria').addEventListener('click', e=>{ if(e.target.id==='modalAuditoria') document.getElementById('modalAuditoria').classList.remove('show'); });
@@ -3219,7 +3303,7 @@ function renderCfgHorariosDias(){
 document.getElementById('btnConfigLoja').addEventListener('click', ()=>{
   document.getElementById('cfgNomeLoja').value = CONFIG_LOJA.nome;
   document.getElementById('cfgEndereco').value = CONFIG_LOJA.endereco;
-  document.getElementById('cfgServicos').value = listaServicos().map(s=>`${s.nome} | ${s.duracao}${s.documentos?' | docs':''}`).join('\n');
+  document.getElementById('cfgServicos').value = listaServicos().map(s=>`${s.nome} | ${s.duracao}${s.valor?' | R$ '+s.valor:''}${s.documentos?' | docs':''}`).join('\n');
   document.getElementById('cfgDocumentos').value = documentosTexto();
   document.getElementById('cfgLimiteFaltas').value = limiteFaltas();
   document.getElementById('cfgAntecedencia').value = antecedenciaMinima();
@@ -3280,8 +3364,18 @@ document.getElementById('btnSalvarConfigLoja').addEventListener('click', async (
     .map(l=>l.trim())
     .filter(Boolean)
     .map(l=>{
-      const partes = l.split('|');
-      return { nome: (partes[0]||'').trim(), duracao: Math.max(10, parseInt(partes[1]) || 30), documentos: /doc/i.test(partes[2]||'') };
+      const partes = l.split('|').map(x=>x.trim());
+      const nome = partes[0] || '';
+      const duracao = Math.max(10, parseInt(partes[1]) || 30);
+      const documentos = partes.some(x=>/doc/i.test(x));
+      // valor: primeira parte (fora nome/duração) que tenha número e não seja "docs"
+      let valor = 0;
+      partes.slice(2).forEach(x=>{
+        if(/doc/i.test(x)) return;
+        const n = parseFloat(x.replace(/[^0-9,.]/g,'').replace(',','.'));
+        if(Number.isFinite(n) && n>0 && valor===0) valor = n;
+      });
+      return { nome, duracao, documentos, valor };
     })
     .filter(s=>s.nome);
   const antecedenciaMin = Math.max(0, parseInt(document.getElementById('cfgAntecedencia').value) || 0);
@@ -3514,10 +3608,7 @@ function renderBloqueiosPanel(iso){
     const podeLiberar = !info.automatico && info.id;
     avisoBox.innerHTML = `<div class="bloqueio-item" style="display:block;">
       🔒 <b>Dia inteiro bloqueado</b> — ${esc(info.motivo)}
-      ${podeLiberar
-        ? `<button data-liberar-dia="${info.id}" style="margin-top:6px;">Liberar o dia</button>`
-        : `<div class="hint" style="margin-top:4px;">Bloqueio automático (feriado ou dia de fechamento).</div>
-           <button data-abrir-excecao="1" style="margin-top:6px;">Abrir este dia mesmo assim</button>`}
+      ${podeLiberar ? `<button data-liberar-dia="${info.id}" style="margin-top:6px;">Liberar o dia</button>` : `<div class="hint" style="margin-top:4px;">Bloqueio automático (feriado ou dia de fechamento).</div>`}
     </div>`;
     const bl = avisoBox.querySelector('[data-liberar-dia]');
     if(bl) bl.addEventListener('click', async ()=>{
@@ -3526,32 +3617,9 @@ function renderBloqueiosPanel(iso){
       renderBloqueiosPanel(iso); renderCalendario();
       if(diaSelecionado===iso) renderDiaPanel(diaSelecionado); gerarSlots();
     });
-    const abrirEx = avisoBox.querySelector('[data-abrir-excecao]');
-    if(abrirEx) abrirEx.addEventListener('click', async ()=>{
-      try{
-        await abrirDiaExcecao(iso);
-        toast('Dia aberto por exceção.');
-        renderBloqueiosPanel(iso); renderCalendario();
-        if(diaSelecionado===iso) renderDiaPanel(diaSelecionado); gerarSlots();
-      }catch(e){ console.error(e); toast('Não foi possível abrir o dia.'); }
-    });
     return;
   }
-
-  const excecao = excecaoAberturaAtiva(iso);
-  avisoBox.innerHTML = excecao ? `<div class="bloqueio-item" style="display:block;">
-      🔓 <b>Dia aberto por exceção</b> — normalmente estaria fechado (feriado ou dia de fechamento).
-      <button data-cancelar-excecao="1" style="margin-top:6px;">Voltar ao fechamento automático</button>
-    </div>` : '';
-  const cancelEx = avisoBox.querySelector('[data-cancelar-excecao]');
-  if(cancelEx) cancelEx.addEventListener('click', async ()=>{
-    try{
-      await cancelarExcecaoAbertura(iso);
-      toast('Exceção removida — dia volta a seguir a regra automática.');
-      renderBloqueiosPanel(iso); renderCalendario();
-      if(diaSelecionado===iso) renderDiaPanel(diaSelecionado); gerarSlots();
-    }catch(e){ console.error(e); toast('Não foi possível remover a exceção.'); }
-  });
+  avisoBox.innerHTML = '';
   gradeBox.style.display = 'block';
 
   // grade de horários clicável
@@ -4309,7 +4377,59 @@ function renderPausaOnline(){
     definirPausaOnline(!pausado);
   });
 }
+/* ---------- sino de próximos agendamentos ---------- */
+function proximosAgendamentos(limite){
+  const agora = new Date();
+  const agoraChave = `${hojeISO()} ${pad(agora.getHours())}:${pad(agora.getMinutes())}`;
+  return cacheAgendamentos
+    .filter(a=> !a.excluidoEm && !STATUS_FINALIZADOS.includes(a.status) && (`${a.data} ${a.horario}`) >= agoraChave)
+    .sort((a,b)=> (a.data+a.horario).localeCompare(b.data+b.horario))
+    .slice(0, limite || 30);
+}
+function renderSino(){
+  const badge = document.getElementById('sinoBadge');
+  const lista = document.getElementById('sinoLista');
+  if(!badge || !lista) return;
+  const hoje = hojeISO();
+  const proximos = proximosAgendamentos(30);
+  const qtdHoje = proximos.filter(a=>a.data===hoje).length;
+  if(qtdHoje>0){ badge.style.display='flex'; badge.textContent = qtdHoje>9?'9+':qtdHoje; }
+  else { badge.style.display='none'; }
+
+  if(proximos.length===0){
+    lista.innerHTML = `<div class="sino-vazio">Nenhum agendamento pendente.</div>`;
+    return;
+  }
+  lista.innerHTML = proximos.slice(0,15).map(a=>{
+    const ehHoje = a.data===hoje;
+    const dataLabel = ehHoje ? 'Hoje' : fmtDataISOtoBR(a.data).slice(0,5);
+    return `<div class="sino-item" data-sino-id="${a.id}">
+      <div class="sino-hora">${dataLabel}<br>${a.horario}</div>
+      <div class="sino-info"><b>${esc(a.nome)}</b><span>${esc(a.celular)||''}${a.servico?(' · '+esc(a.servico)):''}</span></div>
+    </div>`;
+  }).join('');
+  lista.querySelectorAll('[data-sino-id]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const a = cacheAgendamentos.find(x=>x.id===el.dataset.sinoId);
+      document.getElementById('sinoPainel').classList.remove('show');
+      if(a) abrirRecibo(a);
+    });
+  });
+}
+document.getElementById('sinoBtn').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  const painel = document.getElementById('sinoPainel');
+  const abrindo = !painel.classList.contains('show');
+  if(abrindo) renderSino();
+  painel.classList.toggle('show');
+});
+document.addEventListener('click', (e)=>{
+  const wrap = document.getElementById('sinoWrap');
+  if(wrap && !wrap.contains(e.target)) document.getElementById('sinoPainel').classList.remove('show');
+});
+
 function renderHoje(){
+  renderSino();
   renderPausaOnline();
   renderHojeExtras();
   const hoje = hojeISO();
@@ -4458,6 +4578,31 @@ function renderMetricas(){
   renderAvaliacoes();
   renderEspera();
   renderAtendentes(base);
+  renderFaturamento(base);
+}
+
+function valorDoServico(nome){
+  const s = listaServicos().find(x=>x.nome===nome);
+  return s && s.valor ? s.valor : 0;
+}
+function renderFaturamento(base){
+  const box = document.getElementById('faturamentoResumo');
+  if(!box) return;
+  const temValor = listaServicos().some(s=>s.valor>0);
+  if(!temValor){
+    box.innerHTML = `<div class="hint">Nenhum serviço tem valor cadastrado. Adicione um valor aos serviços em Configurações → Serviços (ex: <code>Troca de tela | 30 | R$ 120</code>) para estimar o faturamento.</div>`;
+    return;
+  }
+  const vendas = base.filter(a=>a.status==='comprou');
+  const total = vendas.reduce((s,a)=> s + valorDoServico(a.servico), 0);
+  const semValor = vendas.filter(a=>valorDoServico(a.servico)===0).length;
+  const ticket = vendas.length>0 ? total/vendas.length : 0;
+  const fmt = (n)=> 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  box.innerHTML = `<div class="metric-grid" style="margin-bottom:0;">
+    <div class="metric-card"><div class="num">${fmt(total)}</div><div class="lbl">Faturamento estimado</div></div>
+    <div class="metric-card"><div class="num">${vendas.length}</div><div class="lbl">Vendas no período</div></div>
+    <div class="metric-card"><div class="num">${fmt(ticket)}</div><div class="lbl">Ticket médio</div></div>
+  </div>${semValor>0?`<div class="hint" style="margin-top:8px;">⚠️ ${semValor} venda(s) sem valor cadastrado no serviço não entraram na conta.</div>`:''}`;
 }
 
 /* ---------- desempenho por atendente ---------- */
