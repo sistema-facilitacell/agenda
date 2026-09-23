@@ -442,6 +442,25 @@
   .config-banner code{background:#fdebcf;padding:1px 5px;border-radius:4px;}
 
   .auditoria-item{padding:10px 0;border-bottom:1px solid var(--line);font-size:12.8px;}
+  .link-item{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+  .cfg-abas{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px;border-bottom:1px solid var(--line);padding-bottom:2px;}
+  .cfg-aba{padding:7px 11px;border:none;background:none;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;border-radius:8px 8px 0 0;border-bottom:2px solid transparent;margin-bottom:-3px;}
+  .cfg-aba:hover{color:var(--navy);}
+  .cfg-aba.ativa{color:var(--navy);border-bottom-color:var(--gold);}
+  .cfg-painel{display:none;}
+  .cfg-painel.ativo{display:block;}
+  body.dark-mode .cfg-aba{color:var(--muted);}
+  body.dark-mode .cfg-aba:hover,body.dark-mode .cfg-aba.ativa{color:var(--gold-2);}
+  .link-item .li-topo{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+  .link-item .li-ico{font-size:16px;}
+  .link-item .li-nome{font-weight:700;font-size:13.5px;color:var(--navy);}
+  .link-item .li-desc{font-size:11.5px;color:var(--muted);margin-bottom:8px;}
+  .link-item .li-acoes{display:flex;gap:6px;}
+  .link-item .li-acoes button{flex:1;padding:7px 8px;font-size:11.5px;border-radius:8px;border:1.5px solid var(--line);background:#fff;cursor:pointer;font-weight:600;}
+  .link-item .li-acoes button.wpp{background:#dcf3e4;border-color:#a9d9bd;color:#1a6b3f;}
+  .link-item .li-acoes button:hover{filter:brightness(.97);}
+  body.dark-mode .link-item .li-nome{color:var(--gold-2);}
+  body.dark-mode .link-item .li-acoes button{background:var(--card-bg);color:var(--ink);border-color:var(--card-border);}
   .auditoria-item .linha1{display:flex;justify-content:space-between;gap:8px;}
   .auditoria-item b{color:var(--navy);}
   .auditoria-item .quando{color:var(--muted);font-size:11px;white-space:nowrap;}
@@ -925,6 +944,12 @@
         <div class="metric-card"><div class="num" id="mNaoComparecimento">0%</div><div class="lbl">Taxa de não comparecimento</div></div>
       </div>
 
+      <div class="meta-card" id="cardAtendentes">
+        <h2 style="margin-bottom:2px;font-size:16px;">🧑‍💼 Desempenho por atendente</h2>
+        <p class="sub" style="margin:0 0 10px;">Quem agendou e quanto converteu em venda — no período selecionado acima</p>
+        <div id="atendentesResumo"></div>
+      </div>
+
       <div class="meta-card" id="cardEspera">
         <h2 style="margin-bottom:2px;font-size:16px;">⏱️ Tempo de espera na loja</h2>
         <p class="sub" style="margin:0 0 10px;">Da chegada (check-in) até a situação mudar para "Em atendimento" — mês atual</p>
@@ -1178,6 +1203,22 @@
         <select id="editCategoria"></select>
       </div>
 
+      <div class="row2">
+        <div class="field">
+          <label>Tipo de atendimento</label>
+          <select id="editServico"></select>
+        </div>
+        <div class="field">
+          <label>Atendente responsável</label>
+          <input type="text" id="editAtendente" placeholder="Nome de quem atende">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Data de nascimento (opcional)</label>
+        <input type="date" id="editNasc">
+      </div>
+
       <div class="field">
         <label>Observações</label>
         <textarea id="editObs" placeholder="Ex: Cliente interessado em troca de aparelho, retirada de peça, etc."></textarea>
@@ -1251,45 +1292,69 @@
     <div class="card" style="margin-bottom:0;">
       <h2>⚙️ Configurações da Loja</h2>
       <p class="sub">Esses dados aparecem no cabeçalho, no recibo e nas mensagens automáticas.</p>
-      <div class="field">
-        <label>Nome da loja</label>
-        <input type="text" id="cfgNomeLoja" placeholder="Ex: Nome da sua loja">
+
+      <div class="cfg-abas">
+        <button class="cfg-aba ativa" data-cfgaba="loja">🏬 Loja</button>
+        <button class="cfg-aba" data-cfgaba="horarios">🕐 Horários</button>
+        <button class="cfg-aba" data-cfgaba="servicos">🛠️ Serviços</button>
+        <button class="cfg-aba" data-cfgaba="regras">🔒 Regras</button>
+        <button class="cfg-aba" data-cfgaba="backup">💾 Backup</button>
       </div>
-      <div class="field">
-        <label>Endereço completo</label>
-        <textarea id="cfgEndereco" placeholder="Ex: Av. República Argentina, 1968, Bairro Maracanã, Foz do Iguaçu/PR"></textarea>
+
+      <div class="cfg-painel ativo" data-cfgpainel="loja">
+        <div class="field">
+          <label>Nome da loja</label>
+          <input type="text" id="cfgNomeLoja" placeholder="Ex: Nome da sua loja">
+        </div>
+        <div class="field">
+          <label>Endereço completo</label>
+          <textarea id="cfgEndereco" placeholder="Ex: Av. República Argentina, 1968, Bairro Maracanã, Foz do Iguaçu/PR"></textarea>
+        </div>
       </div>
-      <div class="field">
-        <label>Horário de atendimento por dia da semana</label>
-        <div id="cfgHorariosDias"></div>
+
+      <div class="cfg-painel" data-cfgpainel="horarios">
+        <div class="field">
+          <label>Horário de atendimento por dia da semana</label>
+          <div id="cfgHorariosDias"></div>
+        </div>
       </div>
-      <div class="field">
-        <label>Tipos de atendimento e duração</label>
-        <p class="hint" style="margin-top:-4px;">Um por linha, no formato <code>Nome do serviço | minutos</code>. A duração define quanto tempo o atendimento ocupa na agenda. Acrescente <code>| docs</code> no final para o cliente receber a lista de documentos (ex: <code>Compra parcelada no boleto | 60 | docs</code>).</p>
-        <textarea id="cfgServicos" rows="5" placeholder="Avaliação de aparelho | 30&#10;Compra parcelada no boleto | 60 | docs"></textarea>
+
+      <div class="cfg-painel" data-cfgpainel="servicos">
+        <div class="field">
+          <label>Tipos de atendimento e duração</label>
+          <p class="hint" style="margin-top:-4px;">Um por linha, no formato <code>Nome do serviço | minutos</code>. A duração define quanto tempo o atendimento ocupa na agenda. Acrescente <code>| docs</code> no final para o cliente receber a lista de documentos (ex: <code>Compra parcelada no boleto | 60 | docs</code>).</p>
+          <textarea id="cfgServicos" rows="5" placeholder="Avaliação de aparelho | 30&#10;Compra parcelada no boleto | 60 | docs"></textarea>
+        </div>
+        <div class="field">
+          <label>Documentos que o cliente deve trazer</label>
+          <p class="hint" style="margin-top:-4px;">Vai no recibo e nas mensagens de confirmação e lembrete dos serviços marcados com <code>| docs</code>.</p>
+          <textarea id="cfgDocumentos" rows="2"></textarea>
+        </div>
       </div>
-      <div class="field">
-        <label>Documentos que o cliente deve trazer</label>
-        <p class="hint" style="margin-top:-4px;">Vai no recibo e nas mensagens de confirmação e lembrete dos serviços marcados com <code>| docs</code>.</p>
-        <textarea id="cfgDocumentos" rows="2"></textarea>
+
+      <div class="cfg-painel" data-cfgpainel="regras">
+        <div class="field">
+          <label>Bloquear agendamento online após quantas faltas?</label>
+          <p class="hint" style="margin-top:-4px;">Quem atingir esse número de "Não compareceu" não consegue mais agendar pelo link e é orientado a falar com a loja. Use 0 para desativar.</p>
+          <input type="number" id="cfgLimiteFaltas" min="0" step="1" placeholder="3">
+        </div>
+        <div class="field">
+          <label>Antecedência mínima para o cliente agendar (minutos)</label>
+          <input type="number" id="cfgAntecedencia" min="0" step="10" placeholder="60">
+          <p class="hint" style="margin-top:4px;">Horários que começam antes disso somem do link público. Use 0 para permitir agendamento para daqui a pouco.</p>
+        </div>
       </div>
-      <div class="field">
-        <label>Bloquear agendamento online após quantas faltas?</label>
-        <p class="hint" style="margin-top:-4px;">Quem atingir esse número de "Não compareceu" não consegue mais agendar pelo link e é orientado a falar com a loja. Use 0 para desativar.</p>
-        <input type="number" id="cfgLimiteFaltas" min="0" step="1" placeholder="3">
+
+      <div class="cfg-painel" data-cfgpainel="backup">
+        <div class="field">
+          <label>Backup completo do sistema</label>
+          <p class="hint" style="margin-top:-4px;">Baixa um arquivo com todos os agendamentos, bloqueios, fila de espera e configurações — guarde uma cópia de vez em quando, pra nunca depender só do Firestore.</p>
+          <button class="btn btn-ghost" id="btnBackupJSON" style="width:100%;">⬇ Baixar backup (.json)</button>
+        </div>
       </div>
-      <div class="field">
-        <label>Antecedência mínima para o cliente agendar (minutos)</label>
-        <input type="number" id="cfgAntecedencia" min="0" step="10" placeholder="60">
-        <p class="hint" style="margin-top:4px;">Horários que começam antes disso somem do link público. Use 0 para permitir agendamento para daqui a pouco.</p>
-      </div>
-      <div class="btn-row">
+
+      <div class="btn-row" style="margin-top:8px;">
         <button class="btn btn-primary" id="btnSalvarConfigLoja">✓ Salvar configurações</button>
-      </div>
-      <div class="field" style="border-top:1px solid var(--line);padding-top:16px;margin-top:6px;">
-        <label>Backup completo do sistema</label>
-        <p class="hint" style="margin-top:-4px;">Baixa um arquivo com todos os agendamentos, bloqueios, fila de espera e configurações — guarde uma cópia de vez em quando, pra nunca depender só do Firestore.</p>
-        <button class="btn btn-ghost" id="btnBackupJSON" style="width:100%;">⬇ Baixar backup (.json)</button>
       </div>
     </div>
   </div>
@@ -1379,6 +1444,18 @@
       <h2>🖼️ Foto do aparelho/produto</h2>
       <p class="sub" id="fotoProdutoSubtitulo">—</p>
       <img id="fotoProdutoImg" style="max-width:100%;border-radius:10px;border:1px solid var(--line);margin-top:8px;">
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LINKS DO CLIENTE (por agendamento) -->
+<div class="modal-bg" id="modalLinks">
+  <div class="modal-shell" style="max-width:480px;">
+    <div class="modal-close"><span id="fecharModalLinks">✕</span></div>
+    <div class="card" style="margin-bottom:0;">
+      <h2>🔗 Links do cliente</h2>
+      <p class="sub" id="linksSubtitulo">—</p>
+      <div id="linksLista"></div>
     </div>
   </div>
 </div>
@@ -2582,6 +2659,7 @@ function abrirMenuAcoesFlutuante(id, botaoEl){
     <button class="acoes-item" data-m-editar><span>✏️</span> Editar</button>
     <button class="acoes-item" data-m-duplicar><span>🔁</span> Repetir agendamento</button>
     <button class="acoes-item" data-m-timeline><span>🕐</span> Histórico</button>
+    <button class="acoes-item" data-m-links><span>🔗</span> Links do cliente</button>
     <div class="acoes-divisor"></div>
     <div class="acoes-msg-row">
       <select class="msg-tipo-select" data-m-msgtipo>
@@ -2609,6 +2687,7 @@ function abrirMenuAcoesFlutuante(id, botaoEl){
   menu.querySelector('[data-m-editar]').addEventListener('click', ()=>{ menu.classList.remove('show'); abrirModalEditar(a); });
   menu.querySelector('[data-m-duplicar]').addEventListener('click', ()=>{ menu.classList.remove('show'); duplicarAgendamento(a); });
   menu.querySelector('[data-m-timeline]').addEventListener('click', ()=>{ menu.classList.remove('show'); abrirTimeline(a); });
+  menu.querySelector('[data-m-links]').addEventListener('click', ()=>{ menu.classList.remove('show'); abrirModalLinks(a); });
   menu.querySelector('[data-m-excluir]').addEventListener('click', ()=>{ menu.classList.remove('show'); confirmarExclusao(a); });
   const sel = menu.querySelector('[data-m-msgtipo]');
   menu.querySelector('[data-m-msg-enviar]').addEventListener('click', ()=>{ menu.classList.remove('show'); abrirWhatsAppComMensagem(a, sel.value); });
@@ -2684,6 +2763,60 @@ function montarLinkVisualizacao(){
   url.searchParams.set('visualizar', '1');
   return url.toString();
 }
+
+/* ---------- modal de links por agendamento ---------- */
+function abrirModalLinks(a){
+  document.getElementById('linksSubtitulo').textContent = `${a.nome} — ${fmtDataISOtoBR(a.data)} às ${a.horario}`;
+  const cel = apenasDigitos(a.celular);
+  const nomeCurto = (a.nome||'').split(' ')[0];
+  // cada link: nome, descrição, a URL, e um texto pronto pra mandar no WhatsApp
+  const links = [
+    {
+      ico:'✅', nome:'Confirmar presença',
+      desc:'O cliente confirma que vem, ou avisa que não poderá (cancela). Tudo na mesma tela.',
+      url: montarLinkConfirmacao(a),
+      msg: `Olá ${nomeCurto}! Confirme sua presença no atendimento de ${fmtDataISOtoBR(a.data)} às ${a.horario} (ou avise se não puder vir):`
+    },
+    {
+      ico:'🔁', nome:'Reagendar horário',
+      desc:'O cliente escolhe sozinho uma nova data e horário, sem precisar te ligar.',
+      url: montarLinkReagendar(a),
+      msg: `Olá ${nomeCurto}! Se precisar mudar o horário do seu atendimento, escolha um novo aqui:`
+    },
+    {
+      ico:'⭐', nome:'Avaliar atendimento',
+      desc:'Envie depois do atendimento — o cliente dá uma nota de 0 a 10.',
+      url: montarLinkAvaliacao(a),
+      msg: `Olá ${nomeCurto}! Obrigado pela visita à ${CONFIG_LOJA.nome}. Que nota você dá pro nosso atendimento? Leva 10 segundos:`
+    }
+  ];
+  document.getElementById('linksLista').innerHTML = links.map((l,i)=>`
+    <div class="link-item">
+      <div class="li-topo"><span class="li-ico">${l.ico}</span><span class="li-nome">${esc(l.nome)}</span></div>
+      <div class="li-desc">${esc(l.desc)}</div>
+      <div class="li-acoes">
+        <button data-copiar="${i}">📋 Copiar link</button>
+        ${cel ? `<button class="wpp" data-wpp="${i}">📤 Enviar no WhatsApp</button>` : ''}
+      </div>
+    </div>`).join('');
+
+  const box = document.getElementById('linksLista');
+  box.querySelectorAll('[data-copiar]').forEach(btn=>btn.addEventListener('click', async ()=>{
+    const l = links[+btn.dataset.copiar];
+    try{ await navigator.clipboard.writeText(l.url); toast('Link copiado!'); }
+    catch(e){ toast('Não foi possível copiar automaticamente.'); }
+  }));
+  box.querySelectorAll('[data-wpp]').forEach(btn=>btn.addEventListener('click', ()=>{
+    const l = links[+btn.dataset.wpp];
+    const texto = `${l.msg}\n${l.url}`;
+    window.open(`https://wa.me/55${cel}?text=${encodeURIComponent(texto)}`, '_blank');
+  }));
+
+  document.getElementById('modalLinks').classList.add('show');
+}
+document.getElementById('fecharModalLinks').onclick = ()=> document.getElementById('modalLinks').classList.remove('show');
+document.getElementById('modalLinks').addEventListener('click', e=>{ if(e.target.id==='modalLinks') document.getElementById('modalLinks').classList.remove('show'); });
+
 document.getElementById('btnLinkVisualizacao').addEventListener('click', ()=>{
   document.getElementById('linkVisualizacaoInput').value = montarLinkVisualizacao();
   document.getElementById('modalLinkVisualizacao').classList.add('show');
@@ -2852,6 +2985,10 @@ function abrirModalEditar(a){
   document.getElementById('editObs').value = a.observacao || '';
   document.getElementById('editCategoria').innerHTML = CATEGORIAS_LIST.map(c=>`<option value="${c.v}">${c.label}</option>`).join('');
   document.getElementById('editCategoria').value = a.categoria || '';
+  document.getElementById('editServico').innerHTML = listaServicos().map(s=>`<option value="${esc(s.nome)}">${esc(s.nome)} (${s.duracao} min)</option>`).join('');
+  document.getElementById('editServico').value = a.servico || (listaServicos()[0]||{}).nome || '';
+  document.getElementById('editAtendente').value = a.atendente || '';
+  document.getElementById('editNasc').value = a.nascimento || '';
   document.getElementById('editHorario').innerHTML = gerarOpcoesHorarioEdicao(a.data, a.id);
   document.getElementById('editHorario').value = a.horario;
   window.__edicaoAtual = a;
@@ -2882,6 +3019,11 @@ document.getElementById('btnSalvarEdicao').addEventListener('click', async ()=>{
   const horario = document.getElementById('editHorario').value;
   const observacao = document.getElementById('editObs').value.trim();
   const categoria = document.getElementById('editCategoria').value;
+  const servico = document.getElementById('editServico').value;
+  const atendente = document.getElementById('editAtendente').value.trim();
+  const nascimento = document.getElementById('editNasc').value;
+  const servObj = listaServicos().find(s=>s.nome===servico);
+  const duracao = servObj ? servObj.duracao : (a.duracao || 30);
 
   if(!nome){ toast('Informe o nome do cliente.'); return; }
   if(cpf.replace(/\D/g,'').length===11 && !validaCPF(cpf)){ toast('CPF inválido — confira os números.'); return; }
@@ -2892,7 +3034,7 @@ document.getElementById('btnSalvarEdicao').addEventListener('click', async ()=>{
   const btn = document.getElementById('btnSalvarEdicao');
   btn.disabled = true; btn.textContent = 'Salvando...';
   try{
-    await atualizarAgendamento(a.id, { nome, cpf, celular, data, horario, observacao, categoria });
+    await atualizarAgendamento(a.id, { nome, cpf, celular, data, horario, observacao, categoria, servico, duracao, atendente, nascimento });
     toast('Agendamento atualizado com sucesso!');
     document.getElementById('modalEditar').classList.remove('show');
     renderLista(); renderCalendario();
@@ -2913,7 +3055,11 @@ function renderLixeira(){
     return;
   }
   const ordenada = [...cacheLixeira].sort((a,b)=> (b.excluidoEm||'').localeCompare(a.excluidoEm||''));
-  box.innerHTML = ordenada.map(a=>`
+  box.innerHTML = `
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px;flex-wrap:wrap;">
+      <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;" id="btnRestaurarTudo">↩ Restaurar tudo (${ordenada.length})</button>
+      <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;color:#b3432b;" id="btnEsvaziarLixeira">🗑️ Esvaziar lixeira</button>
+    </div>` + ordenada.map(a=>`
     <div class="lixeira-item">
       <div class="info">
         <b>${esc(a.nome)}</b>
@@ -2924,6 +3070,24 @@ function renderLixeira(){
         <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;color:#b3432b;" data-apagar="${a.id}">Apagar já</button>
       </div>
     </div>`).join('');
+
+  document.getElementById('btnRestaurarTudo').addEventListener('click', async ()=>{
+    if(!window.confirm(`Restaurar todos os ${ordenada.length} agendamentos da lixeira de volta para a lista?`)) return;
+    const btn = document.getElementById('btnRestaurarTudo');
+    btn.disabled = true; btn.textContent = 'Restaurando...';
+    for(const item of ordenada){ await restaurarDaLixeira(item.id); }
+    toast(`${ordenada.length} agendamento(s) restaurado(s).`);
+    renderLixeira(); renderLista(); renderCalendario();
+    if(diaSelecionado) renderDiaPanel(diaSelecionado);
+  });
+  document.getElementById('btnEsvaziarLixeira').addEventListener('click', async ()=>{
+    if(!window.confirm(`Apagar DEFINITIVAMENTE todos os ${ordenada.length} agendamentos da lixeira?\n\nEssa ação não pode ser desfeita.`)) return;
+    const btn = document.getElementById('btnEsvaziarLixeira');
+    btn.disabled = true; btn.textContent = 'Apagando...';
+    for(const item of ordenada){ await excluirPermanentemente(item.id); }
+    toast('Lixeira esvaziada.');
+    renderLixeira();
+  });
   box.querySelectorAll('button[data-restaurar]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
       await restaurarDaLixeira(btn.dataset.restaurar);
@@ -3045,7 +3209,17 @@ document.getElementById('btnConfigLoja').addEventListener('click', ()=>{
   document.getElementById('cfgLimiteFaltas').value = limiteFaltas();
   document.getElementById('cfgAntecedencia').value = antecedenciaMinima();
   renderCfgHorariosDias();
+  // sempre volta pra primeira aba ao abrir
+  document.querySelectorAll('.cfg-aba').forEach(t=>t.classList.toggle('ativa', t.dataset.cfgaba==='loja'));
+  document.querySelectorAll('.cfg-painel').forEach(pn=>pn.classList.toggle('ativo', pn.dataset.cfgpainel==='loja'));
   document.getElementById('modalConfigLoja').classList.add('show');
+});
+document.querySelectorAll('.cfg-aba').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    const alvo = tab.dataset.cfgaba;
+    document.querySelectorAll('.cfg-aba').forEach(t=>t.classList.toggle('ativa', t===tab));
+    document.querySelectorAll('.cfg-painel').forEach(pn=>pn.classList.toggle('ativo', pn.dataset.cfgpainel===alvo));
+  });
 });
 document.getElementById('fecharModalConfig').onclick = ()=> document.getElementById('modalConfigLoja').classList.remove('show');
 document.getElementById('fecharModalVaga').onclick = ()=> document.getElementById('modalVagaAberta').classList.remove('show');
@@ -4242,6 +4416,47 @@ function renderMetricas(){
   renderMetaMensal();
   renderAvaliacoes();
   renderEspera();
+  renderAtendentes(base);
+}
+
+/* ---------- desempenho por atendente ---------- */
+function renderAtendentes(base){
+  const box = document.getElementById('atendentesResumo');
+  if(!box) return;
+  const porAtendente = {};
+  base.forEach(a=>{
+    const nome = (a.atendente||'').trim();
+    if(!nome) return;
+    if(!porAtendente[nome]) porAtendente[nome] = { total:0, vendas:0, compareceu:0, faltou:0 };
+    const p = porAtendente[nome];
+    p.total++;
+    if(a.status==='comprou') p.vendas++;
+    if(a.status==='compareceu'||a.status==='comprou') p.compareceu++;
+    if(a.status==='nao_compareceu') p.faltou++;
+  });
+  const linhas = Object.entries(porAtendente).sort((a,b)=>b[1].total-a[1].total);
+  if(linhas.length===0){
+    box.innerHTML = `<div class="hint">Nenhum atendimento com atendente preenchido neste período. Preencha o campo "Atendente responsável" ao agendar para acompanhar o desempenho de cada um.</div>`;
+    return;
+  }
+  box.innerHTML = `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+    <thead><tr>
+      <th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);">Atendente</th>
+      <th style="text-align:center;padding:6px 8px;border-bottom:1px solid var(--line);">Agendou</th>
+      <th style="text-align:center;padding:6px 8px;border-bottom:1px solid var(--line);">Vendas</th>
+      <th style="text-align:center;padding:6px 8px;border-bottom:1px solid var(--line);">Conversão</th>
+    </tr></thead><tbody>
+    ${linhas.map(([nome,p])=>{
+      const conv = p.total>0 ? Math.round((p.vendas/p.total)*100) : 0;
+      const corConv = conv>=40 ? 'var(--ok)' : (conv>=20 ? 'var(--gold-dark)' : 'var(--muted)');
+      return `<tr>
+        <td style="padding:7px 8px;border-bottom:1px solid var(--line);font-weight:600;">${esc(nome)}</td>
+        <td style="text-align:center;padding:7px 8px;border-bottom:1px solid var(--line);">${p.total}</td>
+        <td style="text-align:center;padding:7px 8px;border-bottom:1px solid var(--line);">${p.vendas}</td>
+        <td style="text-align:center;padding:7px 8px;border-bottom:1px solid var(--line);color:${corConv};font-weight:700;">${conv}%</td>
+      </tr>`;
+    }).join('')}
+    </tbody></table></div>`;
 }
 
 /* ---------- tempo de espera, nao confirmados e cliente sem agendamento ---------- */
