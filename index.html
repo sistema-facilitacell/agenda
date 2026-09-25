@@ -160,7 +160,7 @@
   .sino-btn{position:relative;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;}
   .sino-btn:hover{background:rgba(255,255,255,.2);}
   .sino-badge{position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--navy);}
-  .sino-painel{position:absolute;top:48px;right:0;width:300px;max-height:400px;overflow-y:auto;background:#fff;border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.3);padding:8px;display:none;z-index:250;}
+  .sino-painel{position:fixed;top:60px;right:20px;width:300px;max-height:70vh;overflow-y:auto;background:#fff;border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.3);padding:8px;display:none;z-index:3000;}
   .sino-painel.show{display:block;}
   .sino-cabecalho{font-weight:700;font-size:13px;color:var(--navy);padding:8px 10px 10px;border-bottom:1px solid var(--line);margin-bottom:4px;}
   .sino-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:.12s;}
@@ -173,7 +173,7 @@
   body.dark-mode .sino-painel{background:var(--card-bg);}
   body.dark-mode .sino-cabecalho{color:var(--gold-2);border-color:var(--card-border);}
   body.dark-mode .sino-item:hover{background:#2a2f3d;}
-  @media (max-width:600px){ .sino-painel{width:calc(100vw - 40px);right:-8px;} }
+  @media (max-width:600px){ .sino-painel{width:calc(100vw - 24px);right:12px;left:12px;} }
 
   .app-shell{max-width:1300px;margin:18px auto 0;display:flex;align-items:flex-start;gap:0;padding:0 22px;}
   .sidebar{
@@ -532,6 +532,8 @@
   .bloqueio-item button{background:none;border:none;color:#8a1f1f;font-weight:700;cursor:pointer;font-size:11.5px;text-decoration:underline;}
   .bloqueio-form select, .bloqueio-form input{margin-bottom:8px;}
   .day-blocked{background:#f7e4de !important;border-color:#e3b4a4 !important;}
+  .day-reduced{background:#fdf3d6 !important;border-color:#e6cf8f !important;}
+  .badge-mini{background:var(--gold);color:#3a2f12;font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;margin-left:4px;}
   .day-blocked .cal-count{color:#b3432b !important;}
 
   /* Métricas */
@@ -545,6 +547,15 @@
   .hoje-proximo .horario-grande{font-size:30px;font-weight:800;font-family:'Playfair Display',serif;color:var(--gold-2);}
 
   .hoje-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);}
+  .hoje-acoes-rapidas{display:flex;gap:4px;flex-shrink:0;margin-left:auto;}
+  .hja{width:34px;height:34px;border-radius:9px;border:1.5px solid var(--line);background:#fff;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;transition:.12s;}
+  .hja:hover{transform:scale(1.08);}
+  .hja-ok:hover{background:#dcf3e4;border-color:#a9d9bd;}
+  .hja-nao:hover{background:#fbe1da;border-color:#e6a09a;}
+  .hja-reag:hover{background:#ece2f7;border-color:#c9b3e0;}
+  .hja-canc:hover{background:#fbe1da;border-color:#e6a09a;}
+  body.dark-mode .hja{background:var(--card-bg);border-color:var(--card-border);}
+  @media (max-width:600px){ .hoje-item{flex-wrap:wrap;} .hoje-acoes-rapidas{margin-left:0;width:100%;justify-content:flex-end;} }
   .hoje-item:last-child{border-bottom:none;}
   .hoje-item .hora{width:56px;flex-shrink:0;font-weight:700;color:var(--navy);font-size:13.5px;}
   .hoje-item .info{flex:1;min-width:0;}
@@ -578,6 +589,19 @@
 
   /* Busca por protocolo */
   .busca-protocolo{background:#f7f4ec;border:1.5px dashed var(--gold);border-radius:12px;padding:14px 16px;margin-bottom:18px;}
+  .ficha-cliente{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px;}
+  .ficha-cabecalho b{font-size:15px;color:var(--navy);display:block;}
+  .ficha-cabecalho span{font-size:12px;color:var(--muted);}
+  .ficha-resumo{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0;padding:8px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:12px;color:var(--ink);}
+  .ficha-historico{margin-top:8px;}
+  .ficha-hist-item{padding:8px 0;border-bottom:1px solid var(--line);}
+  .ficha-hist-item:last-child{border-bottom:none;}
+  .fhi-topo{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .fhi-proto{font-family:monospace;font-size:11.5px;font-weight:700;color:var(--gold-dark);}
+  .fhi-data{font-size:12px;color:var(--ink);}
+  .fhi-detalhes{font-size:11.5px;color:var(--muted);margin-top:3px;}
+  body.dark-mode .ficha-cabecalho b{color:var(--gold-2);}
+  body.dark-mode .ficha-cliente{border-color:var(--card-border);}
   .busca-protocolo .lbl{display:block;font-size:12.5px;font-weight:700;color:var(--navy);margin-bottom:8px;}
   .busca-protocolo-row{display:flex;gap:10px;flex-wrap:wrap;}
   .busca-protocolo-row input{flex:1;min-width:200px;text-transform:uppercase;}
@@ -706,12 +730,14 @@
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
         <span class="sino-badge" id="sinoBadge" style="display:none;">0</span>
       </button>
-      <div class="sino-painel" id="sinoPainel">
-        <div class="sino-cabecalho">🔔 Próximos agendamentos</div>
-        <div id="sinoLista"></div>
-      </div>
     </div>
   </div>
+</div>
+
+<!-- painel do sino: fica FORA da topbar pra não ser cortado pelo overflow:hidden dela -->
+<div class="sino-painel" id="sinoPainel">
+  <div class="sino-cabecalho">🔔 Próximos agendamentos</div>
+  <div id="sinoLista"></div>
 </div>
 
 <div class="app-shell">
@@ -725,6 +751,7 @@
   <div class="tab" data-tab="checkin"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>Check-in</span></div>
 
   <div class="sidebar-titulo">Ferramentas</div>
+  <div class="tab tab-config" id="btnFichaCliente"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Ficha do cliente</span></div>
   <div class="tab tab-config" id="btnMensagensWhats"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Mensagens</span></div>
   <div class="tab tab-config" id="btnAuditoria"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg><span>Auditoria</span></div>
   <div class="tab tab-config" id="btnBloqueios"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Bloqueios</span></div>
@@ -761,7 +788,7 @@
         <div class="metric-card"><div class="num" id="hojeTotal">0</div><div class="lbl">Agendamentos hoje</div></div>
         <div class="metric-card"><div class="num" id="hojeRestantes">0</div><div class="lbl">Ainda por vir</div></div>
         <div class="metric-card"><div class="num" id="hojeFinalizados">0</div><div class="lbl">Já finalizados</div></div>
-        <div class="metric-card"><div class="num" id="hojeFilaQtd">0</div><div class="lbl">Na fila de espera</div></div>
+        <div class="metric-card" style="display:none;"><div class="num" id="hojeFilaQtd">0</div><div class="lbl">Na fila de espera</div></div>
       </div>
 
       <div id="hojeProximoBox"></div>
@@ -796,6 +823,11 @@
         </div>
         <div class="cal-grid" id="calDow"></div>
         <div class="cal-grid" id="calGrid" style="margin-top:6px;"></div>
+        <div class="cal-legenda" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:11px;color:var(--muted);">
+          <span>🚫 Feriado / loja fechada</span>
+          <span>🔒 Dia bloqueado</span>
+          <span>⏱️ Expediente reduzido</span>
+        </div>
       </div>
       <div class="card">
         <h2 id="dayPanelTitle">Selecione um dia</h2>
@@ -809,7 +841,7 @@
 
         <button class="btn btn-ghost" id="btnAbrirBloqueiosDoDia" style="width:100%;margin-top:14px;">🔒 Gerenciar bloqueios deste dia</button>
 
-        <span class="bloqueio-toggle" id="toggleFila">⏳ Fila de espera deste dia ▾</span>
+        <span class="bloqueio-toggle" id="toggleFila" style="display:none;">⏳ Fila de espera deste dia ▾</span>
         <div class="bloqueio-panel" id="filaPanel">
           <div id="filaAtivaLista"></div>
         </div>
@@ -1034,10 +1066,10 @@
     <div class="card">
       <div class="checkin-hero">
         <h2 style="margin-bottom:2px;">Check-in de Chegada</h2>
-        <p class="sub">Digite o CPF, o nome ou o protocolo para confirmar a chegada na loja</p>
-        <input type="text" id="checkinBusca" placeholder="CPF, nome ou protocolo (ex: AG-2026-0001)">
+        <p class="sub">Digite o número do protocolo e confirme. O cliente é marcado como confirmado na hora.</p>
+        <input type="text" id="checkinBusca" placeholder="Protocolo (ex: AG-2026-0001 ou só 0001)">
         <div class="btn-row" style="justify-content:center;">
-          <button class="btn btn-primary" id="btnCheckinBuscar">🔎 Buscar agendamento de hoje</button>
+          <button class="btn btn-primary" id="btnCheckinBuscar">🔎 Buscar</button>
         </div>
       </div>
       <div class="checkin-result" id="checkinResultado"></div>
@@ -1291,6 +1323,12 @@
     <div class="card" style="margin-bottom:0;">
       <h2>🔒 Bloqueios da Agenda</h2>
       <p class="sub">Clique nos horários para bloquear ou liberar. Ou use as opções abaixo para fechar o dia inteiro ou reduzir o expediente.</p>
+
+      <details class="bloqueio-avancado" id="proximosBloqueiosBox" style="margin-top:0;margin-bottom:12px;border-top:none;">
+        <summary>📋 Próximos bloqueios <span id="proximosBloqueiosContador" class="badge-mini"></span></summary>
+        <div id="proximosBloqueiosLista" style="margin-top:8px;"></div>
+      </details>
+
       <div class="field">
         <label>Dia</label>
         <input type="date" id="bloqueioData">
@@ -1497,6 +1535,22 @@
       <h2>🖼️ Foto do aparelho/produto</h2>
       <p class="sub" id="fotoProdutoSubtitulo">—</p>
       <img id="fotoProdutoImg" style="max-width:100%;border-radius:10px;border:1px solid var(--line);margin-top:8px;">
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FICHA DO CLIENTE -->
+<div class="modal-bg" id="modalFichaCliente">
+  <div class="modal-shell" style="max-width:560px;">
+    <div class="modal-close"><span id="fecharModalFicha">✕</span></div>
+    <div class="card" style="margin-bottom:0;">
+      <h2>👤 Ficha do cliente</h2>
+      <p class="sub">Busque por nome, CPF ou celular para ver todo o histórico de agendamentos.</p>
+      <div class="busca-protocolo-row" style="margin-bottom:8px;">
+        <input type="text" id="fichaBusca" placeholder="Nome, CPF ou celular">
+        <button class="btn btn-primary" id="btnBuscarFicha">Buscar</button>
+      </div>
+      <div id="fichaResultado"></div>
     </div>
   </div>
 </div>
@@ -2821,6 +2875,78 @@ function montarLinkVisualizacao(){
 }
 
 /* ---------- modal de links por agendamento ---------- */
+/* ---------- ficha do cliente (histórico completo) ---------- */
+function buscarFichaCliente(){
+  const termo = document.getElementById('fichaBusca').value.trim().toLowerCase();
+  const box = document.getElementById('fichaResultado');
+  if(!termo || termo.length<3){ box.innerHTML = `<div class="hint">Digite ao menos 3 letras ou números.</div>`; return; }
+  const dig = apenasDigitos(termo);
+
+  // acha todos os agendamentos que batem com o termo
+  const encontrados = cacheAgendamentos.filter(a=>{
+    const nomeBate = (a.nome||'').toLowerCase().includes(termo);
+    const cpfBate = dig.length>=3 && apenasDigitos(a.cpf).includes(dig);
+    const celBate = dig.length>=3 && apenasDigitos(a.celular).includes(dig);
+    return nomeBate || cpfBate || celBate;
+  });
+  if(encontrados.length===0){
+    box.innerHTML = `<div class="empty-state">Nenhum cliente encontrado com esses dados.</div>`;
+    return;
+  }
+  // agrupa por cliente (mesmo celular, ou mesmo CPF)
+  const grupos = new Map();
+  encontrados.forEach(a=>{
+    const chave = apenasDigitos(a.celular) || apenasDigitos(a.cpf) || (a.nome||'').toLowerCase();
+    if(!grupos.has(chave)) grupos.set(chave, []);
+    grupos.get(chave).push(a);
+  });
+
+  box.innerHTML = [...grupos.values()].map(lista=>{
+    lista.sort((a,b)=>(b.data+b.horario).localeCompare(a.data+a.horario)); // mais recente primeiro
+    const ref = lista[0];
+    const total = lista.length;
+    const compareceu = lista.filter(a=>a.status==='compareceu'||a.status==='comprou').length;
+    const faltou = lista.filter(a=>a.status==='nao_compareceu').length;
+    const comprou = lista.filter(a=>a.status==='comprou').length;
+    const nascInfo = ref.nascimento ? ` · 🎂 ${fmtDataISOtoBR(ref.nascimento)}` : '';
+    const linhas = lista.map(a=>{
+      const s = statusInfo(a.status);
+      const cat = categoriaInfo(a.categoria);
+      return `<div class="ficha-hist-item">
+        <div class="fhi-topo">
+          <span class="fhi-proto">${esc(a.protocolo)||'—'}</span>
+          <span class="fhi-data">${fmtDataISOtoBR(a.data)} · ${a.horario}</span>
+          <span class="badge" style="background:${s.bg};color:${s.color};">${s.label}</span>
+        </div>
+        <div class="fhi-detalhes">${a.servico?esc(a.servico):'—'}${a.categoria?` · <span class="dot-categoria" style="background:${cat.color};"></span>${esc(cat.label)}`:''}${a.atendente?` · 👤 ${esc(a.atendente)}`:''}${a.observacao?` · "${esc(a.observacao)}"`:''}</div>
+      </div>`;
+    }).join('');
+    return `<div class="ficha-cliente">
+      <div class="ficha-cabecalho">
+        <b>${esc(ref.nome)}</b>
+        <span>${ref.celular?esc(ref.celular):''}${ref.cpf?(' · '+esc(ref.cpf)):''}${nascInfo}</span>
+      </div>
+      <div class="ficha-resumo">
+        <span>📋 ${total} agendamento(s)</span>
+        <span>✅ ${compareceu} compareceu</span>
+        <span>❌ ${faltou} faltou</span>
+        <span>💰 ${comprou} compra(s)</span>
+      </div>
+      <div class="ficha-historico">${linhas}</div>
+    </div>`;
+  }).join('');
+}
+document.getElementById('btnFichaCliente').addEventListener('click', ()=>{
+  document.getElementById('fichaBusca').value = '';
+  document.getElementById('fichaResultado').innerHTML = '';
+  document.getElementById('modalFichaCliente').classList.add('show');
+  setTimeout(()=>document.getElementById('fichaBusca').focus(), 100);
+});
+document.getElementById('fecharModalFicha').onclick = ()=> document.getElementById('modalFichaCliente').classList.remove('show');
+document.getElementById('modalFichaCliente').addEventListener('click', e=>{ if(e.target.id==='modalFichaCliente') document.getElementById('modalFichaCliente').classList.remove('show'); });
+document.getElementById('btnBuscarFicha').addEventListener('click', buscarFichaCliente);
+document.getElementById('fichaBusca').addEventListener('keydown', e=>{ if(e.key==='Enter') buscarFichaCliente(); });
+
 function abrirModalLinks(a){
   document.getElementById('linksSubtitulo').textContent = `${a.nome} — ${fmtDataISOtoBR(a.data)} às ${a.horario}`;
   const cel = apenasDigitos(a.celular);
@@ -3424,9 +3550,23 @@ function renderCalendario(){
     const isSelected = iso === diaSelecionado;
     const qtd = contagem[iso] || 0;
     const bloqueio = diaBloqueadoInfo(iso);
-    html += `<div class="cal-day ${isToday?'today':''} ${isPast?'past':''} ${isSelected?'selected':''} ${bloqueio.bloqueado?'day-blocked':''}" data-iso="${iso}" title="${bloqueio.bloqueado ? esc(bloqueio.motivo) : ''}">
+    const reduzido = horarioReduzidoInfo(iso);
+    // decide o marcador do dia conforme o tipo de restrição
+    let marcador = '';
+    if(bloqueio.bloqueado){
+      if(bloqueio.automatico){
+        marcador = `<span class="cal-count" title="${esc(bloqueio.motivo)}">🚫</span>`; // feriado / dia fechado
+      } else {
+        marcador = `<span class="cal-count" title="${esc(bloqueio.motivo)}">🔒</span>`; // dia inteiro bloqueado à mão
+      }
+    } else if(reduzido){
+      marcador = `<span class="cal-count" title="Expediente reduzido — atendimento até ${reduzido.horarioLimite}">⏱️ ${qtd||''}</span>`;
+    } else if(qtd>0){
+      marcador = `<span class="cal-count">${qtd} ag.</span>`;
+    }
+    html += `<div class="cal-day ${isToday?'today':''} ${isPast?'past':''} ${isSelected?'selected':''} ${bloqueio.bloqueado?'day-blocked':''} ${reduzido&&!bloqueio.bloqueado?'day-reduced':''}" data-iso="${iso}" title="${bloqueio.bloqueado ? esc(bloqueio.motivo) : (reduzido ? 'Expediente reduzido até '+reduzido.horarioLimite : '')}">
       <span>${d}</span>
-      ${bloqueio.bloqueado ? `<span class="cal-count">🔒</span>` : (qtd>0 ? `<span class="cal-count">${qtd} ag.</span>` : '')}
+      ${marcador}
     </div>`;
   }
   document.getElementById('calGrid').innerHTML = html;
@@ -3522,8 +3662,58 @@ function abrirModalBloqueios(dataInicial){
   document.getElementById('bloqueioDataFim').value = '';
   document.getElementById('bloqueioMotivoRapido').value = '';
   document.getElementById('bloqueioAvancado').open = false;
+  renderProximosBloqueios();
   renderBloqueiosPanel(inputData.value);
   document.getElementById('modalBloqueios').classList.add('show');
+}
+
+// lista todos os bloqueios de hoje pra frente (manuais + feriados/dias fechados dos próximos 60 dias)
+function renderProximosBloqueios(){
+  const lista = document.getElementById('proximosBloqueiosLista');
+  const contador = document.getElementById('proximosBloqueiosContador');
+  const hoje = hojeISO();
+  const itens = [];
+
+  // 1) bloqueios manuais salvos (dia inteiro, horário específico, reduzido)
+  cacheBloqueios.filter(b=>b.data>=hoje).forEach(b=>{
+    let tipo, ico;
+    if(b.horarioLimite){ tipo = `Expediente até ${b.horarioLimite}`; ico='⏱️'; }
+    else if(b.horario){ tipo = `Horário ${b.horario} bloqueado`; ico='🔒'; }
+    else { tipo = 'Dia inteiro bloqueado'; ico='🔒'; }
+    itens.push({ data:b.data, ico, tipo, motivo:b.motivo||'', id:b.id, automatico:false });
+  });
+
+  // 2) feriados e dias de fechamento nos próximos 60 dias (automáticos, sem botão liberar)
+  const d = new Date(hoje+'T12:00:00');
+  for(let i=0;i<60;i++){
+    const iso = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const fer = nomeFeriado(iso);
+    if(fer) itens.push({ data:iso, ico:'🚫', tipo:'Feriado', motivo:fer, automatico:true });
+    d.setDate(d.getDate()+1);
+  }
+
+  itens.sort((a,b)=> a.data.localeCompare(b.data));
+  contador.textContent = itens.length ? `(${itens.length})` : '';
+  if(itens.length===0){
+    lista.innerHTML = `<div class="hint">Nenhum bloqueio próximo.</div>`;
+    return;
+  }
+  lista.innerHTML = itens.slice(0,40).map(it=>`
+    <div class="bloqueio-item">
+      <span>${it.ico} <b>${fmtDataISOtoBR(it.data)}</b> — ${esc(it.tipo)}${it.motivo?(' · '+esc(it.motivo)):''}</span>
+      ${it.automatico ? `<span class="hint" style="font-size:10px;">automático</span>` : `<button data-liberar-prox="${it.id}" data-data="${it.data}">Liberar</button>`}
+    </div>`).join('');
+  lista.querySelectorAll('[data-liberar-prox]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      await removerBloqueio(btn.dataset.liberarProx);
+      toast('Bloqueio liberado.');
+      renderProximosBloqueios();
+      renderBloqueiosPanel(document.getElementById('bloqueioData').value);
+      renderCalendario();
+      if(diaSelecionado) renderDiaPanel(diaSelecionado);
+      gerarSlots();
+    });
+  });
 }
 document.getElementById('btnAbrirBloqueiosDoDia').addEventListener('click', ()=> abrirModalBloqueios(diaSelecionado));
 document.getElementById('btnBloqueios').addEventListener('click', ()=> abrirModalBloqueios(diaSelecionado || hojeISO()));
@@ -3911,31 +4101,79 @@ function gerarSlots(){
     const qtdFila = filaDoSlot(data, h).length;
     let cls = '';
     if(indisponivel) cls = 'busy';
-    else if(cheio) cls = 'fila';
+    else if(cheio) cls = 'busy';
     else if(passou) cls = 'passado';
     let titulo = '';
     if(travado) titulo = 'Bloqueado';
     else if(naoCabe) titulo = `Não cabe um atendimento de ${dur} min antes do fechamento`;
     else if(passou) titulo = 'Esse horário já passou';
-    else if(cheio) titulo = 'Horário ocupado — clique para entrar na fila de espera';
-    return `<div class="slot ${cls}" data-h="${h}" data-cheio="${cheio?'1':'0'}" title="${titulo}">${h}${qtdFila>0?` <small style="opacity:.7;">(${qtdFila})</small>`:''}</div>`;
+    else if(cheio) titulo = 'Horário já ocupado';
+    return `<div class="slot ${cls}" data-h="${h}" data-cheio="${cheio?'1':'0'}" title="${titulo}">${h}</div>`;
   }).join('');
-  filaHint.style.display = temOcupado ? 'block' : 'none';
+  filaHint.style.display = 'none';
 
   if(todosHorarios.length>0 && livres===0){
-    avisoDiaBox.innerHTML += `<div class="aviso-dia cheio">📋 Não há horários livres nesse dia para um atendimento de ${dur} min. Você pode entrar na fila de espera clicando em um horário ocupado.</div>`;
+    const prox = proximaVagaDisponivel(data, dur);
+    let sugestaoHtml = '';
+    if(prox){
+      const mesmoDia = prox.data===data;
+      sugestaoHtml = `<button class="btn btn-primary" id="btnIrProximaVaga" style="margin-top:8px;padding:8px 14px;font-size:12.5px;">
+        Próxima vaga: ${mesmoDia?'':fmtDataISOtoBR(prox.data).slice(0,5)+' '}${prox.horario} — usar</button>`;
+    } else {
+      sugestaoHtml = `<div class="hint" style="margin-top:6px;">Nenhuma vaga nos próximos 60 dias.</div>`;
+    }
+    avisoDiaBox.innerHTML += `<div class="aviso-dia cheio">📋 Não há horários livres nesse dia para um atendimento de ${dur} min.${sugestaoHtml}</div>`;
+    const btnProx = document.getElementById('btnIrProximaVaga');
+    if(btnProx) btnProx.addEventListener('click', ()=>{
+      const prox2 = proximaVagaDisponivel(data, dur);
+      if(!prox2) return;
+      document.getElementById('fData').value = prox2.data;
+      gerarSlots();
+      setTimeout(()=>{
+        const slot = document.querySelector(`#slotsBox .slot[data-h="${prox2.horario}"]:not(.busy):not(.passado)`);
+        if(slot){ slot.click(); toast(`Horário de ${fmtDataISOtoBR(prox2.data).slice(0,5)} às ${prox2.horario} selecionado.`); }
+      }, 60);
+    });
   }
 
-  document.querySelectorAll('.slot:not(.busy):not(.fila)').forEach(el=>{
+  document.querySelectorAll('.slot:not(.busy):not(.passado)').forEach(el=>{
     el.addEventListener('click', ()=>{
       document.querySelectorAll('.slot').forEach(s=>s.classList.remove('active'));
       el.classList.add('active');
       horarioSelecionado = el.dataset.h;
     });
   });
-  document.querySelectorAll('.slot.fila').forEach(el=>{
-    el.addEventListener('click', ()=> entrarNaFila(data, el.dataset.h));
-  });
+}
+
+// procura a próxima data+horário com vaga para um atendimento de `dur` minutos, a partir de `dataInicial`
+function proximaVagaDisponivel(dataInicial, dur){
+  const passo = passoSlots();
+  let d = new Date(dataInicial+'T12:00:00');
+  for(let i=0; i<60; i++){
+    const iso = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    if(!diaBloqueadoInfo(iso).bloqueado){
+      const dow = d.getDay();
+      const cfgDia = (CONFIG_LOJA.horarios && CONFIG_LOJA.horarios[dow]) || HORARIOS_PADRAO[dow];
+      if(cfgDia.aberto){
+        const intervalos = intervalosOcupados(iso, null);
+        const bloqueados = horariosBloqueados(iso);
+        const limiteFim = minutosDoHorario(cfgDia.fim) + passo;
+        for(const h of gerarHorariosDisponiveis(iso)){
+          const ini = minutosDoHorario(h);
+          const fim = ini + dur;
+          if(fim > limiteFim) continue;
+          if(horarioJaPassou(iso, h)) continue;
+          let travado = false;
+          for(let m=ini; m<fim; m+=passo){ if(bloqueados.has(horarioDeMinutos(m))) travado = true; }
+          if(travado) continue;
+          if(conflitaComOcupados(ini, fim, intervalos)) continue;
+          return { data: iso, horario: h };
+        }
+      }
+    }
+    d.setDate(d.getDate()+1);
+  }
+  return null;
 }
 
 function duracaoSelecionada(){
@@ -4420,7 +4658,19 @@ document.getElementById('sinoBtn').addEventListener('click', (e)=>{
   e.stopPropagation();
   const painel = document.getElementById('sinoPainel');
   const abrindo = !painel.classList.contains('show');
-  if(abrindo) renderSino();
+  if(abrindo){
+    renderSino();
+    // posiciona o painel logo abaixo do botão, alinhado à direita, sem sair da tela
+    const r = document.getElementById('sinoBtn').getBoundingClientRect();
+    painel.style.top = (r.bottom + 8) + 'px';
+    if(window.innerWidth > 600){
+      const largura = 300;
+      let right = window.innerWidth - r.right;
+      if(right + largura > window.innerWidth - 8) right = 8;
+      painel.style.right = right + 'px';
+      painel.style.left = 'auto';
+    }
+  }
   painel.classList.toggle('show');
 });
 document.addEventListener('click', (e)=>{
@@ -4490,10 +4740,35 @@ function renderHoje(){
     const atrasado = !finalizado && a.horario < horaAtual;
     return `<div class="hoje-item ${finalizado?'finalizado':''} ${atrasado?'atrasado':''}">
       <div class="hora">${a.horario}</div>
-      <div class="info"><b>${a.categoria?`<span class="dot-categoria" style="background:${cat.color};" title="${esc(cat.label)}"></span>`:''}${esc(a.nome)}</b><span>${esc(a.celular)||''}</span></div>
-      <span class="badge" style="background:${s.bg};color:${s.color};">${s.label}</span>
+      <div class="info"><b>${a.categoria?`<span class="dot-categoria" style="background:${cat.color};" title="${esc(cat.label)}"></span>`:''}${esc(a.nome)}</b><span>${esc(a.celular)||''} · <span class="badge" style="background:${s.bg};color:${s.color};padding:1px 7px;">${s.label}</span></span></div>
+      <div class="hoje-acoes-rapidas">
+        <button class="hja hja-ok" data-hoje-status="compareceu" data-id="${a.id}" title="Compareceu / Atendido">✅</button>
+        <button class="hja hja-nao" data-hoje-status="nao_compareceu" data-id="${a.id}" title="Não compareceu">❌</button>
+        <button class="hja hja-reag" data-hoje-status="reagendado" data-id="${a.id}" title="Reagendado">🔁</button>
+        <button class="hja hja-canc" data-hoje-status="cancelado" data-id="${a.id}" title="Cancelou">🚫</button>
+      </div>
     </div>`;
   }).join('');
+  listaBox.querySelectorAll('[data-hoje-status]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const novoStatus = btn.dataset.hojeStatus;
+      const id = btn.dataset.id;
+      const a = cacheAgendamentos.find(x=>x.id===id);
+      if(!a) return;
+      // se marcar reagendado, abre o modal de edição já na data/horário para escolher o novo
+      if(novoStatus === 'reagendado'){
+        abrirModalEditar(a);
+        return;
+      }
+      btn.closest('.hoje-acoes-rapidas').style.opacity = '.5';
+      try{
+        await atualizarStatus(id, novoStatus);
+        toast(`${a.nome}: ${statusInfo(novoStatus).label}.`);
+        renderHoje(); renderLista(); renderSino();
+        if(diaSelecionado) renderDiaPanel(diaSelecionado);
+      }catch(e){ console.error(e); toast('Erro ao atualizar.'); }
+    });
+  });
 }
 
 /* ---------- imprimir agenda do dia (planilha simples, só texto) ---------- */
@@ -5083,14 +5358,21 @@ function buscarCheckin(){
   const candidatos = cacheAgendamentos.filter(a=>{
     if(a.data !== hoje) return false;
     if(['cancelado','compareceu','comprou','nao_compareceu'].includes(a.status)) return false;
-    const cpfBate = termoDigitos.length>=3 && apenasDigitos(a.cpf).includes(termoDigitos);
+    // busca principal por protocolo (completo "AG-2026-0001" ou só o número final "0001"/"1")
+    const protoNum = apenasDigitos(a.protocolo);
+    const protocoloBate = termo.length>=1 && (
+      (a.protocolo||'').toUpperCase().includes(termoProtocolo) ||
+      (termoDigitos.length>=1 && protoNum.endsWith(termoDigitos.padStart(protoNum.length,'0')) ) ||
+      (termoDigitos.length>=1 && parseInt(protoNum,10)===parseInt(termoDigitos,10))
+    );
+    // ainda aceita CPF ou nome como reserva
+    const cpfBate = termoDigitos.length>=5 && apenasDigitos(a.cpf).includes(termoDigitos);
     const nomeBate = termo.length>=3 && (a.nome||'').toLowerCase().includes(termo);
-    const protocoloBate = termo.length>=3 && (a.protocolo||'').toUpperCase().includes(termoProtocolo);
-    return cpfBate || nomeBate || protocoloBate;
+    return protocoloBate || cpfBate || nomeBate;
   }).sort((a,b)=>a.horario.localeCompare(b.horario));
 
   if(candidatos.length===0){
-    box.innerHTML = `<div class="empty-state">Nenhum agendamento encontrado para hoje com esses dados.</div>`;
+    box.innerHTML = `<div class="empty-state">Nenhum agendamento em aberto para hoje com esse protocolo.</div>`;
     return;
   }
   box.innerHTML = candidatos.map(a=>{
@@ -5098,15 +5380,26 @@ function buscarCheckin(){
     return `<div class="checkin-card">
       <div>
         <b>${esc(a.nome)}</b>
-        <span>${a.horario} · ${s.label}${a.cpf?(' · '+esc(a.cpf)):''}${a.protocolo?(' · '+esc(a.protocolo)):''}</span>
+        <span>${a.horario} · ${s.label}${a.protocolo?(' · '+esc(a.protocolo)):''}</span>
       </div>
       <button class="btn btn-primary" data-chegou="${a.id}">✅ Confirmar chegada</button>
     </div>`;
   }).join('');
   box.querySelectorAll('button[data-chegou]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
+    btn.addEventListener('click', async ()=>{
       const a = candidatos.find(x=>x.id===btn.dataset.chegou);
-      if(a) abrirModalAssinatura(a);
+      if(!a) return;
+      btn.disabled = true; btn.textContent = 'Confirmando...';
+      try{
+        // check-in simplificado: marca como CONFIRMADO direto, sem assinatura
+        await atualizarStatus(a.id, 'confirmado');
+        toast(`${a.nome} confirmado(a)!`);
+        document.getElementById('checkinBusca').value = '';
+        renderLista(); renderSino();
+        if(diaSelecionado) renderDiaPanel(diaSelecionado);
+        if(document.getElementById('tab-hoje').style.display !== 'none') renderHoje();
+        buscarCheckin();
+      }catch(e){ console.error(e); toast('Erro ao confirmar. Tente novamente.'); btn.disabled=false; btn.textContent='✅ Confirmar chegada'; }
     });
   });
 }
