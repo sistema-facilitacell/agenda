@@ -1851,6 +1851,15 @@ function normalizarConfigLoja(obj){
     .map(s=>({ nome:String(s.nome).trim(), duracao: Math.max(10, Number(s.duracao)||30), documentos: !!s.documentos, valor: Math.max(0, Number(s.valor)||0) }));
   if(!Number.isFinite(Number(obj.antecedenciaMin))) obj.antecedenciaMin = 60;
   if(!Number.isFinite(Number(obj.intervaloSlots))) obj.intervaloSlots = 30;
+  // Migração única: versões antigas vinham com sábado (índice 6) fechado por padrão.
+  // Abre o sábado UMA vez e marca a config como migrada, pra nunca mais sobrescrever
+  // uma escolha futura sua (se você fechar o sábado de propósito, fica fechado).
+  if(!obj.migradoSabadoAberto){
+    if(obj.horarios[6] && obj.horarios[6].aberto===false){
+      obj.horarios[6] = { aberto:true, inicio: obj.horarios[6].inicio||'09:00', fim: obj.horarios[6].fim||'17:50' };
+    }
+    obj.migradoSabadoAberto = true;
+  }
   return obj;
 }
 function carregarConfigLojaLocal(){
@@ -2736,7 +2745,15 @@ function iniciarSincronizacaoTempoReal(){
   db.collection('configuracoes').doc('loja').onSnapshot(doc=>{
     if(doc.exists){
       const dados = doc.data();
-      if(dados && dados.nome && dados.endereco){ CONFIG_LOJA = normalizarConfigLoja(dados); aplicarConfigLoja(); gerarSlots(); }
+      if(dados && dados.nome && dados.endereco){
+        const precisavaMigrar = !dados.migradoSabadoAberto;
+        CONFIG_LOJA = normalizarConfigLoja(dados);
+        aplicarConfigLoja(); gerarSlots();
+        // se a migração do sábado rodou agora e estamos no painel admin, persiste a correção
+        if(precisavaMigrar && !window.__MODO_PUBLICO__ && auth.currentUser){
+          db.collection('configuracoes').doc('loja').set(CONFIG_LOJA).catch(e=>console.error('Erro ao salvar migração de horários:', e));
+        }
+      }
     }
   }, err=>console.error('Erro ao sincronizar configurações da loja:', err));
 }
